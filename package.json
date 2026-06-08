@@ -1,16 +1,16 @@
 {
-  "name": "@pionxzh/chatgpt-exporter",
+  "name": "@danveitch76/chatgpt-exporter",
   "type": "module",
-  "version": "2.32.2",
+  "version": "2.33.0",
   "private": true,
   "packageManager": "pnpm@8.14.1",
   "title": "ChatGPT Exporter",
   "title:zh-CN": "ChatGPT Exporter",
   "title:zh-TW": "ChatGPT Exporter",
-  "description": "Export ChatGPT conversations with one click — backup & share effortlessly!",
+  "description": "Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.",
   "description:zh-CN": "一键导出 ChatGPT 对话，轻松备份与分享",
   "description:zh-TW": "一鍵導出 ChatGPT 對話，輕鬆備份與分享",
-  "author": "pionxzh",
+  "author": "danveitch76",
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0"
@@ -74,3 +74,4 @@
     "*.{js,jsx,ts,tsx}": "pnpm exec eslint"
   }
 }
+

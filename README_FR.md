@@ -8,16 +8,16 @@
 [![release][release-image]][release-url]
 [![GreasyFork][GreasyFork-image]][GreasyFork-url]
 
-[license-image]: https://img.shields.io/github/license/pionxzh/chatgpt-exporter?color=red
-[license-url]: https://github.com/pionxzh/chatgpt-exporter/blob/master/LICENSE
-[release-image]: https://img.shields.io/github/v/release/pionxzh/chatgpt-exporter?color=blue
-[release-url]: https://github.com/pionxzh/chatgpt-exporter/releases/latest
+[license-image]: https://img.shields.io/github/license/danveitch76/chatgpt-exporter?color=red
+[license-url]: https://github.com/danveitch76/chatgpt-exporter/blob/master/LICENSE
+[release-image]: https://img.shields.io/github/v/release/danveitch76/chatgpt-exporter?color=blue
+[release-url]: https://github.com/danveitch76/chatgpt-exporter/releases/latest
 [GreasyFork-image]: https://img.shields.io/static/v1?label=%20&message=GreasyFork&style=flat-square&labelColor=7B0000&color=960000&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3ggEBCQHM3fXsAAAAVdJREFUOMudkz2qwkAUhc/goBaGJBgUtBCZyj0ILkpwAW7Bws4yO3AHLiCtEFD8KVREkoiFxZzX5A2KGfN4F04zMN+ce+5c4LMUgDmANYBnrnV+plBSi+FwyHq9TgA2LQpvCiEiABwMBtzv95RSfoNEHy8DYBzHrNVqVEr9BWKcqNFoxF6vx3a7zc1mYyC73a4MogBg7vs+z+czO50OW60Wt9stK5UKp9Mpj8cjq9WqDTBHnjAdxzGQZrPJw+HA31oulzbAWgLoA0CWZVBKIY5jzGYzdLtdE9DlcrFNrY98zobqOA6TJKHW2jg4nU5sNBpFDp6mhVe5rsvVasUwDHm9Xqm15u12o+/7Hy0gD8KatOd5vN/v1FozTVN6nkchxFuI6hsAAIMg4OPxMJCXdtTbR7JJCMEgCJhlGUlyPB4XfumozInrupxMJpRSRtZlKoNYl+m/6/wDuWAjtPfsQuwAAAAASUVORK5CYII=
 [GreasyFork-url]: https://greasyfork.org/scripts/456055-chatgpt-exporter
 
 [English](./README.md) &nbsp;&nbsp;|&nbsp;&nbsp; Français &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](./README_ID.md) &nbsp;&nbsp;|&nbsp;&nbsp; [한국어](./README_KR.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Türkçe](./README_TR.md)
 
-![image](https://github.com/pionxzh/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
+![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
 ## Installation
 
@@ -40,7 +40,7 @@
 [Install-1-image]: https://img.shields.io/badge/-Installer-blue
 [Install-1-url]: https://greasyfork.org/scripts/456055-chatgpt-exporter
 [Install-2-image]: https://img.shields.io/badge/-Installer-blue
-[Install-2-url]: https://raw.githubusercontent.com/pionxzh/chatgpt-exporter/master/dist/chatgpt.user.js
+[Install-2-url]: https://raw.githubusercontent.com/danveitch76/chatgpt-exporter/master/dist/chatgpt.user.js
 
 #
 
@@ -86,7 +86,7 @@ n'importe quelle situation.
 
 <div align="center">
 
-<img width="643" alt="image" src="https://github.com/pionxzh/chatgpt-exporter/assets/9910706/47481c7a-4a6a-433b-b08e-fdf3bbabcb64">
+<img width="643" alt="image" src="https://github.com/danveitch76/chatgpt-exporter/assets/9910706/47481c7a-4a6a-433b-b08e-fdf3bbabcb64">
 
 </div>
 
@@ -242,7 +242,7 @@ Sélectionnez votre format d'exportation dans le menu déroulant en bas à gauch
 
 Cliquez sur le bouton pour effectuer l'action souhaitée.
 
-- **Archiver** - Les sessions de chat archivées disparaîtront de la barre latérale et pourront être gérées dans les paramètres de ChatGPT. Voir [#199](https://github.com/pionxzh/chatgpt-exporter/issues/199) pour plus de détails.
+- **Archiver** - Les sessions de chat archivées disparaîtront de la barre latérale et pourront être gérées dans les paramètres de ChatGPT. Voir [#199](https://github.com/danveitch76/chatgpt-exporter/issues/199) pour plus de détails.
 - **Supprimer** - Supprime les conversations sélectionnées.
 - **Exporter** - Exporte les conversations sélectionnées dans le format choisi à l'aide du sélecteur de format.
 
@@ -254,6 +254,6 @@ Voir [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 <div align="center">
 
-<img src="https://api.star-history.com/svg?repos=pionxzh/chatgpt-exporter&type=Date" width="600" height="400" alt="Graphique de l'historique des étoiles" valign="middle">
+<img src="https://api.star-history.com/svg?repos=danveitch76/chatgpt-exporter&type=Date" width="600" height="400" alt="Graphique de l'historique des étoiles" valign="middle">
 
 </div>

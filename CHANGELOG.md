@@ -1,5 +1,19 @@
 # Changelog
 
+
+## [2.33.0](https://github.com/danveitch76/chatgpt-exporter/compare/v2.32.2...v2.33.0) (2026-06-08)
+
+### Features
+
+* add File Discovery export mode for metadata-only file and asset inventory generation
+* add defensive scanner for uploaded files, generated files, image assets, sandbox paths and asset pointers
+* add inventory builder with deduplication and extraction statistics
+* wire File Discovery into the Export All dialog
+
+### Notes
+
+* File Discovery does not download file contents in this release.
+* Download resolution and ZIP packaging remain follow-on Phase 1 work.
 ## [2.32.2](https://github.com/pionxzh/chatgpt-exporter/compare/userscript-v2.32.1...userscript-v2.32.2) (2026-05-28)
 
 
@@ -955,3 +969,4 @@
 ### Continuous Integration
 
 * fix release ([771c435](https://github.com/pionxzh/chatgpt-exporter/commit/771c435ebc69bd2fa8a6e60f96ffe041bee155bf))
+
