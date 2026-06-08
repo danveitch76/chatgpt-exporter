@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { useTranslation } from 'react-i18next'
 import { archiveConversation, deleteConversation, fetchAllConversations, fetchConversation, fetchConversationsPage, fetchProjects, probeApi } from '../api'
 import { EXPORT_OPERATION_BATCH } from '../constants'
+import { exportAllToFileDiscovery } from '../exporter/discovery'
 import { exportAllToHtml } from '../exporter/html'
 import { exportAllToJson, exportAllToOfficialJson } from '../exporter/json'
 import { exportAllToMarkdown } from '../exporter/markdown'
@@ -361,6 +362,7 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
         { label: 'HTML', callback: exportAllToHtml },
         { label: 'JSON', callback: exportAllToOfficialJson },
         { label: 'JSON (ZIP)', callback: exportAllToJson },
+        { label: 'File Discovery', callback: exportAllToFileDiscovery },
     ], [])
 
     const fileInputRef = useRef<HTMLInputElement>(null)
