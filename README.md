@@ -255,3 +255,29 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md)
 <img src="https://api.star-history.com/svg?repos=pionxzh/chatgpt-exporter&type=Date" width="600" height="400" alt="Star History Chart" valign="middle">
 
 </div>
+
+## File Discovery
+
+Version 2.33.0 adds a metadata-only File Discovery export mode.
+
+File Discovery scans selected ChatGPT conversations and generates a JSON inventory of detected file and asset references. It is intended as a discovery and planning layer before full file download and ZIP extraction.
+
+Detected references may include:
+
+- uploaded file identifiers
+- generated file references
+- image asset pointers
+- sandbox paths
+- downloadable asset pointers
+- inferred filenames and metadata where available
+
+The discovery report includes:
+
+- generation timestamp
+- scan mode
+- conversation and message context
+- extraction statistics
+- inventory rows
+- download status placeholders
+
+This release does not download file contents. Full file download resolution and ZIP packaging are planned follow-on work.
