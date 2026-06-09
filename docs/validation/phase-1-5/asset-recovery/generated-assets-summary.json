@@ -1,0 +1,1106 @@
+{
+  "generatedAt": "2026-06-09T16:48:54",
+  "totalGeneratedRows": 2856,
+  "sourceFieldSummary": [
+    {
+      "Count": 393,
+      "Name": "message.content.text"
+    },
+    {
+      "Count": 209,
+      "Name": "message.metadata.citation_metadata.url"
+    },
+    {
+      "Count": 129,
+      "Name": "message.metadata.aggregate_result.code"
+    },
+    {
+      "Count": 112,
+      "Name": "message.content.parts[0]"
+    },
+    {
+      "Count": 83,
+      "Name": "message.metadata.search_result_groups[0].entries[0].url"
+    },
+    {
+      "Count": 80,
+      "Name": "message.metadata.aggregate_result.jupyter_messages[2].content.text"
+    },
+    {
+      "Count": 71,
+      "Name": "message.metadata.search_result_groups[1].entries[0].url"
+    },
+    {
+      "Count": 69,
+      "Name": "message.metadata.conversation_context_citation_metadata[0].citation.url"
+    },
+    {
+      "Count": 66,
+      "Name": "message.metadata.search_result_groups[2].entries[0].url"
+    },
+    {
+      "Count": 62,
+      "Name": "message.metadata.search_result_groups[3].entries[0].url"
+    },
+    {
+      "Count": 58,
+      "Name": "message.metadata.search_result_groups[4].entries[0].url"
+    },
+    {
+      "Count": 54,
+      "Name": "message.metadata.search_result_groups[5].entries[0].url"
+    },
+    {
+      "Count": 54,
+      "Name": "message.metadata.content_references[1].items[0].url"
+    },
+    {
+      "Count": 54,
+      "Name": "message.metadata.content_references[2].items[0].url"
+    },
+    {
+      "Count": 52,
+      "Name": "message.metadata.search_result_groups[0].entries[1].url"
+    },
+    {
+      "Count": 49,
+      "Name": "message.metadata.content_references[0].items[0].url"
+    },
+    {
+      "Count": 46,
+      "Name": "message.metadata.search_result_groups[6].entries[0].url"
+    },
+    {
+      "Count": 45,
+      "Name": "message.metadata.content_references[3].items[0].url"
+    },
+    {
+      "Count": 44,
+      "Name": "message.metadata.content_references[4].items[0].url"
+    },
+    {
+      "Count": 37,
+      "Name": "message.metadata.search_result_groups[7].entries[0].url"
+    },
+    {
+      "Count": 37,
+      "Name": "message.metadata.search_result_groups[0].entries[2].url"
+    },
+    {
+      "Count": 32,
+      "Name": "message.metadata.content_references[5].items[0].url"
+    },
+    {
+      "Count": 32,
+      "Name": "message.metadata.aggregate_result.final_expression_output"
+    },
+    {
+      "Count": 30,
+      "Name": "message.metadata.content_references[1].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 29,
+      "Name": "message.metadata.search_result_groups[8].entries[0].url"
+    },
+    {
+      "Count": 27,
+      "Name": "message.metadata.search_result_groups[0].entries[3].url"
+    },
+    {
+      "Count": 27,
+      "Name": "message.metadata.content_references[2].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 26,
+      "Name": "message.metadata.aggregate_result.messages[0].text"
+    },
+    {
+      "Count": 25,
+      "Name": "message.metadata.content_references[0].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 24,
+      "Name": "message.metadata.content_references[4].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 24,
+      "Name": "message.metadata.search_result_groups[1].entries[1].url"
+    },
+    {
+      "Count": 22,
+      "Name": "message.metadata.search_result_groups[9].entries[0].url"
+    },
+    {
+      "Count": 22,
+      "Name": "message.metadata.content_references[6].items[0].url"
+    },
+    {
+      "Count": 19,
+      "Name": "message.metadata.content_references[3].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 19,
+      "Name": "message.metadata.search_result_groups[10].entries[0].url"
+    },
+    {
+      "Count": 19,
+      "Name": "message.metadata.content_references[7].items[0].url"
+    },
+    {
+      "Count": 18,
+      "Name": "message.metadata.search_result_groups[2].entries[1].url"
+    },
+    {
+      "Count": 18,
+      "Name": "message.metadata.search_result_groups[11].entries[0].url"
+    },
+    {
+      "Count": 17,
+      "Name": "message.metadata.content_references[5].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 17,
+      "Name": "message.metadata.content_references[0].item.url"
+    },
+    {
+      "Count": 16,
+      "Name": "message.metadata.search_result_groups[0].entries[4].url"
+    },
+    {
+      "Count": 16,
+      "Name": "message.metadata.search_result_groups[12].entries[0].url"
+    },
+    {
+      "Count": 14,
+      "Name": "message.metadata.search_result_groups[4].entries[1].url"
+    },
+    {
+      "Count": 13,
+      "Name": "message.metadata.search_result_groups[3].entries[1].url"
+    },
+    {
+      "Count": 13,
+      "Name": "message.metadata.search_result_groups[13].entries[0].url"
+    },
+    {
+      "Count": 12,
+      "Name": "message.metadata.content_references[8].sources[0].url"
+    },
+    {
+      "Count": 12,
+      "Name": "message.metadata.conversation_context_citation_metadata[0].citation.snippet"
+    },
+    {
+      "Count": 12,
+      "Name": "message.metadata.content_references[7].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 12,
+      "Name": "message.metadata.content_references[6].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 12,
+      "Name": "message.metadata.search_result_groups[14].entries[0].url"
+    },
+    {
+      "Count": 10,
+      "Name": "message.metadata.content_references[6].sources[0].url"
+    },
+    {
+      "Count": 10,
+      "Name": "message.metadata.search_result_groups[0].entries[5].url"
+    },
+    {
+      "Count": 10,
+      "Name": "message.metadata.content_references[1].item.url"
+    },
+    {
+      "Count": 10,
+      "Name": "message.metadata.search_result_groups[5].entries[1].url"
+    },
+    {
+      "Count": 9,
+      "Name": "message.metadata.content_references[8].sources[1].url"
+    },
+    {
+      "Count": 9,
+      "Name": "message.metadata.content_references[5].sources[0].url"
+    },
+    {
+      "Count": 9,
+      "Name": "message.metadata.search_result_groups[0].entries[6].url"
+    },
+    {
+      "Count": 9,
+      "Name": "message.metadata.search_result_groups[15].entries[0].url"
+    },
+    {
+      "Count": 8,
+      "Name": "message.metadata.content_references[5].sources[1].url"
+    },
+    {
+      "Count": 8,
+      "Name": "message.metadata.content_references[9].items[0].url"
+    },
+    {
+      "Count": 8,
+      "Name": "message.metadata.search_result_groups[2].entries[2].url"
+    },
+    {
+      "Count": 7,
+      "Name": "message.metadata.content_references[8].items[0].url"
+    },
+    {
+      "Count": 7,
+      "Name": "message.metadata.content_references[2].item.url"
+    },
+    {
+      "Count": 7,
+      "Name": "message.metadata.search_result_groups[0].entries[7].url"
+    },
+    {
+      "Count": 7,
+      "Name": "message.metadata.search_result_groups[1].entries[2].url"
+    },
+    {
+      "Count": 7,
+      "Name": "message.metadata.content_references[6].sources[1].url"
+    },
+    {
+      "Count": 6,
+      "Name": "message.metadata.content_references[3].item.url"
+    },
+    {
+      "Count": 6,
+      "Name": "message.metadata.content_references[7].item.url"
+    },
+    {
+      "Count": 6,
+      "Name": "message.content.parts[1]"
+    },
+    {
+      "Count": 6,
+      "Name": "message.metadata.search_result_groups[16].entries[0].url"
+    },
+    {
+      "Count": 6,
+      "Name": "message.metadata.content_references[2].items[0].supporting_websites[1].url"
+    },
+    {
+      "Count": 6,
+      "Name": "message.metadata.content_references[3].sources[0].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[8].sources[2].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[8].sources[3].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[2].sources[0].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[9].item.url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.search_result_groups[3].entries[2].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[0].items[0].supporting_websites[1].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[5].item.url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[5].items[0].supporting_websites[1].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.search_result_groups[0].entries[8].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[8].item.url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[6].sources[2].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.search_result_groups[5].entries[2].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.search_result_groups[1].entries[3].url"
+    },
+    {
+      "Count": 5,
+      "Name": "message.metadata.content_references[10].sources[0].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[1].images[2].image_result.url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[1].images[1].image_result.url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[1].images[0].image_result.url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[10].sources[2].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[7].items[0].supporting_websites[1].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[10].sources[1].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[6].item.url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[10].items[0].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[1].images[3].image_result.url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[11].items[0].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.search_result_groups[2].entries[3].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[12].sources[0].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[12].sources[1].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[1].images[4].image_result.url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.search_result_groups[0].entries[9].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.search_result_groups[2].entries[4].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[4].items[0].supporting_websites[1].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.search_result_groups[1].entries[4].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[4].item.url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[3].sources[1].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[1].items[0].supporting_websites[1].url"
+    },
+    {
+      "Count": 4,
+      "Name": "message.metadata.content_references[1].sources[0].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.search_result_groups[10].entries[1].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.search_result_groups[2].entries[6].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.search_result_groups[17].entries[0].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.content_references[9].sources[0].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.search_result_groups[2].entries[5].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.search_result_groups[2].entries[8].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.content_references[3].items[0].supporting_websites[1].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.content_references[1].images[5].image_result.url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.content_references[4].sources[0].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.content_references[4].sources[1].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.search_result_groups[2].entries[7].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.content_references[7].sources[0].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.content_references[10].item.url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.content_references[5].sources[2].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.search_result_groups[4].entries[2].url"
+    },
+    {
+      "Count": 3,
+      "Name": "message.metadata.content_references[9].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[7].entries[1].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[1].entries[5].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[12].items[0].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[19].entries[0].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[2].items[0].supporting_websites[2].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[18].entries[0].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[5].entries[3].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[12].sources[2].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[1].entries[6].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[9].sources[1].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[3].sources[2].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[6].entries[1].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[11].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[7].items[0].supporting_websites[2].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[0].entries[12].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[0].entries[11].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[0].entries[10].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[10].sources[3].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[3].entries[3].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[10].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.content_references[8].sources[4].url"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.aggregate_result.jupyter_messages[3].content.text"
+    },
+    {
+      "Count": 2,
+      "Name": "message.metadata.search_result_groups[14].entries[1].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.content.result"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[8].entries[1].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[20].entries[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.content.thoughts[0].chunks[1]"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[26].entries[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[5].entries[4].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[21].entries[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[22].entries[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[23].entries[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[24].entries[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[25].entries[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.aggregate_result.in_kernel_exception.args[0]"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.aggregate_result.in_kernel_exception.traceback[6]"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[3].entries[6].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.aggregate_result.jupyter_messages[2].content.data.text/plain"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[3].entries[5].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.content.thoughts[0].content"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[3].entries[4].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[9].sources[3].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.aggregate_result.jupyter_messages[2].content.evalue"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[10].sources[4].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[11].item.url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[11].sources[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[12].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[12].sources[3].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[13].item.url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[13].sources[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[13].sources[1].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[14].item.url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[15].item.url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[16].sources[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[2].items[0].supporting_websites[3].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[2].sources[1].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[2].entries[9].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[1].images[6].image_result.url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[6].sources[3].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[9].entries[1].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[7].sources[1].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[8].items[0].supporting_websites[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[8].sources[5].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[9].sources[2].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[0].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[1].entries[7].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[1].entries[8].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[1].entries[9].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.aggregate_result.jupyter_messages[2].content.traceback[6]"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[11].entries[1].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[12].entries[1].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.content_references[6].items[0].supporting_websites[1].url"
+    },
+    {
+      "Count": 1,
+      "Name": "message.metadata.search_result_groups[9].entries[2].url"
+    }
+  ],
+  "downloadStatusSummary": [
+    {
+      "Count": 2186,
+      "Name": "pending"
+    },
+    {
+      "Count": 670,
+      "Name": "metadata_only"
+    }
+  ],
+  "sampleRows": [
+    {
+      "conversationTitle": "Chat Count Inquiry",
+      "sourceField": "message.metadata.conversation_context_citation_metadata[0].citation.url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/Running Async Function in DevConsole"
+    },
+    {
+      "conversationTitle": "Running Async Function in DevConsole",
+      "sourceField": "message.metadata.conversation_context_citation_metadata[0].citation.url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/ChatGPT API Limitations"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[0].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/If you're going to fry eggs, you'll want to know how to make ..."
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[0].items[0].supporting_websites[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to fry an egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[1].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to fry an egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[1].items[0].supporting_websites[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Fry an Egg Perfectly _ Incredible Egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[2].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to fry an egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[3].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/Crispy Fried Eggs Recipe"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[4].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to fry an egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[4].items[0].supporting_websites[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Fry an Egg Perfectly _ Incredible Egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[5].sources[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/If you're going to fry eggs, you'll want to know how to make ..."
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[5].sources[1].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to fry an egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[5].sources[2].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/Crispy Fried Eggs Recipe"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.search_result_groups[0].entries[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/A super quick tip from tonights episode of #JamiesSuperfood ..."
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.search_result_groups[1].entries[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Fry an Egg Perfectly _ Incredible Egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[0].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/If you're going to fry eggs, you'll want to know how to make ..."
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[1].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/If you're going to fry eggs, you'll want to know how to make ..."
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[2].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/If you're going to fry eggs, you'll want to know how to make ..."
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[3].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to fry an egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[4].sources[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/If you're going to fry eggs, you'll want to know how to make ..."
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.content_references[4].sources[1].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to fry an egg"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.search_result_groups[0].entries[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/The Best Fried Eggs You'll Ever Make _ Epicurious 101"
+    },
+    {
+      "conversationTitle": "Fried Egg Cooking Tips",
+      "sourceField": "message.metadata.search_result_groups[1].entries[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Make the Perfect Fried Eggs"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.text",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/ChatGPT-Financial_Audit_Prompt(1"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.text",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/ChatGPT-Financial_Audit_Prompt(1"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.text",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/ChatGPT-Financial_Audit_Prompt(1"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.text",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/ChatGPT-Financial_Audit_Prompt(1"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.text",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/ChatGPT-Financial_Audit_Prompt(1"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.text",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/ChatGPT-Financial_Audit_Prompt(1"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.text",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/ChatGPT-Financial_Audit_Prompt(1"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.text",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/archive_hist"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.metadata.aggregate_result.final_expression_output",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/archive_hist"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.text",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/ChatGPT-Financial_Audit_Prompt(1"
+    },
+    {
+      "conversationTitle": "HTML File Generation",
+      "sourceField": "message.content.parts[0]",
+      "downloadStatus": "metadata_only",
+      "zipPath": "generated/ChatGPT-Financial_Audit_Prompt.html"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[0].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversations Without Losing Images"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[0].items[0].supporting_websites[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversation (Full Guide)"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[1].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversations_ Complete Guide (2026)"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[1].items[0].supporting_websites[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/Export ChatGPT Conversations_ TXT, Markdown, JSON, PDF ..."
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[2].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/ExportGPT_ Export ChatGPT Conversation - Chrome Web Store"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[2].items[0].supporting_websites[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/ExportGPT"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[3].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/ChatGPT Exporter - Extract chat convos easily"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[3].items[0].supporting_websites[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/ChatGPT Exporter - ChatGPT to PDF, MD, and more"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[4].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to download 1 full chat history in word or PDF to feed ..."
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[5].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversations Without Losing Images"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[5].items[0].supporting_websites[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversation (Full Guide)"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[6].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversations Without Losing Images"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[6].items[0].supporting_websites[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversation (Full Guide)"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[7].items[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversations Without Losing Images"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[8].sources[0].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversations Without Losing Images"
+    },
+    {
+      "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+      "sourceField": "message.metadata.content_references[8].sources[1].url",
+      "downloadStatus": "pending",
+      "zipPath": "generated/How to Export ChatGPT Conversations_ Complete Guide (2026)"
+    }
+  ]
+}
