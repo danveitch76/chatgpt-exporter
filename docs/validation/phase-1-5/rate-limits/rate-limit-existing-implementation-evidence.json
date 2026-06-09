@@ -1,0 +1,522 @@
+[
+  {
+    "file": ".\\src\\api.ts",
+    "line": 681,
+    "text": "* Thrown when the API responds with 429 Too Many Requests."
+  },
+  {
+    "file": ".\\src\\api.ts",
+    "line": 682,
+    "text": "* Carries the wait time from the `Retry-After` header (or a safe default)."
+  },
+  {
+    "file": ".\\src\\api.ts",
+    "line": 684,
+    "text": "export class RateLimitError extends Error {"
+  },
+  {
+    "file": ".\\src\\api.ts",
+    "line": 688,
+    "text": "super('Too Many Requests (429)')"
+  },
+  {
+    "file": ".\\src\\api.ts",
+    "line": 689,
+    "text": "this.name = 'RateLimitError'"
+  },
+  {
+    "file": ".\\src\\api.ts",
+    "line": 698,
+    "text": "'retry-after',"
+  },
+  {
+    "file": ".\\src\\api.ts",
+    "line": 736,
+    "text": "if (response.status === 429) {"
+  },
+  {
+    "file": ".\\src\\api.ts",
+    "line": 737,
+    "text": "throw new RateLimitError(response.headers.get('Retry-After'))"
+  },
+  {
+    "file": ".\\src\\api.ts",
+    "line": 773,
+    "text": "if (response.status === 429) {"
+  },
+  {
+    "file": ".\\src\\api.ts",
+    "line": 774,
+    "text": "const secs = response.headers.get('retry-after')"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 2,
+    "text": "import { RateLimitError } from '../api'"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 26,
+    "text": "/** Seconds remaining in a rate-limit pause (only set when status === 'rate_limited') */"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 33,
+    "text": "* Max times the entire queue can be globally paused for rate limiting before"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 36,
+    "text": "const MAX_GLOBAL_PAUSES = 5"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 38,
+    "text": "* Default pause length (ms) applied to the whole queue on a 429."
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 41,
+    "text": "const DEFAULT_429_PAUSE_MS = 60_000"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 54,
+    "text": "private readonly backoffMultiplier = 2"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 55,
+    "text": "private backoff: number"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 62,
+    "text": "* receiving a 429. While Date.now() < pauseUntil every process() iteration"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 65,
+    "text": "private pauseUntil = 0"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 66,
+    "text": "/** How many global rate-limit pauses have been applied so far */"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 67,
+    "text": "private globalPauses = 0"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 69,
+    "text": "constructor(private minBackoff: number, private maxBackoff: number) {"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 70,
+    "text": "this.backoff = minBackoff"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 93,
+    "text": "this.backoff = this.minBackoff"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 94,
+    "text": "this.pauseUntil = 0"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 95,
+    "text": "this.globalPauses = 0"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 117,
+    "text": "// ── Global rate-limit pause ──────────────────────────────────────────"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 118,
+    "text": "// If a previous request set pauseUntil, wait for the remainder before"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 121,
+    "text": "const remaining = this.pauseUntil - Date.now()"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 124,
+    "text": "// Broadcast the pause status for every item currently at the front"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 127,
+    "text": "this.pauseUntil = 0"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 134,
+    "text": "let waitMs = this.backoff"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 142,
+    "text": "this.backoff = this.minBackoff // reset on success"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 146,
+    "text": "if (error instanceof RateLimitError) {"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 147,
+    "text": "this.globalPauses++"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 148,
+    "text": "if (this.globalPauses > MAX_GLOBAL_PAUSES) {"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 149,
+    "text": "// Rate limit persists even after several long pauses — abort."
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 150,
+    "text": "console.warn('[Exporter] Queue stopped: API rate limit did not clear after', MAX_GLOBAL_PAUSES, 'pauses')"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 154,
+    "text": "// Freeze the whole queue. Exponentially increase the pause so"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 155,
+    "text": "// we back off harder if the first pause wasn't long enough."
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 156,
+    "text": "const pauseMs = Math.max("
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 157,
+    "text": "error.retryAfterMs,"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 158,
+    "text": "DEFAULT_429_PAUSE_MS * this.globalPauses,"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 160,
+    "text": "this.pauseUntil = Date.now() + pauseMs"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 161,
+    "text": "this.progress(name, 'rate_limited', Math.round(pauseMs / 1000))"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 162,
+    "text": "console.warn(`[Exporter] Rate limited (429). Pausing queue for ${Math.round(pauseMs / 1000)}s (pause #${this.globalPauses})`)"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 163,
+    "text": "// Put this item back — it will be retried after the pause clears"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 175,
+    "text": "this.backoff = Math.min(this.backoff * this.backoffMultiplier, this.maxBackoff)"
+  },
+  {
+    "file": ".\\src\\utils\\queue.ts",
+    "line": 176,
+    "text": "waitMs = this.backoff"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 10,
+    "text": "import { RequestQueue } from '../utils/queue'"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 129,
+    "text": "error: string"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 138,
+    "text": "error,"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 289,
+    "text": "{error && <li className=\"SelectItem\">{t('Error')}: {error}</li>}"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 337,
+    "text": "{!loading && !error && filtered.length === 0 && conversations.length > 0 && ("
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 380,
+    "text": "const [error, setError] = useState('')"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 385,
+    "text": "const disabled = processing || !!error || selected.length === 0"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 392,
+    "text": "const requestQueue = useMemo(() => new RequestQueue<ApiConversationWithId>(200, 1600), [])"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 393,
+    "text": "const archiveQueue = useMemo(() => new RequestQueue<boolean>(200, 1600), [])"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 394,
+    "text": "const deleteQueue = useMemo(() => new RequestQueue<boolean>(200, 1600), [])"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 400,
+    "text": "currentStatus: '' as '' | 'processing' | 'retrying' | 'rate_limited',"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 401,
+    "text": "rateLimitWaitSecs: undefined as number | undefined,"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 406,
+    "text": "const pendingBatchesRef = useRef<ApiConversationItem[][]>([])"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 409,
+    "text": "/** Set to true when the user clicks Cancel — prevents the 'done' handler from starting the next batch */"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 432,
+    "text": "requestQueue.clear()"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 434,
+    "text": "requestQueue.add({ name: title, request: () => fetchConversation(id, exportType !== 'JSON') })"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 436,
+    "text": "requestQueue.start()"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 437,
+    "text": "}, [requestQueue, exportType])"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 440,
+    "text": "const off = requestQueue.on('progress', (prog) => {"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 444,
+    "text": "rateLimitWaitSecs: prog.rateLimitWaitSecs,"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 452,
+    "text": "}, [requestQueue])"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 457,
+    "text": "setProgress({ ...prog, rateLimitWaitSecs: prog.rateLimitWaitSecs, batchIndex: 0, totalBatches: 0 })"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 465,
+    "text": "setProgress({ ...prog, rateLimitWaitSecs: prog.rateLimitWaitSecs, batchIndex: 0, totalBatches: 0 })"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 471,
+    "text": "const off = requestQueue.on('done', async (results) => {"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 489,
+    "text": "const nextChunk = pendingBatchesRef.current[batchIndexRef.current]"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 497,
+    "text": "}, [requestQueue, exportAllOptions, exportType, format, metaList, startApiBatch, selectedProject])"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 500,
+    "text": "const off = archiveQueue.on('done', () => {"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 510,
+    "text": "const off = deleteQueue.on('done', () => {"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 521,
+    "text": "requestQueue.stop()"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 524,
+    "text": "}, [requestQueue, archiveQueue, deleteQueue])"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 530,
+    "text": "pendingBatchesRef.current = chunks"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 539,
+    "text": "rateLimitWaitSecs: undefined,"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 584,
+    "text": "// Cancel any in-flight work when the dialog unmounts to avoid stale-state errors"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 590,
+    "text": "requestQueue.clear()"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 594,
+    "text": "}, [requestQueue, archiveQueue, deleteQueue])"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 606,
+    "text": ".catch(err => console.error('Error fetching projects:', err))"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 625,
+    "text": ".catch((err: Error) => {"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 627,
+    "text": "console.error('Error fetching conversations:', err)"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 628,
+    "text": "setError(err.message || 'Failed to load conversations')"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 646,
+    "text": "console.error('loadMore error', err)"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 656,
+    "text": "type ProbeStatus = null | 'testing' | 'ok' | 'rate_limited' | 'error'"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 665,
+    "text": "setProbeHeaders(result.rateLimitHeaders)"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 670,
+    "text": "setProbeStatus('rate_limited')"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 675,
+    "text": "setProbeStatus('error')"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 683,
+    "text": ": probeStatus === 'rate_limited'"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 684,
+    "text": "? `🚫 Rate limited${probeRetryAfterSecs != null ? ` · wait ${probeRetryAfterSecs}s` : ''}`"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 685,
+    "text": ": probeStatus === 'error'"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 686,
+    "text": "? '⚠️ Error'"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 701,
+    "text": "? `Rate-limit headers: ${JSON.stringify(probeHeaders)}`"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 702,
+    "text": ": 'Check if the API is currently rate-limiting requests'}"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 737,
+    "text": "error={error}"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 794,
+    "text": "{progress.currentStatus === 'rate_limited'"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 795,
+    "text": "? `⏳ Rate limited — waiting ${progress.rateLimitWaitSecs ?? '…'}s`"
+  },
+  {
+    "file": ".\\src\\ui\\ExportDialog.tsx",
+    "line": 814,
+    "text": "className={`h-2.5 rounded-full ${progress.currentStatus === 'rate_limited' ? 'bg-amber-500' : 'bg-blue-600'}`}"
+  }
+]
