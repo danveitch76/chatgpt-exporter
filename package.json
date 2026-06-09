@@ -23,14 +23,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "tsc --noEmit && pnpm run test:file-extractor && pnpm run test:file-extractor-limits && pnpm run test:generated-asset-classification && pnpm run test:failure-recovery-classification",
+    "test": "tsc --noEmit && pnpm run test:file-extractor && pnpm run test:file-extractor-limits && pnpm run test:generated-asset-classification && pnpm run test:failure-recovery-classification && pnpm run test:uploaded-asset-classification",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky",
     "test:file-extractor": "tsx ./src/file-extractor/fixtures/validateFileExtractionFixture.ts",
     "test:file-extractor-limits": "tsx ./src/file-extractor/fixtures/validateExportLimits.ts",
     "test:generated-asset-classification": "tsx ./src/file-extractor/fixtures/validateGeneratedAssetClassification.ts",
-    "test:failure-recovery-classification": "tsx ./src/file-extractor/fixtures/validateFailureRecoveryClassification.ts"
+    "test:failure-recovery-classification": "tsx ./src/file-extractor/fixtures/validateFailureRecoveryClassification.ts",
+    "test:uploaded-asset-classification": "tsx ./src/file-extractor/fixtures/validateUploadedAssetClassification.ts"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.14",

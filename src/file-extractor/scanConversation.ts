@@ -176,6 +176,14 @@ function looksLikeGeneratedFileText(value: string): boolean {
 }
 
 function inferSourceType(message: ConversationNodeMessage, path: string, value: string): FileSourceType {
+    const isStructuredUploadedAsset
+        = path.includes('asset_pointer')
+        || path.includes('image_asset_pointer')
+        || path.includes('audio_asset_pointer')
+        || path.includes('video_container_asset_pointer')
+        || value.startsWith('data:image/')
+        || value.startsWith('sediment://')
+        || looksLikeFileId(value)
     if (
         value.startsWith('sediment://')
         || path.includes('image_asset_pointer')
@@ -196,7 +204,7 @@ function inferSourceType(message: ConversationNodeMessage, path: string, value: 
         return 'generated'
     }
 
-    if (message.author?.role === 'user') {
+    if (message.author?.role === 'user' && isStructuredUploadedAsset) {
         return 'uploaded'
     }
 
