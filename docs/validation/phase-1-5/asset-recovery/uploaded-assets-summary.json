@@ -1,0 +1,74 @@
+[
+  {
+    "conversationTitle": "Running Async Function in DevConsole",
+    "filename": null,
+    "downloadStatus": "pending",
+    "AssetPointerType": "embedded-base64-image",
+    "AssetPointerLength": 100982,
+    "sourceField": "message.content.parts[0].asset_pointer",
+    "zipPath": "uploaded/data_image_png;base64,iVBORw0KGgoAAAANSUhEUgAAAl4AAAKqCAYAAADrIlCJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAP+lSURBVHhe7L15WBRX2vf_xS2oNNLQIriBimyKgiaokS"
+  },
+  {
+    "conversationTitle": "Running Async Function in DevConsole",
+    "filename": null,
+    "downloadStatus": "pending",
+    "AssetPointerType": "embedded-base64-image",
+    "AssetPointerLength": 136522,
+    "sourceField": "message.content.parts[0].asset_pointer",
+    "zipPath": "uploaded/data_image_png;base64,iVBORw0KGgoAAAANSUhEUgAAAlsAAAPLCAYAAABo1EyGAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAP+lSURBVHhe7N15fFPXmfDxnyTvC14kwHYAs3ojEMDgED"
+  },
+  {
+    "conversationTitle": "Running Async Function in DevConsole",
+    "filename": null,
+    "downloadStatus": "pending",
+    "AssetPointerType": "embedded-base64-image",
+    "AssetPointerLength": 100282,
+    "sourceField": "message.content.parts[0].asset_pointer",
+    "zipPath": "uploaded/data_image_png;base64,iVBORw0KGgoAAAANSUhEUgAAAh0AAAM8CAYAAADz5xLAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAP+lSURBVHhe7L17XFV1vv__bCpTuSiwUdSUVEQgL2iNWo"
+  },
+  {
+    "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+    "filename": null,
+    "downloadStatus": "pending",
+    "AssetPointerType": "embedded-base64-image",
+    "AssetPointerLength": 130294,
+    "sourceField": "message.content.parts[0].asset_pointer",
+    "zipPath": "uploaded/data_image_png;base64,iVBORw0KGgoAAAANSUhEUgAAB38AAAKcCAYAAADoyXCVAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAP+lSURBVHhe7N13XJXl_8fxFxsEFAEBEcW9R07cozS1zE"
+  },
+  {
+    "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+    "filename": null,
+    "downloadStatus": "pending",
+    "AssetPointerType": "other",
+    "AssetPointerLength": 6462,
+    "sourceField": "message.content.parts[0]",
+    "zipPath": "uploaded/askmr@DESKTOP-DAN[2026-06-08 17_39_47]C__Users_askmr_OneDrive__DanOS_dev_git_chatgpt-exporter$ Select-String `\r\n__   -Path ._src_api.ts `\r\n__   -Pattern _asset_,_attachment_,_file_"
+  },
+  {
+    "conversationTitle": "IN PROGRESS - Extracting ChatGPT Files",
+    "filename": null,
+    "downloadStatus": "pending",
+    "AssetPointerType": "embedded-base64-image",
+    "AssetPointerLength": 36994,
+    "sourceField": "message.content.parts[0].asset_pointer",
+    "zipPath": "uploaded/data_image_png;base64,iVBORw0KGgoAAAANSUhEUgAAAzAAAAJICAYAAAC+DgEDAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAGvkSURBVHhe7d17dFX1gff_z0kgmoY0hotAOzlyCRUsaR"
+  },
+  {
+    "conversationTitle": "GitHub - Job Search Dashboard",
+    "filename": null,
+    "downloadStatus": "pending",
+    "AssetPointerType": "embedded-base64-image",
+    "AssetPointerLength": 111150,
+    "sourceField": "message.content.parts[0].asset_pointer",
+    "zipPath": "uploaded/data_image_png;base64,iVBORw0KGgoAAAANSUhEUgAABTUAAAJeCAYAAABlHeGCAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAP+lSURBVHhe7N1_fFTlnff_l1UzCp0gNgjfDqaVVNch9i"
+  },
+  {
+    "conversationTitle": "TLDR Fractional Executive Infographic Analysis",
+    "filename": null,
+    "downloadStatus": "pending",
+    "AssetPointerType": "embedded-base64-image",
+    "AssetPointerLength": 722871,
+    "sourceField": "message.content.parts[0].asset_pointer",
+    "zipPath": "uploaded/data_image_jpeg;base64,_9j_4AAQSkZJRgABAQAASABIAAD_4QCARXhpZgAATU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAIdpAAQAAAABAAAAWgAAAAAAAABIAAAAAQAAAEgAA"
+  }
+]
