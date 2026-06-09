@@ -1,3 +1,4 @@
+import { classifyFileReference } from './classifyFileReference'
 import { scanConversationForFiles } from './scanConversation'
 import type { FileExtractionStats, FileInventoryRow, FileReference } from './types'
 import type { ApiConversationWithId } from '../api'
@@ -47,9 +48,12 @@ export function buildInventory(conversations: ApiConversationWithId[]): BuildInv
 }
 
 function toInventoryRow(reference: FileReference): FileInventoryRow {
+    const assetClass = classifyFileReference(reference)
+
     return {
         ...reference,
-        downloadStatus: reference.fileId || reference.assetPointer ? 'pending' : 'metadata_only',
+        assetClass,
+        downloadStatus: assetClass === 'recoverable_embedded_asset' || assetClass === 'recoverable_backend_asset' ? 'pending' : 'metadata_only',
         zipPath: buildZipPath(reference),
     }
 }
