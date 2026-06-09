@@ -2,75 +2,150 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$DiscoveryJsonPath,
 
-    [string]$OutputPath = ".\docs\validation\phase-1-5\asset-recovery\generated-assets-summary.json"
+    [int]$Limit = 50
 )
 
-$json = Get-Content $DiscoveryJsonPath -Raw | ConvertFrom-Json
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
-$generated = @(
-    $json.inventory |
-    Where-Object { $_.sourceType -eq "generated" }
-)
+function Get-PropertyValue {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$Object,
 
-function Get-CandidateClass {
-    param([object]$Row)
+        [Parameter(Mandatory = $true)]
+        [string]$Name
+    )
 
-    $sourceField = [string]$Row.sourceField
-    $rawValue = [string]$Row.rawValue
-    $assetPointer = [string]$Row.assetPointer
-    $filename = [string]$Row.filename
+    $property = $Object.PSObject.Properties[$Name]
+    if ($null -eq $property) {
+        return $null
+    }
 
-    if ($assetPointer -match "^data:image/[^;]+;base64,") { return "generated-image" }
-    if ($assetPointer -like "sediment://*") { return "generated-image" }
-    if ($filename -match "\.(zip|pdf|docx|xlsx|csv|json|md|html|png|jpg|jpeg|webp)(\s|$)") { return "generated-file" }
-    if ($rawValue -match "/mnt/data/[^\s'`"]+") { return "sandbox-path-mention" }
-    if ($rawValue -match "\.(zip|pdf|docx|xlsx|csv|json|md|html|png|jpg|jpeg|webp)(\s|$)") { return "file-like-text-reference" }
-    if ($sourceField -match "citation_metadata|conversation_context_citation_metadata") { return "citation-url" }
-    if ($sourceField -match "search_result_groups") { return "search-result-url" }
-    if ($sourceField -match "content_references") { return "content-reference-url" }
-    if ($sourceField -match "aggregate_result\.code") { return "execution-code" }
-    if ($sourceField -match "jupyter_messages|aggregate_result\.messages|final_expression_output|in_kernel_exception") { return "execution-output-text" }
-    if ($sourceField -match "message\.content\.text|message\.content\.parts|message\.content\.result|message\.content\.thoughts") { return "conversation-content" }
-
-    return "unknown-generated-reference"
+    return $property.Value
 }
 
-$classified = @(
-    $generated | ForEach-Object {
-        [pscustomobject]@{
-            conversationTitle = $_.conversationTitle
-            sourceField = $_.sourceField
-            downloadStatus = $_.downloadStatus
-            candidateClass = Get-CandidateClass -Row $_
-            zipPath = $_.zipPath
-        }
+function Get-CandidateType {
+    param([object]$Row)
+
+    $assetPointer = Get-PropertyValue $Row "assetPointer"
+    $rawPath = Get-PropertyValue $Row "rawPath"
+    $rawUrl = Get-PropertyValue $Row "rawUrl"
+    $fileId = Get-PropertyValue $Row "fileId"
+    $filename = Get-PropertyValue $Row "filename"
+    $sourceField = Get-PropertyValue $Row "sourceField"
+    $rawValue = Get-PropertyValue $Row "rawValue"
+
+    $text = @(
+        $assetPointer
+        $rawPath
+        $rawUrl
+        $fileId
+        $filename
+        $sourceField
+        $rawValue
+    ) -join " "
+
+    if ($assetPointer -is [string] -and $assetPointer.StartsWith("data:image/")) {
+        return "embedded-data-image"
+    }
+
+    if ($assetPointer -is [string] -and $assetPointer.StartsWith("sediment://")) {
+        return "sediment-pointer"
+    }
+
+    if ($fileId -is [string] -and $fileId.StartsWith("file-")) {
+        return "file-id"
+    }
+
+    if ($rawPath -is [string] -and ($rawPath.StartsWith("sandbox:/mnt/data/") -or $rawPath.StartsWith("/mnt/data/"))) {
+        return "sandbox-path"
+    }
+
+    if ($rawUrl -is [string] -and $rawUrl.StartsWith("http")) {
+        return "url"
+    }
+
+    if ($text -match "sandbox:/mnt/data/|/mnt/data/") {
+        return "sandbox-path-mention"
+    }
+
+    if ($text -match "https?://") {
+        return "url-mention"
+    }
+
+    if ($text -match "```|PowerShell|Traceback|Exception|askmr@DESKTOP") {
+        return "execution-or-terminal-text"
+    }
+
+    return "unknown-or-conversation-content"
+}
+
+Write-Host "==> Loading discovery JSON" -ForegroundColor Cyan
+
+if (-not (Test-Path $DiscoveryJsonPath)) {
+    throw "Discovery JSON not found: $DiscoveryJsonPath"
+}
+
+$json = Get-Content -Raw -Path $DiscoveryJsonPath | ConvertFrom-Json
+
+if ($null -eq $json.inventory) {
+    throw "Discovery JSON does not contain an inventory property."
+}
+
+$generated = @(
+    $json.inventory | Where-Object {
+        (Get-PropertyValue $_ "sourceType") -eq "generated"
     }
 )
 
-$result = [ordered]@{
-    generatedAt = (Get-Date).ToString("s")
-    totalGeneratedRows = $generated.Count
-    classSummary = @(
-        $classified |
-        Group-Object candidateClass |
-        Sort-Object Count -Descending |
-        Select-Object Count,Name
-    )
-    downloadStatusSummary = @(
-        $generated |
-        Group-Object downloadStatus |
-        Sort-Object Count -Descending |
-        Select-Object Count,Name
-    )
-    samples = @(
-        $classified |
-        Select-Object -First 50
-    )
-}
+Write-Host "==> Generated rows: $($generated.Count)" -ForegroundColor Cyan
 
-$result |
-    ConvertTo-Json -Depth 10 |
-    Set-Content -Encoding UTF8 $OutputPath
+$summary = $generated |
+    ForEach-Object {
+        [pscustomobject]@{
+            CandidateType = Get-CandidateType $_
+            SourceType = Get-PropertyValue $_ "sourceType"
+            ConversationTitle = Get-PropertyValue $_ "conversationTitle"
+            FileName = Get-PropertyValue $_ "filename"
+            FileId = Get-PropertyValue $_ "fileId"
+            AssetPointer = Get-PropertyValue $_ "assetPointer"
+            RawPath = Get-PropertyValue $_ "rawPath"
+            RawUrl = Get-PropertyValue $_ "rawUrl"
+            DownloadStatus = Get-PropertyValue $_ "downloadStatus"
+            ZipPath = Get-PropertyValue $_ "zipPath"
+            SourceField = Get-PropertyValue $_ "sourceField"
+        }
+    }
 
-Write-Host "Created: $OutputPath" -ForegroundColor Green
-$result.classSummary | Format-Table -AutoSize
+Write-Host "`n==> Candidate type counts" -ForegroundColor Cyan
+
+$summary |
+    Group-Object CandidateType |
+    Sort-Object Count -Descending |
+    Select-Object Name, Count |
+    Format-Table -AutoSize
+
+Write-Host "`n==> Candidate sample" -ForegroundColor Cyan
+
+$summary |
+    Select-Object -First $Limit |
+    Format-Table CandidateType, ConversationTitle, FileName, FileId, DownloadStatus, ZipPath -AutoSize
+
+$outDir = ".\docs\validation\phase-1\file-resolver"
+New-Item -ItemType Directory -Force $outDir | Out-Null
+
+$summary |
+    ConvertTo-Json -Depth 20 |
+    Set-Content -Encoding UTF8 "$outDir\generated-asset-candidates-safe-summary.json"
+
+$summary |
+    Group-Object CandidateType |
+    Sort-Object Count -Descending |
+    Select-Object Name, Count |
+    ConvertTo-Json -Depth 5 |
+    Set-Content -Encoding UTF8 "$outDir\generated-asset-candidate-type-counts.json"
+
+Write-Host "`n==> Wrote:" -ForegroundColor Green
+Write-Host "$outDir\generated-asset-candidates-safe-summary.json"
+Write-Host "$outDir\generated-asset-candidate-type-counts.json"

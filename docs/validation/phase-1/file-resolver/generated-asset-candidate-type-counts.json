@@ -1,0 +1,26 @@
+[
+  {
+    "Name": "url",
+    "Count": 1987
+  },
+  {
+    "Name": "sandbox-path-mention",
+    "Count": 675
+  },
+  {
+    "Name": "sandbox-path",
+    "Count": 122
+  },
+  {
+    "Name": "unknown-or-conversation-content",
+    "Count": 66
+  },
+  {
+    "Name": "execution-or-terminal-text",
+    "Count": 5
+  },
+  {
+    "Name": "url-mention",
+    "Count": 1
+  }
+]

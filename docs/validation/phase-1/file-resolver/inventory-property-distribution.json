@@ -1,0 +1,74 @@
+[
+  {
+    "Property": "authorRole",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "conversationTitle",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "conversationCreateTime",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "downloadStatus",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "zipPath",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "sourceField",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "sourceType",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "messageCreateTime",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "conversationUpdateTime",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "rawValue",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "conversationId",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "messageId",
+    "RowsWithProperty": 2975
+  },
+  {
+    "Property": "filename",
+    "RowsWithProperty": 2962
+  },
+  {
+    "Property": "assetPointer",
+    "RowsWithProperty": 2305
+  },
+  {
+    "Property": "rawUrl",
+    "RowsWithProperty": 1987
+  },
+  {
+    "Property": "extension",
+    "RowsWithProperty": 964
+  },
+  {
+    "Property": "rawPath",
+    "RowsWithProperty": 848
+  },
+  {
+    "Property": "sizeBytes",
+    "RowsWithProperty": 62
+  }
+]
