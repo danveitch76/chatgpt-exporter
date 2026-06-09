@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-06-09T17:04:18.7231061+01:00",
+  "issue": "#46",
+  "purpose": "Performance baseline benchmarking for Phase 1.5 real account discovery output.",
+  "sourceDiscoveryJson": "C:\\Users\\askmr\\OneDrive\\Downloads\\ChatGPT-chatgpt-file-discovery.file-discovery.json",
+  "totalInventoryRows": 2975,
+  "sourceTypeSummary": [
+    {
+      "sourceType": "generated",
+      "count": 2856
+    },
+    {
+      "sourceType": "image",
+      "count": 111
+    },
+    {
+      "sourceType": "uploaded",
+      "count": 8
+    }
+  ],
+  "downloadStatusSummary": [
+    {
+      "downloadStatus": "pending",
+      "count": 2305
+    },
+    {
+      "downloadStatus": "metadata_only",
+      "count": 670
+    }
+  ],
+  "generatedClassSummary": [],
+  "knownRuntimeSeconds": 60,
+  "browserCrash": false,
+  "browserInstability": false,
+  "notes": [
+    "100-conversation validation completed in approximately 60 seconds.",
+    "Browser crash was not observed.",
+    "Browser instability was not observed.",
+    "Generated inventory required classification refinement before being treated as recoverable asset count."
+  ]
+}
