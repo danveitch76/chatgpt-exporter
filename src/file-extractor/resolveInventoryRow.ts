@@ -7,6 +7,7 @@ export type FileResolverStatus =
     | 'failed'
 
 export interface ResolvedFileAsset {
+    downloadPath?: string
     status: FileResolverStatus
     filename?: string
     mimeType?: string
@@ -38,7 +39,12 @@ export function resolveInventoryRow(row: FileInventoryRow): ResolvedFileAsset {
     }
 
     if (row.fileId) {
-        return unsupported(row, 'Backend file-id recovery is not implemented yet.')
+        return {
+            status: 'metadata_only',
+            downloadPath: buildBackendFileDownloadPath(row.fileId),
+            failureReason: 'Backend file-id route identified but live download is not validated yet.',
+            source: row,
+        }
     }
 
     if (row.assetPointer) {
@@ -102,6 +108,15 @@ function inferExtensionFromMimeType(mimeType: string): string | undefined {
     }
 
     return map[mimeType]
+}
+
+export function buildBackendFileDownloadPath(fileId: string): string {
+    const query = new URLSearchParams({
+        post_id: '',
+        inline: 'false',
+    })
+
+    return `/backend-api/files/download/${fileId}?${query.toString()}`
 }
 
 function buildDefaultFilename(row: FileInventoryRow, extension?: string): string {

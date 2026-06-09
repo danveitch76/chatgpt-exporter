@@ -66,7 +66,8 @@ assert('uploaded base64 image infers mime type', uploadedResult.mimeType === 'im
 assert('uploaded base64 image infers extension', uploadedResult.extension === 'png')
 
 assert('sandbox path remains metadata-only', metadataResult.status === 'metadata_only')
-assert('file id is unsupported for now', unsupportedResult.status === 'unsupported')
+assert('file id produces backend download route metadata', unsupportedResult.status === 'metadata_only')
+assert('file id exposes backend download path', unsupportedResult.downloadPath === '/backend-api/files/download/file-abc123?post_id=&inline=false')
 assert('malformed data URI fails safely', malformedResult.status === 'failed')
 
 export const fileResolverValidation = {
