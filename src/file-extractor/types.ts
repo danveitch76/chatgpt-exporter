@@ -1,11 +1,25 @@
-export type FileSourceType = 'uploaded' | 'generated' | 'image' | 'unknown'
+export type FileSourceType =
+    | 'uploaded'
+    | 'generated'
+    | 'image'
+    | 'unknown'
 
 export type FileDownloadStatus =
-  | 'pending'
-  | 'downloaded'
-  | 'metadata_only'
-  | 'failed'
-  | 'skipped_duplicate'
+    | 'pending'
+    | 'downloaded'
+    | 'metadata_only'
+    | 'failed'
+    | 'skipped_duplicate'
+
+export type FileAssetClass =
+    | 'recoverable_embedded_asset'
+    | 'recoverable_backend_asset'
+    | 'metadata_only_sandbox_reference'
+    | 'citation_url'
+    | 'search_result_url'
+    | 'conversation_content'
+    | 'terminal_or_execution_text'
+    | 'unknown_metadata'
 
 export interface FileReference {
     conversationId: string
@@ -16,6 +30,7 @@ export interface FileReference {
     messageCreateTime?: number | string
     authorRole?: string
     sourceType: FileSourceType
+    assetClass?: FileAssetClass
     fileId?: string
     assetPointer?: string
     filename?: string
