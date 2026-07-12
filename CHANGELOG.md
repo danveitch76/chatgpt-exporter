@@ -1,19 +1,53 @@
 # Changelog
 
+## [2.33.3](https://github.com/danveitch76/chatgpt-exporter/compare/v2.33.2...v2.33.3) (2026-07-12)
+
+
+### Maintenance
+
+* add `Maintain-ChatGPT-Exporter.ps1` for governed synchronisation with the upstream repository
+* add automated upstream assessment, commit classification and validation workflow
+* add automated build, test and lint validation prior to publication
+* add comprehensive maintainer documentation
+* change the default **Export All** file type selection to **JSON (ZIP)**
+
+## [2.33.2](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.0...userscript-v2.33.2) (2026-07-05)
+
+
+### Bug Fixes
+
+* fix export progress so the total reflects the actual number of selected conversations rather than the batch size
+* export answer source lists (upstream) ([5b56f35](https://github.com/pionxzh/chatgpt-exporter/commit/5b56f354c7fa49d814928cbd0b4f1d48b9ec21e2)), closes [#361](https://github.com/pionxzh/chatgpt-exporter/issues/361)
+* improve the exporter user interface when the ChatGPT sidebar is collapsed (upstream) ([6b36cbb](https://github.com/pionxzh/chatgpt-exporter/commit/6b36cbb90ae8117647e74cea49356054ec835a6e))
+* retire access to `__NEXT_DATA__` and `__remixContext` to maintain compatibility with recent ChatGPT changes (upstream) ([f5ef7fe](https://github.com/pionxzh/chatgpt-exporter/commit/f5ef7fe30152dc92ffd4c119a954f8e900dd9e97)), closes [#362](https://github.com/pionxzh/chatgpt-exporter/issues/362)
+
+## [2.33.1](https://github.com/danveitch76/chatgpt-exporter/compare/v2.33.0...v2.33.1) (2026-07-05)
+
+
+### Bug Fixes
+
+* fix export progress so the total reflects the actual number of selected conversations instead of the internal batch size of 50
+
+### Improvements
+
+* update project version metadata
+* rebuild generated userscript
 
 ## [2.33.0](https://github.com/danveitch76/chatgpt-exporter/compare/v2.32.2...v2.33.0) (2026-06-08)
+
 
 ### Features
 
 * add File Discovery export mode for metadata-only file and asset inventory generation
 * add defensive scanner for uploaded files, generated files, image assets, sandbox paths and asset pointers
 * add inventory builder with deduplication and extraction statistics
-* wire File Discovery into the Export All dialog
+* wire File Discovery into the **Export All** dialog
 
 ### Notes
 
 * File Discovery does not download file contents in this release.
-* Download resolution and ZIP packaging remain follow-on Phase 1 work.
+* Download resolution and ZIP packaging remain Phase 1 follow-on work.
+
 ## [2.32.2](https://github.com/pionxzh/chatgpt-exporter/compare/userscript-v2.32.1...userscript-v2.32.2) (2026-05-28)
 
 

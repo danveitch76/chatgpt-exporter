@@ -3,7 +3,7 @@
 // @name:zh-CN         ChatGPT Exporter
 // @name:zh-TW         ChatGPT Exporter
 // @namespace          danveitch76
-// @version            2.33.2
+// @version            2.33.3
 // @author             danveitch76
 // @description        Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.
 // @description:zh-CN  一键导出 ChatGPT 对话，轻松备份与分享
@@ -16148,7 +16148,7 @@ ${sourceList}` : sourceList;
       code2 > 64975 && code2 < 65008 || (code2 & 65535) === 65535 || (code2 & 65535) === 65534 || // Out of range
       code2 > 1114111
     ) {
-      return "�";
+      return " ";
     }
     return String.fromCharCode(code2);
   }
@@ -18308,7 +18308,7 @@ ${sourceList}` : sourceList;
           replace2 = String.fromCharCode(code2, next);
           skip = 1;
         } else {
-          replace2 = "�";
+          replace2 = " ";
         }
       } else {
         replace2 = String.fromCharCode(code2);
@@ -23250,10 +23250,10 @@ ${content2}`;
     const { enableMeta, exportMetaList, exportAllLimit } = useSettingContext();
     const metaList = F$1(() => enableMeta ? exportMetaList : [], [enableMeta, exportMetaList]);
     const exportAllOptions = F$1(() => [
+      { label: "JSON (ZIP)", callback: exportAllToJson },
       { label: "Markdown", callback: exportAllToMarkdown },
       { label: "HTML", callback: exportAllToHtml },
       { label: "JSON", callback: exportAllToOfficialJson },
-      { label: "JSON (ZIP)", callback: exportAllToJson },
       { label: "File Discovery", callback: exportAllToFileDiscovery }
     ], []);
     const fileInputRef = _(null);

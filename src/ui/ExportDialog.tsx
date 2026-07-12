@@ -358,10 +358,10 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
     const metaList = useMemo(() => enableMeta ? exportMetaList : [], [enableMeta, exportMetaList])
 
     const exportAllOptions = useMemo(() => [
+        { label: 'JSON (ZIP)', callback: exportAllToJson },
         { label: 'Markdown', callback: exportAllToMarkdown },
         { label: 'HTML', callback: exportAllToHtml },
         { label: 'JSON', callback: exportAllToOfficialJson },
-        { label: 'JSON (ZIP)', callback: exportAllToJson },
         { label: 'File Discovery', callback: exportAllToFileDiscovery },
     ], [])
 
