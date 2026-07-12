@@ -17,6 +17,10 @@
 
 [English](./README.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp;&nbsp; Indonesia &nbsp;&nbsp;|&nbsp;&nbsp; [한국어](./README_KR.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Türkçe](./README_TR.md)
 
+
+> [!NOTE]
+> Repositori ini adalah fork terpelihara dari `pionxzh/chatgpt-exporter`. Fitur khusus fork, termasuk File Discovery dan alat pemeliharaan, didokumentasikan dalam [README bahasa Inggris](./README.md).
+
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/0697599c-2432-4eae-bc6a-ea4b6ecf89aa)
 
 ## Instalasi

@@ -17,6 +17,10 @@
 
 [English](./README.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](./README_ID.md) &nbsp;&nbsp;|&nbsp;&nbsp; [한국어](./README_KR.md) &nbsp;&nbsp;|&nbsp;&nbsp; Türkçe
 
+
+> [!NOTE]
+> Bu depo, `pionxzh/chatgpt-exporter` projesinin bakımı yapılan bir çatallamasıdır. File Discovery ve bakım aracı dâhil çatala özgü özellikler [İngilizce README](./README.md) içinde belgelenmiştir.
+
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/2c5554d6-6afc-46b5-aa52-d78bd5ee433c)
 
 ## Kurulum

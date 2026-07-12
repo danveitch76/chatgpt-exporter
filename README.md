@@ -17,6 +17,13 @@
 
 English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](./README_ID.md) &nbsp;&nbsp;|&nbsp;&nbsp; [한국어](./README_KR.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Türkçe](./README_TR.md)
 
+
+> [!NOTE]
+> This repository is a maintained downstream fork of [`pionxzh/chatgpt-exporter`](https://github.com/pionxzh/chatgpt-exporter). It preserves upstream attribution while adding File Discovery, asset classification, validation tooling and governed upstream-maintenance automation.
+
+**Current downstream release:** `2.33.3`
+
+
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
 ## Install
@@ -231,12 +238,13 @@ Click the upload icon button to upload a JSON file of conversations, such as one
 
 In the list of all your conversations, select which conversations you want to export. Check the "Select All" checkbox to export all your conversations.
 
-Select your export format from the dropdown on the bottom left. You can choose from the following formats.
+Select your export format from the dropdown on the bottom left. **JSON (ZIP)** is the default.
 
+- **JSON (ZIP)** — one JSON file per conversation inside a ZIP archive
 - **Markdown**
 - **HTML**
-- **JSON**
-- **JSON (ZIP)**
+- **JSON** — OpenAI-compatible conversation JSON
+- **File Discovery** — structured file and asset-reference inventory
 
 Click the button to perform the action you want.
 
@@ -244,9 +252,73 @@ Click the button to perform the action you want.
 - **Delete** - Deletes the selected conversations.
 - **Export** - Exports the selected conversations in the format chosen using the format selector.
 
+## File Discovery
+
+File Discovery scans selected ChatGPT conversations and exports a structured JSON inventory of file and asset references.
+
+It can identify and classify references including:
+
+- uploaded file identifiers;
+- generated-file references;
+- image and embedded data assets;
+- sandbox paths;
+- backend file identifiers;
+- asset pointers;
+- citation and search-result URLs;
+- inferred filenames, media types, extensions and sizes where available.
+
+The inventory includes:
+
+- generation timestamp;
+- discovery mode;
+- conversation and message context;
+- source type and asset classification;
+- deduplication status;
+- resolution status and failure reason;
+- extraction statistics.
+
+### Current capability boundary
+
+Version 2.33.3 includes discovery, classification, resolver proof, backend-path mapping, archive-limit planning and validation fixtures.
+
+The **File Discovery** user-interface option remains inventory-only. It does not yet perform complete live bulk download and ZIP packaging of all discovered assets. Backend file routes have been identified, but live authenticated download remains subject to further Phase 1 validation.
+
+See:
+
+- [Validation evidence](./docs/validation/)
+- [Roadmap](./docs/ROADMAP.md)
+- [Changelog](./CHANGELOG.md)
+
+## Upstream maintenance
+
+The repository includes a governed maintenance tool:
+
+```text
+scripts/maintainer/Maintain-ChatGPT-Exporter.ps1
+```
+
+It assesses upstream-only commits, classifies them, detects equivalent downstream commits, applies selected changes, validates the repository and can create a pull request.
+
+See the [maintainer documentation](./scripts/maintainer/README.md).
+
+## Development
+
+```powershell
+corepack pnpm install --frozen-lockfile
+corepack pnpm run lint
+corepack pnpm run test
+corepack pnpm run build
+```
+
+Further guidance:
+
+- [Contributing](./CONTRIBUTING.md)
+- [Documentation index](./docs/README.md)
+- [Release process](./docs/RELEASE.md)
+
 ## 🤝 Contribution
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md)
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## ⭐ Star History
 
@@ -255,29 +327,3 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md)
 <img src="https://api.star-history.com/svg?repos=danveitch76/chatgpt-exporter&type=Date" width="600" height="400" alt="Star History Chart" valign="middle">
 
 </div>
-
-## File Discovery
-
-Version 2.33.0 adds a metadata-only File Discovery export mode.
-
-File Discovery scans selected ChatGPT conversations and generates a JSON inventory of detected file and asset references. It is intended as a discovery and planning layer before full file download and ZIP extraction.
-
-Detected references may include:
-
-- uploaded file identifiers
-- generated file references
-- image asset pointers
-- sandbox paths
-- downloadable asset pointers
-- inferred filenames and metadata where available
-
-The discovery report includes:
-
-- generation timestamp
-- scan mode
-- conversation and message context
-- extraction statistics
-- inventory rows
-- download status placeholders
-
-This release does not download file contents. Full file download resolution and ZIP packaging are planned follow-on work.

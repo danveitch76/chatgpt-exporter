@@ -17,6 +17,10 @@
 
 [English](./README.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](./README_ID.md) &nbsp;&nbsp;|&nbsp;&nbsp; 한국어 &nbsp;&nbsp;|&nbsp;&nbsp; [Türkçe](./README_TR.md)
 
+
+> [!NOTE]
+> 이 저장소는 `pionxzh/chatgpt-exporter`의 유지 관리되는 포크입니다. File Discovery와 유지 관리 도구를 포함한 포크 전용 기능은 [영문 README](./README.md)에 문서화되어 있습니다.
+
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
 ## 설치하기

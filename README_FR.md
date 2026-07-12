@@ -17,6 +17,10 @@
 
 [English](./README.md) &nbsp;&nbsp;|&nbsp;&nbsp; Français &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](./README_ID.md) &nbsp;&nbsp;|&nbsp;&nbsp; [한국어](./README_KR.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Türkçe](./README_TR.md)
 
+
+> [!NOTE]
+> Ce dépôt est un fork maintenu de `pionxzh/chatgpt-exporter`. Les fonctions propres au fork, notamment File Discovery et l’outil de maintenance, sont documentées dans le [README anglais](./README.md).
+
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
 ## Installation

@@ -8,6 +8,14 @@ The default operating mode is assessment only. No upstream commits are applied u
 
 ---
 
+## Project status
+
+The maintainer was introduced in downstream release **2.33.3**. It is repository tooling, not part of the browser userscript runtime.
+
+It prepares and validates maintenance changes and can open a pull request. It does not create or publish releases.
+
+---
+
 ## Purpose
 
 The downstream repository has materially diverged from upstream. It contains Dan-specific functionality, including File Discovery, asset classification, validation evidence and file-resolution work. A blind fork synchronisation or full upstream merge would therefore be unsafe.
@@ -94,11 +102,13 @@ The script does not run `corepack enable`; this avoids requiring administrator r
 
 ## Installation
 
-Place the script somewhere outside the repository, for example:
+The canonical script is stored at:
 
 ```text
-C:\Scripts\Maintain-ChatGPT-Exporter.ps1
+scripts\maintainer\Maintain-ChatGPT-Exporter.ps1
 ```
+
+It may also be copied to a central scripts directory.
 
 Temporary execution-policy bypass:
 
@@ -106,10 +116,11 @@ Temporary execution-policy bypass:
 Set-ExecutionPolicy -Scope Process Bypass
 ```
 
-The script can then be invoked directly:
+From the repository root:
 
 ```powershell
-C:\Scripts\Maintain-ChatGPT-Exporter.ps1
+.\scripts\maintainer\Maintain-ChatGPT-Exporter.ps1 `
+    -RepoPath $PWD
 ```
 
 ---
