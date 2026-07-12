@@ -1,4 +1,15 @@
-export type FileSourceType = 'uploaded' | 'generated' | 'image' | 'unknown'
+export type FileSourceType =
+    | 'uploaded'
+    | 'generated'
+    | 'image'
+    | 'unknown'
+
+export type FileDownloadStatus =
+    | 'pending'
+    | 'downloaded'
+    | 'metadata_only'
+    | 'failed'
+    | 'skipped_duplicate'
 
 export type FileAssetClass =
     | 'recoverable_embedded_asset'
@@ -9,13 +20,6 @@ export type FileAssetClass =
     | 'conversation_content'
     | 'terminal_or_execution_text'
     | 'unknown_metadata'
-
-export type FileDownloadStatus =
-    | 'pending'
-    | 'downloaded'
-    | 'metadata_only'
-    | 'failed'
-    | 'skipped_duplicate'
 
 export interface FileReference {
     conversationId: string
