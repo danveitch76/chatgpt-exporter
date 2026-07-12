@@ -405,7 +405,8 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
 
     const pendingBatchesRef = useRef<ApiConversationItem[][]>([])
     const batchIndexRef = useRef(0)
-    const totalBatchesRef = useRef(0)
+    const totalBatchesRef = useRef(0)
+    const totalItemsRef = useRef(0)
     /** Set to true when the user clicks Cancel — prevents the 'done' handler from starting the next batch */
     const cancelledRef = useRef(false)
     /** Incremented on each new fetch; callbacks check this to discard stale results after remount */
@@ -444,8 +445,11 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
                 rateLimitWaitSecs: prog.rateLimitWaitSecs,
                 batchIndex: batchIndexRef.current,
                 totalBatches: totalBatchesRef.current,
-                completed: batchIndexRef.current * EXPORT_OPERATION_BATCH + prog.completed,
-                total: totalBatchesRef.current * EXPORT_OPERATION_BATCH,
+                completed: Math.min(
+                    totalItemsRef.current,
+                    batchIndexRef.current * EXPORT_OPERATION_BATCH + prog.completed,
+                ),
+                total: totalItemsRef.current,
             })
         })
         return () => off()
@@ -529,7 +533,8 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
         const chunks = chunkArray(selected, EXPORT_OPERATION_BATCH)
         pendingBatchesRef.current = chunks
         batchIndexRef.current = 0
-        totalBatchesRef.current = chunks.length
+        totalBatchesRef.current = chunks.length
+        totalItemsRef.current = selected.length
         setProcessing(true)
         setProgress({
             total: selected.length,

@@ -2,10 +2,10 @@
 // @name               ChatGPT Exporter
 // @name:zh-CN         ChatGPT Exporter
 // @name:zh-TW         ChatGPT Exporter
-// @namespace          pionxzh
-// @version            2.32.2
-// @author             pionxzh
-// @description        Export ChatGPT conversations with one click — backup & share effortlessly!
+// @namespace          danveitch76
+// @version            2.33.2
+// @author             danveitch76
+// @description        Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.
 // @description:zh-CN  一键导出 ChatGPT 对话，轻松备份与分享
 // @description:zh-TW  一鍵導出 ChatGPT 對話，輕鬆備份與分享
 // @license            MIT
@@ -35,733 +35,764 @@
 // @run-at             document-end
 // ==/UserScript==
 
-(e=>{const n=document.createElement("style");n.textContent=e,document.head.append(n),setInterval(()=>{n.isConnected||document.head.append(n)},300)})(` .CheckBoxLabel {
-    position: relative;
-    display: flex;
-    font-size: 16px;
-    vertical-align: middle;
-}
-
-.CheckBoxLabel * {
-    cursor: pointer;
-}
-
-.CheckBoxLabel[disabled] {
-    opacity: 0.7;
-}
-
-.CheckBoxLabel[disabled] * {
-    cursor: not-allowed;
-}
-
-.CheckBoxLabel input {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    margin: 0;
-    padding: 0;
-}
-
-.CheckBoxLabel .IconWrapper {
-    display: inline-flex;
-    align-items: center;
-    position: relative;
-    vertical-align: middle;
-    font-size: 1.5rem;
-}
-
-.CheckBoxLabel input:checked ~ svg {
-    color: rgb(28 100 242);
-}
-
-.dark .CheckBoxLabel input:checked ~ svg {
-    color: rgb(144, 202, 249);
-}
-
-.CheckBoxLabel .LabelText {
-    margin-left: 0.5rem;
-    font-size: 1rem;
-    line-height: 1.5;
-}
-span[data-time-format] {
-    display: none;
-}
-
-body[data-time-format="12"] span[data-time-format="12"] {
-    display: inline;
-}
-
-body[data-time-format="24"] span[data-time-format="24"] {
-    display: inline;
-}
-
-.Select {
-    padding: 0 2rem 0 0.5rem;
-    width: auto;
-    min-width: 7.5rem;
-    border-radius: 4px;
-    box-shadow: 0 0 0 1px #6f6e77;
-}
-
-.dark .Select {
-    background-color: #2f2f2f;
-    color: #fff;
-    box-shadow: 0 0 0 1px #6f6e77;
-}
-
-html {
-    --ce-text-primary: var(--text-primary, #0d0d0d);
-    --ce-menu-primary: #ffffff;
-    --ce-menu-secondary: var(--sidebar-surface-secondary, #ececec);
-    --ce-border-light: #0d0d0d26;
-}
-
-.dark {
-    --ce-text-primary: var(--text-primary, #ececec);
-    --ce-menu-primary: #2A2A2A;
-    --ce-menu-secondary: var(--sidebar-surface-secondary, #212121);
-    --ce-border-light: var(--border-default, rgba(255, 255, 255, .15));
-}
-
-.dark .bg-menu {
-    background-color: var(--ce-menu-primary);
-}
-
-.border-menu {
-    border-color: var(--ce-border-light);
-}
-
-.menu-item {
-    height: 46px;
-}
-
-.menu-item[disabled] {
-    filter: brightness(0.5);
-}
-
-.ce-card {
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.dark .ce-card {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.inputFieldSet {
-    display: block;
-    border-width: 2px;
-    border-style: groove;
-}
-
-.inputFieldSet legend {
-    margin-left: 4px;
-}
-
-.inputFieldSet input {
-    background-color: transparent;
-    box-shadow: none!important;
-}
-
-.row-half {
-    grid-column: auto / span 1;
-}
-
-.row-full {
-    grid-column: auto / span 2;
-}
-
-.dropdown-backdrop {
-    display: block;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(0,0,0,.5);
-    animation-name: pointerFadeIn;
-    animation-duration: .3s;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
-
-@keyframes pointerFadeIn {
-    from {
-        opacity: 0;
-        pointer-events: none;
-    }
-    to {
-        opacity: 1;
-        pointer-events: auto;
-    }
-}
-
-@keyframes rotate {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes circularDash {
-    0% {
-        stroke-dasharray: 1px, 200px;
-        stroke-dashoffset: 0;
-    }
-    50% {
-        stroke-dasharray: 100px, 200px;
-        stroke-dashoffset: -15px;
-    }
-    100% {
-        stroke-dasharray: 100px, 200px;
-        stroke-dashoffset: -125px;
-    }
-}
-.DialogOverlay {
-    background-color: rgba(0, 0, 0, 0.44);
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    animation: fadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.DialogContent {
-    background-color: #f3f3f3;
-    border-radius: 6px;
-    box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90vw;
-    max-width: 560px;
-    max-height: 85vh;
-    overflow: hidden;
-    padding: 16px 24px;
-    z-index: 1001;
-    outline: none;
-    animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
-}
-
-.dark .DialogContent {
-    background-color: #2a2a2a;
-    border-color: #40414f;
-    border-width: 1px;
-}
-
-.DialogContent._export {
-    background-color: #ffffff;
-}
-
-.dark .DialogContent._export {
-    background-color: #2a2a2a;
-}
-
-.DialogContent input[type="checkbox"] {
-    border: none;
-    outline: none;
-    box-shadow: none;
-}
-
-.DialogTitle {
-    margin: 0 0 16px 0;
-    font-weight: 500;
-    color: #1a1523;
-    font-size: 20px;
-    flex-shrink: 0;
-}
-
-.DialogBody {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.dark .DialogTitle {
-    color: #fff;
-}
-
-.Button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    padding: 0 15px;
-    font-size: 15px;
-    line-height: 1;
-    height: 35px;
-}
-.Button.green {
-    background-color: #ddf3e4;
-    color: #18794e;
-}
-.Button.red {
-    background-color: #f9d9d9;
-    color: #a71d2a;
-}
-.Button.neutral {
-    background-color: transparent;
-    color: #6f6e77;
-    border: 1px solid #6f6e77;
-    font-size: 13px;
-    height: 26px;
-    padding: 0 8px;
-}
-.Button.green:hover {
-    background-color: #ccebd7;
-}
-.Button.neutral:hover {
-    background-color: rgba(111, 110, 119, 0.1);
-}
-.dark .Button.neutral {
-    color: #a0a0a8;
-    border-color: #a0a0a8;
-}
-.dark .Button.neutral:hover {
-    background-color: rgba(160, 160, 168, 0.1);
-}
-.Button:disabled {
-    opacity: 0.5;
-    color: #6f6e77;
-    background-color: #e0e0e0;
-    cursor: not-allowed;
-}
-.Button:disabled:hover {
-    background-color: #e0e0e0;
-}
-
-.IconButton {
-    font-family: inherit;
-    border-radius: 100%;
-    height: 25px;
-    width: 25px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #6f6e77;
-}
-.IconButton:hover {
-    background-color: rgba(0, 0, 0, 0.06);
-}
-
-.CloseButton {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.Fieldset {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.Label {
-    font-size: 15px;
-    color: #1a1523;
-    min-width: 90px;
-    text-align: right;
-}
-
-.dark .Label {
-    color: #fff;
-}
-
-.Input {
-    width: 100%;
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    padding: 0 10px;
-    font-size: 15px;
-    line-height: 1;
-    color: #000;
-    background-color: #fafafa;
-    box-shadow: 0 0 0 1px #6f6e77;
-    height: 35px;
-    outline: none;
-}
-
-.dark .Input {
-    background-color: #2f2f2f;
-    color: #fff;
-    box-shadow: 0 0 0 1px #6f6e77;
-}
-
-.Description {
-    font-size: 13px;
-    color: #5a5865;
-    text-align: right;
-    margin-bottom: 4px;
-}
-
-.dark .Description {
-    color: #bcbcbc;
-}
-
-.SelectSearch {
-    width: 100%;
-    padding: 8px 16px;
-    border: 1px solid #6f6e77;
-    border-bottom: none;
-    border-radius: 4px 4px 0 0;
-    background-color: transparent;
-    color: inherit;
-    font-size: 14px;
-    outline: none;
-    flex-shrink: 0;
-}
-.SelectSearch::placeholder {
-    color: #9ca3af;
-}
-
-.SelectToolbar {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-radius: 0;
-    border: 1px solid #6f6e77;
-    border-bottom: none;
-    flex-shrink: 0;
-}
-
-.ProjectSelect .Select {
-    width: auto;
-}
-
-.SelectList {
-    position: relative;
-    width: 100%;
-    flex: 1;
-    min-height: 120px;
-    padding: 12px 16px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    border: 1px solid #6f6e77;
-    border-radius: 0 0 4px 4px;
-    white-space: nowrap;
-}
-
-.SelectItem {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    overflow: hidden;
-}
-
-.SelectItem .CheckBoxLabel {
-    flex: 1;
-    min-width: 0;
-}
-
-.SelectItem .LabelText {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.SelectItem label, .SelectItem input {
-    cursor: pointer;
-}
-
-.SelectItem span {
-    vertical-align: middle;
-}
-
-.SelectItemMeta {
-    flex-shrink: 0;
-    font-size: 0.7rem;
-    color: #9ca3af;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-    min-width: 6.5rem;
-    text-align: right;
-}
-.SelectItemMetaActive {
-    color: #6b7280;
-    font-weight: 600;
-}
-.dark {
-    .SelectItemMetaActive { color: #d1d5db; }
-}
-
-/* \u2500\u2500 Sortable column header row \u2500\u2500 */
-.SelectListHeader {
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    border: 1px solid #6f6e77;
-    border-bottom: none;
-    background: #f9fafb;
-    user-select: none;
-    flex-shrink: 0;
-}
-
-.dark {
-    .SelectListHeader { background: #1f2937; }
-}
-
-.SelectListHeaderCell {
-    flex-shrink: 0;
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: #9ca3af;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    background: transparent;
-    border: none;
-    padding: 5px 4px;
-    cursor: pointer;
-    white-space: nowrap;
-    min-width: 6.5rem;
-    text-align: right;
-}
-.SelectListHeaderCell:hover { color: #374151; }
-.dark {
-    .SelectListHeaderCell:hover { color: #e5e7eb; }
-}
-.SelectListHeaderCellTitle {
-    flex: 1;
-    text-align: left;
-    padding-left: 28px; /* align with checkbox label */
-}
-.SelectListHeaderCellActive {
-    color: #2563eb;
-}
-.dark {
-    .SelectListHeaderCellActive { color: #60a5fa; }
-}
-
-
-@media (max-width: 480px) {
-    .DialogContent { max-height: 90vh; }
-    .SelectListHeaderCell:last-child { display: none; }
-    .SelectItemMeta:last-child { display: none; }
-    .SelectToolbar .Button.neutral,
-    .SelectToolbar input[type="number"] { display: none; }
-    .ActionBar { justify-content: flex-end; }
-    .ActionBar > .Select { width: 100%; }
-    .ActionBar > .flex-grow { display: none; }
-}
-
-@keyframes contentShow {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -48%) scale(0.96);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-.animate-fadeIn  {
-    animation: fadeIn .3s;
-}
-
-.animate-slideUp  {
-    animation: slideUp .3s;
-}
-
-.bg-blue-600 {
-    background-color: rgb(28 100 242);
-}
-
-.hover\\:bg-gray-500\\/10:hover {
-    background-color: hsla(0, 0%, 61%, .1)
-}
-
-.border-\\[\\#6f6e77\\] {
-    border-color: #6f6e77;
-}
-
-.cursor-help {
-    cursor: help;
-}
-
-.dark .dark\\:bg-white\\/5 {
-    background-color: rgb(255 255 255 / 5%);
-}
-
-.dark .dark\\:text-gray-200 {
-    color: rgb(229 231 235 / 1);
-}
-
-.dark .dark\\:text-gray-300 {
-    color: rgb(209 213 219 / 1);
-}
-
-.dark .dark\\:border-gray-\\[\\#86858d\\] {
-    border-color: #86858d;
-}
-
-.gap-x-1 {
-    column-gap: 0.25rem;
-}
-
-.h-2\\.5 {
-    height: 0.625rem;
-}
-
-.h-4 {
-    height: 1rem;
-}
-
-.inline-flex {
-    display: inline-flex;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.ml-3 {
-    margin-left: 0.75rem;
-}
-
-.ml-4 {
-    margin-left: 1rem;
-}
-
-.mr-8 {
-    margin-right: 2rem;
-}
-
-.pb-0 {
-    padding-bottom: 0;
-}
-
-.pr-8 {
-    padding-right: 2rem;
-}
-
-.right-4 {
-    right: 1rem;
-}
-
-.rounded-full {
-    border-radius: 9999px;
-}
-
-.select-all {
-    user-select: all!important;
-}
-
-.shrink-0 {
-    flex-shrink: 0;
-}
-
-.space-y-6>:not([hidden])~:not([hidden]) {
-    --tw-space-y-reverse: 0;
-    margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
-    margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
-}
-
-.truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.whitespace-nowrap {
-    white-space: nowrap;
-}
-
-@media (min-width:768px) {
-    /* md */
-}
-
-@media (min-width:1024px) {
-    .lg\\:mt-0 {
-        margin-top: 0;
-    }
-
-    .lg\\:top-8 {
-        top: 2rem;
-    }
-}
-
-
-.toggle-switch {
-    position: relative;
-    outline: none;
-    background-color: rgb(229 231 235);
-    border: 1px solid rgb(107 114 128);
-    border-radius: 9999px;
-    cursor: pointer;
-    height: 20px;
-    width: 32px;
-}
-
-.dark .toggle-switch {
-    background-color: rgb(255 255 255 / 5%);
-    border-color: rgb(255 255 255 / 1);
-}
-
-.toggle-switch[data-state="checked"] {
-    background-color: rgb(0 0 0);
-    border-color: rgb(0 0 0);
-}
-
-.dark .toggle-switch[data-state="checked"] {
-    background-color: rgb(22 163 74);
-    border-color: rgb(22 163 74);
-}
-
-.toggle-switch-handle {
-    display: block;
-    background-color: rgb(255 255 255);
-    border-radius: 9999px;
-    height: 16px;
-    width: 16px;
-    transition: transform 0.1s;
-    will-change: transform;
-    transform: translateX(1px);
-}
-
-.toggle-switch-handle[data-state="checked"] {
-    transform: translateX(14px);
-}
-
-.toggle-switch-handle:hover {
-    background-color: rgb(243 244 246);
-}
-
-.toggle-switch-label {
-    color: rgb(107 114 128);
-    margin-left: 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.toggle-switch-label:hover {
-    color: rgb(71 85 105);
+(n=>{const r=document.createElement("style");r.textContent=n,document.head.append(r),setInterval(()=>{r.isConnected||document.head.append(r)},300)})(` .CheckBoxLabel {\r
+    position: relative;\r
+    display: flex;\r
+    font-size: 16px;\r
+    vertical-align: middle;\r
+}\r
+\r
+.CheckBoxLabel * {\r
+    cursor: pointer;\r
+}\r
+\r
+.CheckBoxLabel[disabled] {\r
+    opacity: 0.7;\r
+}\r
+\r
+.CheckBoxLabel[disabled] * {\r
+    cursor: not-allowed;\r
+}\r
+\r
+.CheckBoxLabel input {\r
+    position: absolute;\r
+    opacity: 0;\r
+    width: 100%;\r
+    height: 100%;\r
+    top: 0;\r
+    left: 0;\r
+    margin: 0;\r
+    padding: 0;\r
+}\r
+\r
+.CheckBoxLabel .IconWrapper {\r
+    display: inline-flex;\r
+    align-items: center;\r
+    position: relative;\r
+    vertical-align: middle;\r
+    font-size: 1.5rem;\r
+}\r
+\r
+.CheckBoxLabel input:checked ~ svg {\r
+    color: rgb(28 100 242);\r
+}\r
+\r
+.dark .CheckBoxLabel input:checked ~ svg {\r
+    color: rgb(144, 202, 249);\r
+}\r
+\r
+.CheckBoxLabel .LabelText {\r
+    margin-left: 0.5rem;\r
+    font-size: 1rem;\r
+    line-height: 1.5;\r
+}\r
+span[data-time-format] {\r
+    display: none;\r
+}\r
+\r
+body[data-time-format="12"] span[data-time-format="12"] {\r
+    display: inline;\r
+}\r
+\r
+body[data-time-format="24"] span[data-time-format="24"] {\r
+    display: inline;\r
+}\r
+\r
+.Select {\r
+    padding: 0 2rem 0 0.5rem;\r
+    width: auto;\r
+    min-width: 7.5rem;\r
+    border-radius: 4px;\r
+    box-shadow: 0 0 0 1px #6f6e77;\r
+}\r
+\r
+.dark .Select {\r
+    background-color: #2f2f2f;\r
+    color: #fff;\r
+    box-shadow: 0 0 0 1px #6f6e77;\r
+}\r
+\r
+html {\r
+    --ce-text-primary: var(--text-primary, #0d0d0d);\r
+    --ce-menu-primary: #ffffff;\r
+    --ce-menu-secondary: var(--sidebar-surface-secondary, #ececec);\r
+    --ce-border-light: #0d0d0d26;\r
+}\r
+\r
+.dark {\r
+    --ce-text-primary: var(--text-primary, #ececec);\r
+    --ce-menu-primary: #2A2A2A;\r
+    --ce-menu-secondary: var(--sidebar-surface-secondary, #212121);\r
+    --ce-border-light: var(--border-default, rgba(255, 255, 255, .15));\r
+}\r
+\r
+.dark .bg-menu {\r
+    background-color: var(--ce-menu-primary);\r
+}\r
+\r
+.border-menu {\r
+    border-color: var(--ce-border-light);\r
+}\r
+\r
+.menu-item {\r
+    height: 46px;\r
+}\r
+\r
+.menu-item[disabled] {\r
+    filter: brightness(0.5);\r
+}\r
+\r
+.ce-nav-trigger {\r
+    min-width: 0;\r
+    border: 0;\r
+    color: var(--ce-text-primary);\r
+}\r
+\r
+.ce-nav-trigger .ce-menu-item-text {\r
+    overflow: hidden;\r
+    text-overflow: ellipsis;\r
+    white-space: nowrap;\r
+}\r
+\r
+.ce-nav-trigger-collapsed {\r
+    width: 32px;\r
+    height: 32px;\r
+    margin: 0 auto 0.5rem;\r
+    padding: 0;\r
+    justify-content: center;\r
+    gap: 0;\r
+    border-radius: 8px;\r
+    color: var(--text-secondary, var(--ce-text-primary));\r
+}\r
+\r
+.ce-nav-trigger-collapsed:hover {\r
+    background-color: var(--sidebar-surface-secondary, rgba(255, 255, 255, 0.1));\r
+}\r
+\r
+.ce-nav-trigger-collapsed .ce-menu-item-text {\r
+    display: none;\r
+}\r
+\r
+.ce-card {\r
+    border-radius: 1rem;\r
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);\r
+}\r
+\r
+.dark .ce-card {\r
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);\r
+}\r
+\r
+.inputFieldSet {\r
+    display: block;\r
+    border-width: 2px;\r
+    border-style: groove;\r
+}\r
+\r
+.inputFieldSet legend {\r
+    margin-left: 4px;\r
+}\r
+\r
+.inputFieldSet input {\r
+    background-color: transparent;\r
+    box-shadow: none!important;\r
+}\r
+\r
+.row-half {\r
+    grid-column: auto / span 1;\r
+}\r
+\r
+.row-full {\r
+    grid-column: auto / span 2;\r
+}\r
+\r
+.dropdown-backdrop {\r
+    display: block;\r
+    position: fixed;\r
+    top: 0;\r
+    bottom: 0;\r
+    left: 0;\r
+    right: 0;\r
+    background-color: rgba(0,0,0,.5);\r
+    animation-name: pointerFadeIn;\r
+    animation-duration: .3s;\r
+}\r
+\r
+@keyframes fadeIn {\r
+    from {\r
+        opacity: 0;\r
+    }\r
+    to {\r
+        opacity: 1;\r
+    }\r
+}\r
+\r
+@keyframes slideUp {\r
+    from {\r
+        transform: translateY(100%);\r
+    }\r
+    to {\r
+        transform: translateY(0);\r
+    }\r
+}\r
+\r
+@keyframes pointerFadeIn {\r
+    from {\r
+        opacity: 0;\r
+        pointer-events: none;\r
+    }\r
+    to {\r
+        opacity: 1;\r
+        pointer-events: auto;\r
+    }\r
+}\r
+\r
+@keyframes rotate {\r
+    from {\r
+        transform: rotate(0deg);\r
+    }\r
+    to {\r
+        transform: rotate(360deg);\r
+    }\r
+}\r
+\r
+@keyframes circularDash {\r
+    0% {\r
+        stroke-dasharray: 1px, 200px;\r
+        stroke-dashoffset: 0;\r
+    }\r
+    50% {\r
+        stroke-dasharray: 100px, 200px;\r
+        stroke-dashoffset: -15px;\r
+    }\r
+    100% {\r
+        stroke-dasharray: 100px, 200px;\r
+        stroke-dashoffset: -125px;\r
+    }\r
+}\r
+.DialogOverlay {\r
+    background-color: rgba(0, 0, 0, 0.44);\r
+    position: fixed;\r
+    inset: 0;\r
+    z-index: 1000;\r
+    animation: fadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1);\r
+}\r
+\r
+.DialogContent {\r
+    background-color: #f3f3f3;\r
+    border-radius: 6px;\r
+    box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;\r
+    position: fixed;\r
+    top: 50%;\r
+    left: 50%;\r
+    transform: translate(-50%, -50%);\r
+    width: 90vw;\r
+    max-width: 560px;\r
+    max-height: 85vh;\r
+    overflow: hidden;\r
+    padding: 16px 24px;\r
+    z-index: 1001;\r
+    outline: none;\r
+    animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);\r
+    display: flex;\r
+    flex-direction: column;\r
+}\r
+\r
+.dark .DialogContent {\r
+    background-color: #2a2a2a;\r
+    border-color: #40414f;\r
+    border-width: 1px;\r
+}\r
+\r
+.DialogContent._export {\r
+    background-color: #ffffff;\r
+}\r
+\r
+.dark .DialogContent._export {\r
+    background-color: #2a2a2a;\r
+}\r
+\r
+.DialogContent input[type="checkbox"] {\r
+    border: none;\r
+    outline: none;\r
+    box-shadow: none;\r
+}\r
+\r
+.DialogTitle {\r
+    margin: 0 0 16px 0;\r
+    font-weight: 500;\r
+    color: #1a1523;\r
+    font-size: 20px;\r
+    flex-shrink: 0;\r
+}\r
+\r
+.DialogBody {\r
+    flex: 1;\r
+    min-height: 0;\r
+    overflow-y: auto;\r
+    overflow-x: hidden;\r
+}\r
+\r
+.dark .DialogTitle {\r
+    color: #fff;\r
+}\r
+\r
+.Button {\r
+    display: inline-flex;\r
+    align-items: center;\r
+    justify-content: center;\r
+    border-radius: 4px;\r
+    padding: 0 15px;\r
+    font-size: 15px;\r
+    line-height: 1;\r
+    height: 35px;\r
+}\r
+.Button.green {\r
+    background-color: #ddf3e4;\r
+    color: #18794e;\r
+}\r
+.Button.red {\r
+    background-color: #f9d9d9;\r
+    color: #a71d2a;\r
+}\r
+.Button.neutral {\r
+    background-color: transparent;\r
+    color: #6f6e77;\r
+    border: 1px solid #6f6e77;\r
+    font-size: 13px;\r
+    height: 26px;\r
+    padding: 0 8px;\r
+}\r
+.Button.green:hover {\r
+    background-color: #ccebd7;\r
+}\r
+.Button.neutral:hover {\r
+    background-color: rgba(111, 110, 119, 0.1);\r
+}\r
+.dark .Button.neutral {\r
+    color: #a0a0a8;\r
+    border-color: #a0a0a8;\r
+}\r
+.dark .Button.neutral:hover {\r
+    background-color: rgba(160, 160, 168, 0.1);\r
+}\r
+.Button:disabled {\r
+    opacity: 0.5;\r
+    color: #6f6e77;\r
+    background-color: #e0e0e0;\r
+    cursor: not-allowed;\r
+}\r
+.Button:disabled:hover {\r
+    background-color: #e0e0e0;\r
+}\r
+\r
+.IconButton {\r
+    font-family: inherit;\r
+    border-radius: 100%;\r
+    height: 25px;\r
+    width: 25px;\r
+    display: inline-flex;\r
+    align-items: center;\r
+    justify-content: center;\r
+    color: #6f6e77;\r
+}\r
+.IconButton:hover {\r
+    background-color: rgba(0, 0, 0, 0.06);\r
+}\r
+\r
+.CloseButton {\r
+    position: absolute;\r
+    top: 10px;\r
+    right: 10px;\r
+}\r
+\r
+.Fieldset {\r
+    display: flex;\r
+    gap: 20px;\r
+    align-items: center;\r
+    margin-bottom: 15px;\r
+}\r
+\r
+.Label {\r
+    font-size: 15px;\r
+    color: #1a1523;\r
+    min-width: 90px;\r
+    text-align: right;\r
+}\r
+\r
+.dark .Label {\r
+    color: #fff;\r
+}\r
+\r
+.Input {\r
+    width: 100%;\r
+    flex: 1;\r
+    display: inline-flex;\r
+    align-items: center;\r
+    justify-content: center;\r
+    border-radius: 4px;\r
+    padding: 0 10px;\r
+    font-size: 15px;\r
+    line-height: 1;\r
+    color: #000;\r
+    background-color: #fafafa;\r
+    box-shadow: 0 0 0 1px #6f6e77;\r
+    height: 35px;\r
+    outline: none;\r
+}\r
+\r
+.dark .Input {\r
+    background-color: #2f2f2f;\r
+    color: #fff;\r
+    box-shadow: 0 0 0 1px #6f6e77;\r
+}\r
+\r
+.Description {\r
+    font-size: 13px;\r
+    color: #5a5865;\r
+    text-align: right;\r
+    margin-bottom: 4px;\r
+}\r
+\r
+.dark .Description {\r
+    color: #bcbcbc;\r
+}\r
+\r
+.SelectSearch {\r
+    width: 100%;\r
+    padding: 8px 16px;\r
+    border: 1px solid #6f6e77;\r
+    border-bottom: none;\r
+    border-radius: 4px 4px 0 0;\r
+    background-color: transparent;\r
+    color: inherit;\r
+    font-size: 14px;\r
+    outline: none;\r
+    flex-shrink: 0;\r
+}\r
+.SelectSearch::placeholder {\r
+    color: #9ca3af;\r
+}\r
+\r
+.SelectToolbar {\r
+    display: flex;\r
+    align-items: center;\r
+    padding: 12px 16px;\r
+    border-radius: 0;\r
+    border: 1px solid #6f6e77;\r
+    border-bottom: none;\r
+    flex-shrink: 0;\r
+}\r
+\r
+.ProjectSelect .Select {\r
+    width: auto;\r
+}\r
+\r
+.SelectList {\r
+    position: relative;\r
+    width: 100%;\r
+    flex: 1;\r
+    min-height: 120px;\r
+    padding: 12px 16px;\r
+    overflow-x: hidden;\r
+    overflow-y: auto;\r
+    border: 1px solid #6f6e77;\r
+    border-radius: 0 0 4px 4px;\r
+    white-space: nowrap;\r
+}\r
+\r
+.SelectItem {\r
+    display: flex;\r
+    align-items: center;\r
+    gap: 6px;\r
+    overflow: hidden;\r
+}\r
+\r
+.SelectItem .CheckBoxLabel {\r
+    flex: 1;\r
+    min-width: 0;\r
+}\r
+\r
+.SelectItem .LabelText {\r
+    overflow: hidden;\r
+    text-overflow: ellipsis;\r
+    white-space: nowrap;\r
+}\r
+\r
+.SelectItem label, .SelectItem input {\r
+    cursor: pointer;\r
+}\r
+\r
+.SelectItem span {\r
+    vertical-align: middle;\r
+}\r
+\r
+.SelectItemMeta {\r
+    flex-shrink: 0;\r
+    font-size: 0.7rem;\r
+    color: #9ca3af;\r
+    white-space: nowrap;\r
+    font-variant-numeric: tabular-nums;\r
+    min-width: 6.5rem;\r
+    text-align: right;\r
+}\r
+.SelectItemMetaActive {\r
+    color: #6b7280;\r
+    font-weight: 600;\r
+}\r
+.dark {\r
+    .SelectItemMetaActive { color: #d1d5db; }\r
+}\r
+\r
+/* \u2500\u2500 Sortable column header row \u2500\u2500 */\r
+.SelectListHeader {\r
+    display: flex;\r
+    align-items: center;\r
+    padding: 0 16px;\r
+    border: 1px solid #6f6e77;\r
+    border-bottom: none;\r
+    background: #f9fafb;\r
+    user-select: none;\r
+    flex-shrink: 0;\r
+}\r
+\r
+.dark {\r
+    .SelectListHeader { background: #1f2937; }\r
+}\r
+\r
+.SelectListHeaderCell {\r
+    flex-shrink: 0;\r
+    font-size: 0.68rem;\r
+    font-weight: 600;\r
+    color: #9ca3af;\r
+    letter-spacing: 0.03em;\r
+    text-transform: uppercase;\r
+    background: transparent;\r
+    border: none;\r
+    padding: 5px 4px;\r
+    cursor: pointer;\r
+    white-space: nowrap;\r
+    min-width: 6.5rem;\r
+    text-align: right;\r
+}\r
+.SelectListHeaderCell:hover { color: #374151; }\r
+.dark {\r
+    .SelectListHeaderCell:hover { color: #e5e7eb; }\r
+}\r
+.SelectListHeaderCellTitle {\r
+    flex: 1;\r
+    text-align: left;\r
+    padding-left: 28px; /* align with checkbox label */\r
+}\r
+.SelectListHeaderCellActive {\r
+    color: #2563eb;\r
+}\r
+.dark {\r
+    .SelectListHeaderCellActive { color: #60a5fa; }\r
+}\r
+\r
+\r
+@media (max-width: 480px) {\r
+    .DialogContent { max-height: 90vh; }\r
+    .SelectListHeaderCell:last-child { display: none; }\r
+    .SelectItemMeta:last-child { display: none; }\r
+    .SelectToolbar .Button.neutral,\r
+    .SelectToolbar input[type="number"] { display: none; }\r
+    .ActionBar { justify-content: flex-end; }\r
+    .ActionBar > .Select { width: 100%; }\r
+    .ActionBar > .flex-grow { display: none; }\r
+}\r
+\r
+@keyframes contentShow {\r
+    from {\r
+        opacity: 0;\r
+        transform: translate(-50%, -48%) scale(0.96);\r
+    }\r
+    to {\r
+        opacity: 1;\r
+        transform: translate(-50%, -50%) scale(1);\r
+    }\r
+}\r
+.animate-fadeIn  {\r
+    animation: fadeIn .3s;\r
+}\r
+\r
+.animate-slideUp  {\r
+    animation: slideUp .3s;\r
+}\r
+\r
+.bg-blue-600 {\r
+    background-color: rgb(28 100 242);\r
+}\r
+\r
+.hover\\:bg-gray-500\\/10:hover {\r
+    background-color: hsla(0, 0%, 61%, .1)\r
+}\r
+\r
+.border-\\[\\#6f6e77\\] {\r
+    border-color: #6f6e77;\r
+}\r
+\r
+.cursor-help {\r
+    cursor: help;\r
+}\r
+\r
+.dark .dark\\:bg-white\\/5 {\r
+    background-color: rgb(255 255 255 / 5%);\r
+}\r
+\r
+.dark .dark\\:text-gray-200 {\r
+    color: rgb(229 231 235 / 1);\r
+}\r
+\r
+.dark .dark\\:text-gray-300 {\r
+    color: rgb(209 213 219 / 1);\r
+}\r
+\r
+.dark .dark\\:border-gray-\\[\\#86858d\\] {\r
+    border-color: #86858d;\r
+}\r
+\r
+.gap-x-1 {\r
+    column-gap: 0.25rem;\r
+}\r
+\r
+.h-2\\.5 {\r
+    height: 0.625rem;\r
+}\r
+\r
+.h-4 {\r
+    height: 1rem;\r
+}\r
+\r
+.inline-flex {\r
+    display: inline-flex;\r
+}\r
+\r
+.items-center {\r
+    align-items: center;\r
+}\r
+\r
+.ml-3 {\r
+    margin-left: 0.75rem;\r
+}\r
+\r
+.ml-4 {\r
+    margin-left: 1rem;\r
+}\r
+\r
+.mr-8 {\r
+    margin-right: 2rem;\r
+}\r
+\r
+.pb-0 {\r
+    padding-bottom: 0;\r
+}\r
+\r
+.pr-8 {\r
+    padding-right: 2rem;\r
+}\r
+\r
+.right-4 {\r
+    right: 1rem;\r
+}\r
+\r
+.rounded-full {\r
+    border-radius: 9999px;\r
+}\r
+\r
+.select-all {\r
+    user-select: all!important;\r
+}\r
+\r
+.shrink-0 {\r
+    flex-shrink: 0;\r
+}\r
+\r
+.space-y-6>:not([hidden])~:not([hidden]) {\r
+    --tw-space-y-reverse: 0;\r
+    margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));\r
+    margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));\r
+}\r
+\r
+.truncate {\r
+    overflow: hidden;\r
+    text-overflow: ellipsis;\r
+    white-space: nowrap;\r
+}\r
+\r
+.whitespace-nowrap {\r
+    white-space: nowrap;\r
+}\r
+\r
+@media (min-width:768px) {\r
+    /* md */\r
+}\r
+\r
+@media (min-width:1024px) {\r
+    .lg\\:mt-0 {\r
+        margin-top: 0;\r
+    }\r
+\r
+    .lg\\:top-8 {\r
+        top: 2rem;\r
+    }\r
+}\r
+\r
+\r
+.toggle-switch {\r
+    position: relative;\r
+    outline: none;\r
+    background-color: rgb(229 231 235);\r
+    border: 1px solid rgb(107 114 128);\r
+    border-radius: 9999px;\r
+    cursor: pointer;\r
+    height: 20px;\r
+    width: 32px;\r
+}\r
+\r
+.dark .toggle-switch {\r
+    background-color: rgb(255 255 255 / 5%);\r
+    border-color: rgb(255 255 255 / 1);\r
+}\r
+\r
+.toggle-switch[data-state="checked"] {\r
+    background-color: rgb(0 0 0);\r
+    border-color: rgb(0 0 0);\r
+}\r
+\r
+.dark .toggle-switch[data-state="checked"] {\r
+    background-color: rgb(22 163 74);\r
+    border-color: rgb(22 163 74);\r
+}\r
+\r
+.toggle-switch-handle {\r
+    display: block;\r
+    background-color: rgb(255 255 255);\r
+    border-radius: 9999px;\r
+    height: 16px;\r
+    width: 16px;\r
+    transition: transform 0.1s;\r
+    will-change: transform;\r
+    transform: translateX(1px);\r
+}\r
+\r
+.toggle-switch-handle[data-state="checked"] {\r
+    transform: translateX(14px);\r
+}\r
+\r
+.toggle-switch-handle:hover {\r
+    background-color: rgb(243 244 246);\r
+}\r
+\r
+.toggle-switch-label {\r
+    color: rgb(107 114 128);\r
+    margin-left: 0.75rem;\r
+    font-size: 0.875rem;\r
+    font-weight: 500;\r
+}\r
+\r
+.toggle-switch-label:hover {\r
+    color: rgb(71 85 105);\r
 } `);
 
 (function (JSZip, html2canvas) {
@@ -1228,6 +1259,7 @@ html {
   const KEY_META_ENABLED = "exporter:enable_meta";
   const KEY_META_LIST = "exporter:meta_list";
   const KEY_THINKING_ENABLED = "exporter:enable_thinking";
+  const KEY_SOURCES_ENABLED = "exporter:enable_sources";
   const KEY_EXPORT_ALL_LIMIT = "exporter:export_all_limit";
   const KEY_OAI_LOCALE = "oai/apps/locale";
   const EXPORT_OPERATION_BATCH = 100;
@@ -1244,19 +1276,6 @@ html {
     ctx.drawImage(el, 0, 0);
     return canvas.toDataURL("image/png");
   }
-  async function getBase64FromImageUrl(url) {
-    const img = await loadImage(url);
-    return getBase64FromImg(img);
-  }
-  function loadImage(url) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.src = url;
-      img.crossOrigin = "anonymous";
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-    });
-  }
   function blobToDataURL(blob) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1264,16 +1283,6 @@ html {
       reader.onload = () => resolve(reader.result);
       reader.readAsDataURL(blob);
     });
-  }
-  function getPageAccessToken() {
-    var _a, _b, _c, _d, _e, _f;
-    return ((_f = (_e = (_d = (_c = (_b = (_a = _unsafeWindow == null ? void 0 : _unsafeWindow.__remixContext) == null ? void 0 : _a.state) == null ? void 0 : _b.loaderData) == null ? void 0 : _c.root) == null ? void 0 : _d.clientBootstrap) == null ? void 0 : _e.session) == null ? void 0 : _f.accessToken) ?? null;
-  }
-  function getUserProfile() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
-    const user = ((_c = (_b = (_a = _unsafeWindow == null ? void 0 : _unsafeWindow.__NEXT_DATA__) == null ? void 0 : _a.props) == null ? void 0 : _b.pageProps) == null ? void 0 : _c.user) ?? ((_i = (_h = (_g = (_f = (_e = (_d = _unsafeWindow == null ? void 0 : _unsafeWindow.__remixContext) == null ? void 0 : _d.state) == null ? void 0 : _e.loaderData) == null ? void 0 : _f.root) == null ? void 0 : _g.clientBootstrap) == null ? void 0 : _h.session) == null ? void 0 : _i.user);
-    if (!user) throw new Error("No user found.");
-    return user;
   }
   function getChatIdFromUrl() {
     const match = location.pathname.match(/^\/(?:share|c|g\/[a-z0-9-]+\/c)\/([a-z0-9-]+)/i);
@@ -1284,26 +1293,17 @@ html {
     return location.pathname.startsWith("/share") && !location.pathname.endsWith("/continue");
   }
   function getConversationFromSharePage() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
-    if ((_d = (_c = (_b = (_a = window.__NEXT_DATA__) == null ? void 0 : _a.props) == null ? void 0 : _b.pageProps) == null ? void 0 : _c.serverResponse) == null ? void 0 : _d.data) {
-      return JSON.parse(JSON.stringify(window.__NEXT_DATA__.props.pageProps.serverResponse.data));
-    }
-    if ((_i = (_h = (_g = (_f = (_e = window.__remixContext) == null ? void 0 : _e.state) == null ? void 0 : _f.loaderData) == null ? void 0 : _g["routes/share.$shareId.($action)"]) == null ? void 0 : _h.serverResponse) == null ? void 0 : _i.data) {
-      return JSON.parse(JSON.stringify(window.__remixContext.state.loaderData["routes/share.$shareId.($action)"].serverResponse.data));
+    var _a, _b, _c, _d, _e;
+    if ((_e = (_d = (_c = (_b = (_a = _unsafeWindow.__reactRouterContext) == null ? void 0 : _a.state) == null ? void 0 : _b.loaderData) == null ? void 0 : _c["routes/share.$shareId.($action)"]) == null ? void 0 : _d.serverResponse) == null ? void 0 : _e.data) {
+      return JSON.parse(JSON.stringify(_unsafeWindow.__reactRouterContext.state.loaderData["routes/share.$shareId.($action)"].serverResponse.data));
     }
     return null;
   }
   const defaultAvatar = "data:image/svg+xml,%3Csvg%20stroke%3D%22currentColor%22%20fill%3D%22none%22%20stroke-width%3D%221.5%22%20viewBox%3D%22-6%20-6%2036%2036%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20style%3D%22color%3A%20white%3B%20background%3A%20%23ab68ff%3B%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M20%2021v-2a4%204%200%200%200-4-4H8a4%204%200%200%200-4%204v2%22%3E%3C%2Fpath%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%227%22%20r%3D%224%22%3E%3C%2Fcircle%3E%3C%2Fsvg%3E";
   async function getUserAvatar() {
     try {
-      const { picture } = getUserProfile();
-      if (picture) return await getBase64FromImageUrl(picture);
-    } catch (e2) {
-      console.error(e2);
-    }
-    try {
       const avatars = Array.from(document.querySelectorAll("img[alt]:not([aria-hidden])"));
-      const avatar = avatars.find((avatar2) => !avatar2.src.startsWith("data:"));
+      const avatar = avatars.find((avatar2) => avatar2.src.startsWith("https://cdn.auth0.com/avatars/"));
       if (avatar) return getBase64FromImg(avatar);
     } catch (e2) {
       console.error(e2);
@@ -1582,8 +1582,6 @@ html {
   }
   const fetchSession = memorize(_fetchSession);
   async function getAccessToken() {
-    const pageAccessToken = getPageAccessToken();
-    if (pageAccessToken) return pageAccessToken;
     const session = await fetchSession();
     return session.accessToken;
   }
@@ -8438,6 +8436,7 @@ html {
   const Export$8 = "Export";
   const Loading$8 = "Loading";
   const Preview$8 = "Preview";
+  const Sources$8 = "Sources";
   const Search$8 = "Search";
   const en_US = {
     title: title$8,
@@ -8476,6 +8475,9 @@ html {
     "Export Metadata Description": "Add metadata to exported Markdown and HTML files.",
     "Export Thinking Process": "Export Thinking Process",
     "Export Thinking Process Description": "Include the model's thinking/reasoning process in exported Markdown and HTML files.",
+    "Export Sources": "Export Sources",
+    "Export Sources Description": "Include the source list shown at the end of each answer in exported Markdown and HTML files.",
+    Sources: Sources$8,
     "OpenAI Official Format": "OpenAI Official Format",
     "Conversation Archive Alert": "Are you sure you want to archive all selected conversations?",
     "Conversation Archived Message": "All selected conversations have been archived. Please refresh the page to see the changes.",
@@ -8523,6 +8525,7 @@ html {
   const Export$7 = "Exportar";
   const Loading$7 = "Cargando";
   const Preview$7 = "Previsualizar";
+  const Sources$7 = "Fuentes";
   const Search$7 = "Buscar";
   const es = {
     title: title$7,
@@ -8561,6 +8564,9 @@ html {
     "Export Metadata Description": "Añadir Metadatos a los archivos Markdown y HTML exportados.",
     "Export Thinking Process": "Exportar Proceso de Pensamiento",
     "Export Thinking Process Description": "Incluir el proceso de pensamiento/razonamiento del modelo en los archivos Markdown y HTML exportados.",
+    "Export Sources": "Exportar fuentes",
+    "Export Sources Description": "Incluir la lista de fuentes que se muestra al final de cada respuesta en los archivos Markdown y HTML exportados.",
+    Sources: Sources$7,
     "OpenAI Official Format": "Formato Oficial de OpenAI",
     "Conversation Archive Alert": "¿Estás seguro que quieres archivar todas las conversaciones seleccionadas?",
     "Conversation Archived Message": "Todos las conversaciones seleccionadas se han archivado. Por favor refresca la página para ver los cambios.",
@@ -8589,6 +8595,7 @@ html {
   const Export$6 = "Exporter";
   const Loading$6 = "Chargement";
   const Preview$6 = "Aperçu";
+  const Sources$6 = "Sources";
   const Search$6 = "Rechercher";
   const fr = {
     title: title$6,
@@ -8627,6 +8634,9 @@ html {
     "Export Metadata Description": "Ajouter des métadonnées aux fichiers Markdown et HTML exportés.",
     "Export Thinking Process": "Exporter le processus de réflexion",
     "Export Thinking Process Description": "Inclure le processus de réflexion/raisonnement du modèle dans les fichiers Markdown et HTML exportés.",
+    "Export Sources": "Exporter les sources",
+    "Export Sources Description": "Inclure la liste des sources affichée à la fin de chaque réponse dans les fichiers Markdown et HTML exportés.",
+    Sources: Sources$6,
     "OpenAI Official Format": "Format officiel OpenAI",
     "Conversation Archive Alert": "Êtes-vous sûr de vouloir archiver toutes les conversations sélectionnées ?",
     "Conversation Archived Message": "Toutes les conversations sélectionnées ont été archivées. Veuillez actualiser la page pour voir les changements.",
@@ -8655,6 +8665,7 @@ html {
   const Export$5 = "Ekspor";
   const Loading$5 = "Memuat";
   const Preview$5 = "Pratinjau";
+  const Sources$5 = "Sumber";
   const Search$5 = "Cari";
   const id_ID = {
     title: title$5,
@@ -8693,6 +8704,9 @@ html {
     "Export Metadata Description": "Tambahkan metadata ke file Markdown dan HTML yang diekspor.",
     "Export Thinking Process": "Ekspor Proses Berpikir",
     "Export Thinking Process Description": "Sertakan proses berpikir/penalaran model dalam file Markdown dan HTML yang diekspor.",
+    "Export Sources": "Ekspor Sumber",
+    "Export Sources Description": "Sertakan daftar sumber yang ditampilkan di akhir setiap jawaban dalam file Markdown dan HTML yang diekspor.",
+    Sources: Sources$5,
     "OpenAI Official Format": "Format Resmi OpenAI",
     "Conversation Archive Alert": "Apakah Anda yakin ingin mengarsipkan semua percakapan yang dipilih?",
     "Conversation Archived Message": "Semua percakapan yang dipilih telah diarsipkan. Harap segarkan halaman untuk melihat perubahan.",
@@ -8721,6 +8735,7 @@ html {
   const Export$4 = "エクスポート";
   const Loading$4 = "読み込み中";
   const Preview$4 = "プレビュー";
+  const Sources$4 = "出典";
   const Search$4 = "検索";
   const ja_JP = {
     title: title$4,
@@ -8759,6 +8774,9 @@ html {
     "Export Metadata Description": "エクスポートされたMarkdownおよびHTMLファイルにメタデータを追加します。",
     "Export Thinking Process": "思考プロセスをエクスポート",
     "Export Thinking Process Description": "エクスポートされたMarkdownおよびHTMLファイルにモデルの思考・推論プロセスを含めます。",
+    "Export Sources": "ソースをエクスポート",
+    "Export Sources Description": "各回答の末尾に表示されるソース一覧を、エクスポートされた Markdown および HTML ファイルに含めます。",
+    Sources: Sources$4,
     "OpenAI Official Format": "OpenAI公式フォーマット",
     "Conversation Archive Alert": "選択したすべての会話をアーカイブしてもよろしいですか？",
     "Conversation Archived Message": "選択したすべての会話がアーカイブされました。変更を表示するには、ページを更新してください。",
@@ -8787,6 +8805,7 @@ html {
   const Export$3 = "Экспорт";
   const Loading$3 = "Загрузка";
   const Preview$3 = "Предпросмотр";
+  const Sources$3 = "Источники";
   const Search$3 = "Поиск";
   const ru = {
     title: title$3,
@@ -8825,6 +8844,9 @@ html {
     "Export Metadata Description": "Добавляйте метаданные в экспортированные файлы Markdown и HTML.",
     "Export Thinking Process": "Экспорт процесса мышления",
     "Export Thinking Process Description": "Включить процесс мышления/рассуждения модели в экспортированные файлы Markdown и HTML.",
+    "Export Sources": "Экспорт источников",
+    "Export Sources Description": "Включить список источников, показанный в конце каждого ответа, в экспортированные файлы Markdown и HTML.",
+    Sources: Sources$3,
     "OpenAI Official Format": "Официальный формат OpenAI",
     "Conversation Archive Alert": "Вы уверены, что хотите архивировать все выбранные разговоры?",
     "Conversation Archived Message": "Все выбранные разговоры были заархивированы. Пожалуйста, обновите страницу, чтобы увидеть изменения.",
@@ -8853,6 +8875,7 @@ html {
   const Export$2 = "Dışa Aktar";
   const Loading$2 = "Yükleniyor";
   const Preview$2 = "Önizleme";
+  const Sources$2 = "Kaynaklar";
   const Search$2 = "Ara";
   const tr_TR = {
     title: title$2,
@@ -8891,6 +8914,9 @@ html {
     "Export Metadata Description": "Dışa aktarılan Markdown ve HTML dosyalarına üst veri ekle",
     "Export Thinking Process": "Düşünme Sürecini Dışa Aktar",
     "Export Thinking Process Description": "Dışa aktarılan Markdown ve HTML dosyalarına modelin düşünme/akıl yürütme sürecini dahil et.",
+    "Export Sources": "Kaynakları Dışa Aktar",
+    "Export Sources Description": "Her yanıtın sonunda gösterilen kaynak listesini dışa aktarılan Markdown ve HTML dosyalarına dahil et.",
+    Sources: Sources$2,
     "OpenAI Official Format": "OpenAI Resmi Format",
     "Conversation Archive Alert": "Seçilen tüm konuşmaları arşivlemek istediğinizden emin misiniz?",
     "Conversation Archived Message": "Seçilen tüm konuşmalar arşivlendi. Değişiklikleri görmek için sayfayı yenileyin.",
@@ -8919,6 +8945,7 @@ html {
   const Export$1 = "导出";
   const Loading$1 = "加载中";
   const Preview$1 = "预览";
+  const Sources$1 = "来源";
   const Search$1 = "搜索";
   const zh_Hans = {
     title: title$1,
@@ -8957,6 +8984,9 @@ html {
     "Export Metadata Description": "会添加至 Markdown 以及 HTML 导出。",
     "Export Thinking Process": "导出思考过程",
     "Export Thinking Process Description": "在导出的 Markdown 和 HTML 文件中包含模型的思考/推理过程。",
+    "Export Sources": "导出来源",
+    "Export Sources Description": "在导出的 Markdown 和 HTML 文件中包含每个回答末尾显示的来源列表。",
+    Sources: Sources$1,
     "OpenAI Official Format": "OpenAI 官方格式",
     "Conversation Archive Alert": "确定要归档所有选取的对话？",
     "Conversation Archived Message": "所有所选的对话已归档。请刷新页面。",
@@ -8985,6 +9015,7 @@ html {
   const Export = "匯出";
   const Loading = "載入中";
   const Preview = "預覽";
+  const Sources = "來源";
   const Search = "搜尋";
   const zh_Hant = {
     title,
@@ -9023,6 +9054,9 @@ html {
     "Export Metadata Description": "會添加至 Markdown 以及 HTML 匯出。",
     "Export Thinking Process": "匯出思考過程",
     "Export Thinking Process Description": "在匯出的 Markdown 和 HTML 檔案中包含模型的思考/推理過程。",
+    "Export Sources": "匯出來源",
+    "Export Sources Description": "在匯出的 Markdown 和 HTML 檔案中包含每個回答末尾顯示的來源列表。",
+    Sources,
     "OpenAI Official Format": "OpenAI 官方格式",
     "Conversation Archive Alert": "確定要封存所有選取的對話？",
     "Conversation Archived Message": "所有選取的對話已封存。請重新整理頁面。",
@@ -9270,673 +9304,785 @@ html {
   instance.on("languageChanged", (lng) => {
     ScriptStorage.set(KEY_LANGUAGE, lng);
   });
-  const templateHtml = `<!DOCTYPE html>
-<html lang="{{lang}}" data-theme="{{theme}}">
-<head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="https://chat.openai.com/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{title}}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"><\/script>
-    <script>
-        hljs.highlightAll()
-    <\/script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/katex.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/katex.min.js"><\/script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/contrib/auto-render.min.js"><\/script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            renderMathInElement(document.body, {
-                delimiters: [
-                    { left: "$$", right: "$$", display: true },
-                    { left: "$", right: "$", display: false },
-                    { left: "\\\\[", right: "\\\\]", display: true },
-                    { left: "\\\\(", right: "\\\\)", display: false }
-                ],
-                throwOnError: false,
-                ignoredClasses: ["no-katex"],
-                preProcess: function(math) {
-                    return \`\\\\displaystyle \\\\Large \${math}\`;
-                }
-            });
-            document.querySelectorAll('.katex').forEach(function(el) {
-                const parent = el.parentNode;
-                const grandparent = parent.parentNode;
-                if (grandparent.tagName === 'P' && isOnlyContent(grandparent, parent)) {
-                    el.style.width = '100%';
-                    el.style.display = 'block';
-                    el.style.textAlign = 'center';
-                    parent.style.textAlign = 'center';
-                } else {
-                    el.style.display = 'inline-block';
-                    el.style.width = 'fit-content';
-                }
-            });
-            function isOnlyContent(parent, element) {
-                let onlyKaTeX = true;
-                parent.childNodes.forEach(function(child) {
-                    console.log(child.textContent);
-                    if (child !== element) {
-                        if (child.nodeType === Node.TEXT_NODE) {
-                            if (child.textContent.trim().length > 0) {
-                                onlyKaTeX = false;
-                            }
-                        } else if (child.nodeType === Node.ELEMENT_NODE) {
-                            onlyKaTeX = false;
-                        }
-                    }
-                });
-                return onlyKaTeX;
-            }
-        });
-    <\/script>
-
-    <style>
-        :root {
-            --page-text: #0d0d0d;
-            --page-bg: #fff;
-            --td-borders: #374151;
-            --th-borders: #4b5563;
-            --tw-prose-code: var(--page-text);
-            --tw-prose-counters: #9b9b9b;
-            --tw-prose-headings: var(--page-text);
-            --tw-prose-hr: rgba(0,0,0,.25);
-            --tw-prose-links: var(--page-text);
-            --tw-prose-quotes: var(--page-text);
-            --meta-title: #616c77;
-        }
-
-        [data-theme="dark"] {
-            --page-text: #ececec;
-            --page-bg: #212121;
-            --tw-prose-code: var(--page-text);
-            --tw-prose-counters: #9b9b9b;
-            --tw-prose-headings: var(--page-text);
-            --tw-prose-hr: hsla(0,0%,100%,.25);
-            --tw-prose-links: var(--page-text);
-            --tw-prose-quotes: var(--page-text);
-            --meta-title: #959faa;
-        }
-
-        * {
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        ::-webkit-scrollbar {
-            height: 1rem;
-            width: .5rem
-        }
-
-        ::-webkit-scrollbar:horizontal {
-            height: .5rem;
-            width: 1rem
-        }
-
-        ::-webkit-scrollbar-track {
-            background-color: transparent;
-            border-radius: 9999px
-        }
-
-        ::-webkit-scrollbar-thumb {
-            --tw-border-opacity: 1;
-            background-color: rgba(217,217,227,.8);
-            border-color: rgba(255,255,255,var(--tw-border-opacity));
-            border-radius: 9999px;
-            border-width: 1px
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            --tw-bg-opacity: 1;
-            background-color: rgba(236,236,241,var(--tw-bg-opacity))
-        }
-
-        .dark ::-webkit-scrollbar-thumb {
-            --tw-bg-opacity: 1;
-            background-color: rgba(86,88,105,var(--tw-bg-opacity))
-        }
-
-        .dark ::-webkit-scrollbar-thumb:hover {
-            --tw-bg-opacity: 1;
-            background-color: rgba(172,172,190,var(--tw-bg-opacity))
-        }
-
-        @media (min-width: 768px) {
-            .scrollbar-trigger ::-webkit-scrollbar-thumb {
-                visibility:hidden
-            }
-
-            .scrollbar-trigger:hover ::-webkit-scrollbar-thumb {
-                visibility: visible
-            }
-        }
-
-        body {
-            font-family: Söhne,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Helvetica Neue,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--page-text);
-            background-color: var(--page-bg);
-            margin: 0;
-            padding: 0;
-        }
-
-        [data-theme="light"] .sun {
-            display: none;
-        }
-
-        [data-theme="dark"] .moon {
-            display: none;
-        }
-
-        .toggle {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            background-color: #fff;
-            border: 1px solid #e2e8f0;
-        }
-
-        [data-width="narrow"] .width-toggle .expand {
-            display: block;
-        }
-
-        [data-width="wide"] .width-toggle .narrow {
-            display: block;
-        }
-
-        .width-toggle {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            background-color: #fff;
-            border: 1px solid #e2e8f0;
-            margin-left: 8px;
-            cursor: pointer;
-        }
-
-        .width-toggle svg {
-            display: none;
-        }
-
-        .metadata_container {
-            display: flex;
-            flex-direction: column;
-            margin-top: 8px;
-            padding-left: 1rem;
-        }
-
-        .metadata_item {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            border-radius: 16px;
-            padding: 4px 0.5rem;
-        }
-
-        .metadata_item:hover {
-            background-color: rgba(0,0,0,.1);
-        }
-
-        .metadata_item > div:first-child {
-            flex: 0 1 100px;
-            color: var(--meta-title);
-        }
-
-        .metadata_item > div:last-child {
-            flex: 1;
-        }
-
-        a {
-            color: var(--tw-prose-links);
-            font-size: 0.8rem;
-            text-decoration-line: underline;
-            text-underline-offset: 2px;
-        }
-
-        .conversation-content > p:first-child,
-        ol:first-child {
-            margin-top: 0;
-        }
-
-        p>code, li>code {
-            color: var(--tw-prose-code);
-            font-weight: 600;
-            font-size: .875em;
-        }
-
-        p>code::before,
-        p>code::after,
-        li>code::before,
-        li>code::after {
-            content: "\`";
-        }
-
-        hr {
-            width: 100%;
-            height: 0;
-            border: 1px solid var(--tw-prose-hr);
-            margin-bottom: 1em;
-            margin-top: 1em;
-        }
-
-        pre {
-            color: #ffffff;
-            background-color: #000000;
-            overflow-x: auto;
-            margin: 0 0 1rem 0;
-            border-radius: 0.375rem;
-        }
-
-        pre>code {
-            font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace !important;
-            font-weight: 400;
-            font-size: .875em;
-            line-height: 1.7142857;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            color: var(--tw-prose-headings);
-            margin: 0;
-        }
-
-        h1 {
-            font-size: 2.25em;
-            font-weight: 600;
-            line-height: 1.1111111;
-            margin-bottom: 0.8888889em;
-            margin-top: 0;
-        }
-
-        h2 {
-            font-size: 1.5em;
-            font-weight: 700;
-            line-height: 1.3333333;
-            margin-bottom: 1em;
-            margin-top: 2em;
-        }
-
-        h3 {
-            font-size: 1.25em;
-            font-weight: 600;
-            line-height: 1.6;
-            margin-bottom: .6em;
-            margin-top: 1.6em;
-        }
-
-        h4 {
-            font-weight: 400;
-            line-height: 1.5;
-            margin-bottom: .5em;
-            margin-top: 1.5em
-        }
-
-        h3,h4 {
-            margin-bottom: .5rem;
-            margin-top: 1rem;
-        }
-
-        h5 {
-            font-weight: 600;
-        }
-
-        blockquote {
-            border-left: 2px solid rgba(142,142,160,1);
-            color: var(--tw-prose-quotes);
-            font-style: italic;
-            font-style: normal;
-            font-weight: 500;
-            line-height: 1rem;
-            margin: 1.6em 0;
-            padding-left: 1em;
-            quotes: "\\201C""\\201D""\\2018""\\2019";
-        }
-
-        blockquote p:first-of-type:before {
-            content: open-quote;
-        }
-
-        blockquote p:last-of-type:after {
-            content: close-quote;
-        }
-
-        ol, ul {
-            padding-left: 1.1rem;
-        }
-
-        ::marker {
-            color: var(--tw-prose-counters);
-            font-weight: 400;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 0;
-            table-layout: auto;
-            text-align: left;
-            font-size: .875em;
-            line-height: 1.7142857;
-        }
-
-        table * {
-            box-sizing: border-box;
-            border-width: 0;
-            border-style: solid;
-            border-color: #d9d9e3;
-        }
-
-        table thead {
-            border-bottom-color: var(--th-borders);
-            border-bottom-width: 1px;
-        }
-
-        table th {
-            background-color: rgba(236,236,241,.2);
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-top-width: 1px;
-            padding: 0.25rem 0.75rem;
-        }
-
-        table th:first-child {
-            border-top-left-radius: 0.375rem;
-        }
-
-        table th:last-child {
-            border-right-width: 1px;
-            border-top-right-radius: 0.375rem;
-        }
-
-        table tbody tr {
-            border-bottom-color: var(--td-borders);
-            border-bottom-width: 1px;
-        }
-
-        table tbody tr:last-child {
-            border-bottom-width: 0;
-        }
-
-        table tbody tr:last-child td:first-child {
-            border-bottom-left-radius: 0.375rem;
-        }
-
-        table tbody tr:last-child td:last-child {
-            border-bottom-right-radius: 0.375rem;
-        }
-
-        table td {
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            padding: 0.25rem 0.75rem;
-        }
-
-        table td:last-child {
-            border-right-width: 1px;
-        }
-
-        [type=checkbox], [type=radio] {
-            accent-color: #2563eb;
-        }
-
-        .conversation {
-            margin: 0 auto;
-            padding: 1rem;
-            max-width: 64rem;
-        }
-
-        [data-width="narrow"] .conversation {
-            max-width: 64rem;
-        }
-
-        [data-width="wide"] .conversation {
-            max-width: 90%;
-        }
-
-        @media (min-width: 1280px) {
-            .conversation {
-                max-width: 48rem;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .conversation {
-                max-width: 40rem;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .conversation {
-                max-width: 48rem;
-            }
-        }
-
-        .conversation-header {
-            margin-bottom: 1rem;
-        }
-
-        .conversation-header h1 {
-            margin: 0;
-        }
-
-        .conversation-header h1 a {
-            font-size: 1.5rem;
-        }
-
-        .conversation-header .conversation-export {
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-        }
-
-        .conversation-header p {
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-        }
-
-        .conversation-item {
-            display: flex;
-            position: relative;
-            padding: 1rem;
-            border-left: 1px solid rgba(0,0,0,.1);
-            border-right: 1px solid rgba(0,0,0,.1);
-            border-bottom: 1px solid rgba(0,0,0,.1);
-        }
-
-        .conversation-item:first-of-type {
-            border-top: 1px solid rgba(0,0,0,.1);
-        }
-
-        .author {
-            display: flex;
-            flex: 0 0 30px;
-            justify-content: center;
-            align-items: center;
-            width: 30px;
-            height: 30px;
-            border-radius: 0.125rem;
-            margin-right: 1rem;
-            overflow: hidden;
-        }
-
-        .author svg {
-            color: #fff;
-            width: 22px;
-            height: 22px;
-        }
-
-        .author img {
-            content: url({{avatar}});
-            width: 100%;
-            height: 100%;
-        }
-
-        .author.GPT-3 {
-            background-color: rgb(16, 163, 127);
-        }
-
-        .author.GPT-4 {
-            background-color: black;
-        }
-
-        .conversation-content-wrapper {
-            display: flex;
-            position: relative;
-            overflow: hidden;
-            flex: 1 1 auto;
-            flex-direction: column;
-        }
-
-        .thinking {
-            font-size: 0.875rem;
-            line-height: 1.5;
-            margin-bottom: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            padding: 0.5rem 0.75rem;
-        }
-
-        .thinking summary {
-            cursor: pointer;
-            font-weight: 500;
-            color: #6b7280;
-        }
-
-        .thinking p {
-            margin: 0.5rem 0;
-            color: #6b7280;
-        }
-
-        .dark .thinking {
-            border-color: #4b5563;
-        }
-
-        .dark .thinking summary,
-        .dark .thinking p {
-            color: #9ca3af;
-        }
-
-        .conversation-content {
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
-        .conversation-content p {
-            white-space: pre-wrap;
-            line-height: 28px;
-        }
-
-        .conversation-content img, .conversation-content video {
-            display: block;
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 2em;
-            margin-top: 2em;
-        }
-
-        .time {
-            position: absolute;
-            right: 8px;
-            bottom: 0;
-            font-size: 0.8rem;
-            color: #acacbe
-        }
-
-    </style>
-</head>
-
-<body>
-    <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <symbol id="chatgpt" viewBox="0 0 41 41">
-            <path d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.500197C16.1708 0.495044 14.0893 1.16803 12.3614 2.42214C10.6335 3.67624 9.34853 5.44666 8.6917 7.47815C7.30085 7.76286 5.98686 8.3414 4.8377 9.17505C3.68854 10.0087 2.73073 11.0782 2.02839 12.312C0.956464 14.1591 0.498905 16.2988 0.721698 18.4228C0.944492 20.5467 1.83612 22.5449 3.268 24.1293C2.81966 25.4759 2.66413 26.9026 2.81182 28.3141C2.95951 29.7256 3.40701 31.0892 4.12437 32.3138C5.18791 34.1659 6.8123 35.6322 8.76321 36.5013C10.7141 37.3704 12.8907 37.5973 14.9789 37.1492C15.9208 38.2107 17.0786 39.0587 18.3747 39.6366C19.6709 40.2144 21.0755 40.5087 22.4946 40.4998C24.6307 40.5054 26.7133 39.8321 28.4418 38.5772C30.1704 37.3223 31.4556 35.5506 32.1119 33.5179C33.5027 33.2332 34.8167 32.6547 35.9659 31.821C37.115 30.9874 38.0728 29.9178 38.7752 28.684C39.8458 26.8371 40.3023 24.6979 40.0789 22.5748C39.8556 20.4517 38.9639 18.4544 37.5324 16.8707ZM22.4978 37.8849C20.7443 37.8874 19.0459 37.2733 17.6994 36.1501C17.7601 36.117 17.8666 36.0586 17.936 36.0161L25.9004 31.4156C26.1003 31.3019 26.2663 31.137 26.3813 30.9378C26.4964 30.7386 26.5563 30.5124 26.5549 30.2825V19.0542L29.9213 20.998C29.9389 21.0068 29.9541 21.0198 29.9656 21.0359C29.977 21.052 29.9842 21.0707 29.9867 21.0902V30.3889C29.9842 32.375 29.1946 34.2791 27.7909 35.6841C26.3872 37.0892 24.4838 37.8806 22.4978 37.8849ZM6.39227 31.0064C5.51397 29.4888 5.19742 27.7107 5.49804 25.9832C5.55718 26.0187 5.66048 26.0818 5.73461 26.1244L13.699 30.7248C13.8975 30.8408 14.1233 30.902 14.3532 30.902C14.583 30.902 14.8088 30.8408 15.0073 30.7248L24.731 25.1103V28.9979C24.7321 29.0177 24.7283 29.0376 24.7199 29.0556C24.7115 29.0736 24.6988 29.0893 24.6829 29.1012L16.6317 33.7497C14.9096 34.7416 12.8643 35.0097 10.9447 34.4954C9.02506 33.9811 7.38785 32.7263 6.39227 31.0064ZM4.29707 13.6194C5.17156 12.0998 6.55279 10.9364 8.19885 10.3327C8.19885 10.4013 8.19491 10.5228 8.19491 10.6071V19.808C8.19351 20.0378 8.25334 20.2638 8.36823 20.4629C8.48312 20.6619 8.64893 20.8267 8.84863 20.9404L18.5723 26.5542L15.206 28.4979C15.1894 28.5089 15.1703 28.5155 15.1505 28.5173C15.1307 28.5191 15.1107 28.516 15.0924 28.5082L7.04046 23.8557C5.32135 22.8601 4.06716 21.2235 3.55289 19.3046C3.03862 17.3858 3.30624 15.3413 4.29707 13.6194ZM31.955 20.0556L22.2312 14.4411L25.5976 12.4981C25.6142 12.4872 25.6333 12.4805 25.6531 12.4787C25.6729 12.4769 25.6928 12.4801 25.7111 12.4879L33.7631 17.1364C34.9967 17.849 36.0017 18.8982 36.6606 20.1613C37.3194 21.4244 37.6047 22.849 37.4832 24.2684C37.3617 25.6878 36.8382 27.0432 35.9743 28.1759C35.1103 29.3086 33.9415 30.1717 32.6047 30.6641C32.6047 30.5947 32.6047 30.4733 32.6047 30.3889V21.188C32.6066 20.9586 32.5474 20.7328 32.4332 20.5338C32.319 20.3348 32.154 20.1698 31.955 20.0556ZM35.3055 15.0128C35.2464 14.9765 35.1431 14.9142 35.069 14.8717L27.1045 10.2712C26.906 10.1554 26.6803 10.0943 26.4504 10.0943C26.2206 10.0943 25.9948 10.1554 25.7963 10.2712L16.0726 15.8858V11.9982C16.0715 11.9783 16.0753 11.9585 16.0837 11.9405C16.0921 11.9225 16.1048 11.9068 16.1207 11.8949L24.1719 7.25025C25.4053 6.53903 26.8158 6.19376 28.2383 6.25482C29.6608 6.31589 31.0364 6.78077 32.2044 7.59508C33.3723 8.40939 34.2842 9.53945 34.8334 10.8531C35.3826 12.1667 35.5464 13.6095 35.3055 15.0128ZM14.2424 21.9419L10.8752 19.9981C10.8576 19.9893 10.8423 19.9763 10.8309 19.9602C10.8195 19.9441 10.8122 19.9254 10.8098 19.9058V10.6071C10.8107 9.18295 11.2173 7.78848 11.9819 6.58696C12.7466 5.38544 13.8377 4.42659 15.1275 3.82264C16.4173 3.21869 17.8524 2.99464 19.2649 3.1767C20.6775 3.35876 22.0089 3.93941 23.1034 4.85067C23.0427 4.88379 22.937 4.94215 22.8668 4.98473L14.9024 9.58517C14.7025 9.69878 14.5366 9.86356 14.4215 10.0626C14.3065 10.2616 14.2466 10.4877 14.2479 10.7175L14.2424 21.9419ZM16.071 17.9991L20.4018 15.4978L24.7325 17.9975V22.9985L20.4018 25.4983L16.071 22.9985V17.9991Z" fill="currentColor"></path>
-        </symbol>
-    </svg>
-    <div class="conversation">
-        <div class="conversation-header">
-            <h1>
-                <a href="{{source}}" target="_blank" rel="noopener noreferrer">{{title}}</a>
-                <button class="toggle">
-                    <svg class="sun" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                    <svg class="moon" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                </button>
-                <button class="toggle width-toggle">
-                    <svg class="expand" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="display: block;">
-                        <path d="M3 12h18M6 8l-4 4 4 4M18 8l4 4-4 4"></path>
-                    </svg>
-                    <svg class="narrow" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                        <path d="M3 12h7M14 12h7M6 16l4-4-4-4M18 16l-4-4 4-4"></path>
-                    </svg>
-                </button>
-            </h1>
-            <div class="conversation-export">
-                <p>Exported by
-                <a href="https://github.com/pionxzh/chatgpt-exporter.git">ChatGPT Exporter</a>
-                at {{time}}</p>
-            </div>
-            {{details}}
-        </div>
-
-        {{content}}
-    </div>
-
-
-    <script>
-        function toggleDarkMode(mode) {
-            const html = document.querySelector('html');
-            const isDarkMode = html.getAttribute('data-theme') === 'dark';
-            const newMode = mode || (isDarkMode ? 'light' : 'dark');
-            if (newMode !== 'dark' && newMode !== 'light') return;
-            html.setAttribute('data-theme', newMode);
-
-            const url = new URL(window.location);
-            url.searchParams.set('theme', newMode);
-            window.history.replaceState({}, '', url);
-        }
-        function toggleWidthMode(mode) {
-            const body = document.querySelector('body');
-            const widthToggleButton = document.querySelector('.width-toggle');
-            const isWide = body.getAttribute('data-width') === 'wide';
-            const newWidthMode = mode || (isWide ? 'narrow' : 'wide');
-            if (newWidthMode !== 'narrow' && newWidthMode !== 'wide') return;
-            body.setAttribute('data-width', newWidthMode);
-
-            const url = new URL(window.location);
-            url.searchParams.set('width', newWidthMode);
-            window.history.replaceState({}, '', url);
-
-            // Update the icon based on the current mode
-            const narrowIcon = widthToggleButton.querySelector('.narrow');
-            const expandIcon = widthToggleButton.querySelector('.expand');
-
-            if (newWidthMode === 'wide') {
-                expandIcon.style.display = "none";
-                narrowIcon.style.display = "block";
-            } else {
-                expandIcon.style.display = "block";
-                narrowIcon.style.display = "none";
-            }
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const theme = urlParams.get('theme');
-        const width = urlParams.get('width');
-
-        if (theme) toggleDarkMode(theme);
-        if (width) toggleWidthMode(width);
-
-        document.querySelector('.toggle').addEventListener('click', () => toggleDarkMode());
-        document.querySelector('.width-toggle').addEventListener('click', () => toggleWidthMode());
-    <\/script>
-</body>
-
-</html>
+  const templateHtml = `<!DOCTYPE html>\r
+<html lang="{{lang}}" data-theme="{{theme}}">\r
+<head>\r
+    <meta charset="UTF-8" />\r
+    <link rel="icon" href="https://chat.openai.com/favicon.ico" />\r
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />\r
+    <title>{{title}}</title>\r
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">\r
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"><\/script>\r
+    <script>\r
+        hljs.highlightAll()\r
+    <\/script>\r
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/katex.min.css">\r
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/katex.min.js"><\/script>\r
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/contrib/auto-render.min.js"><\/script>\r
+    <script>\r
+        document.addEventListener("DOMContentLoaded", function() {\r
+            renderMathInElement(document.body, {\r
+                delimiters: [\r
+                    { left: "$$", right: "$$", display: true },\r
+                    { left: "$", right: "$", display: false },\r
+                    { left: "\\\\[", right: "\\\\]", display: true },\r
+                    { left: "\\\\(", right: "\\\\)", display: false }\r
+                ],\r
+                throwOnError: false,\r
+                ignoredClasses: ["no-katex"],\r
+                preProcess: function(math) {\r
+                    return \`\\\\displaystyle \\\\Large \${math}\`;\r
+                }\r
+            });\r
+            document.querySelectorAll('.katex').forEach(function(el) {\r
+                const parent = el.parentNode;\r
+                const grandparent = parent.parentNode;\r
+                if (grandparent.tagName === 'P' && isOnlyContent(grandparent, parent)) {\r
+                    el.style.width = '100%';\r
+                    el.style.display = 'block';\r
+                    el.style.textAlign = 'center';\r
+                    parent.style.textAlign = 'center';\r
+                } else {\r
+                    el.style.display = 'inline-block';\r
+                    el.style.width = 'fit-content';\r
+                }\r
+            });\r
+            function isOnlyContent(parent, element) {\r
+                let onlyKaTeX = true;\r
+                parent.childNodes.forEach(function(child) {\r
+                    console.log(child.textContent);\r
+                    if (child !== element) {\r
+                        if (child.nodeType === Node.TEXT_NODE) {\r
+                            if (child.textContent.trim().length > 0) {\r
+                                onlyKaTeX = false;\r
+                            }\r
+                        } else if (child.nodeType === Node.ELEMENT_NODE) {\r
+                            onlyKaTeX = false;\r
+                        }\r
+                    }\r
+                });\r
+                return onlyKaTeX;\r
+            }\r
+        });\r
+    <\/script>\r
+\r
+    <style>\r
+        :root {\r
+            --page-text: #0d0d0d;\r
+            --page-bg: #fff;\r
+            --td-borders: #374151;\r
+            --th-borders: #4b5563;\r
+            --tw-prose-code: var(--page-text);\r
+            --tw-prose-counters: #9b9b9b;\r
+            --tw-prose-headings: var(--page-text);\r
+            --tw-prose-hr: rgba(0,0,0,.25);\r
+            --tw-prose-links: var(--page-text);\r
+            --tw-prose-quotes: var(--page-text);\r
+            --meta-title: #616c77;\r
+        }\r
+\r
+        [data-theme="dark"] {\r
+            --page-text: #ececec;\r
+            --page-bg: #212121;\r
+            --tw-prose-code: var(--page-text);\r
+            --tw-prose-counters: #9b9b9b;\r
+            --tw-prose-headings: var(--page-text);\r
+            --tw-prose-hr: hsla(0,0%,100%,.25);\r
+            --tw-prose-links: var(--page-text);\r
+            --tw-prose-quotes: var(--page-text);\r
+            --meta-title: #959faa;\r
+        }\r
+\r
+        * {\r
+            box-sizing: border-box;\r
+            font-size: 16px;\r
+        }\r
+\r
+        ::-webkit-scrollbar {\r
+            height: 1rem;\r
+            width: .5rem\r
+        }\r
+\r
+        ::-webkit-scrollbar:horizontal {\r
+            height: .5rem;\r
+            width: 1rem\r
+        }\r
+\r
+        ::-webkit-scrollbar-track {\r
+            background-color: transparent;\r
+            border-radius: 9999px\r
+        }\r
+\r
+        ::-webkit-scrollbar-thumb {\r
+            --tw-border-opacity: 1;\r
+            background-color: rgba(217,217,227,.8);\r
+            border-color: rgba(255,255,255,var(--tw-border-opacity));\r
+            border-radius: 9999px;\r
+            border-width: 1px\r
+        }\r
+\r
+        ::-webkit-scrollbar-thumb:hover {\r
+            --tw-bg-opacity: 1;\r
+            background-color: rgba(236,236,241,var(--tw-bg-opacity))\r
+        }\r
+\r
+        .dark ::-webkit-scrollbar-thumb {\r
+            --tw-bg-opacity: 1;\r
+            background-color: rgba(86,88,105,var(--tw-bg-opacity))\r
+        }\r
+\r
+        .dark ::-webkit-scrollbar-thumb:hover {\r
+            --tw-bg-opacity: 1;\r
+            background-color: rgba(172,172,190,var(--tw-bg-opacity))\r
+        }\r
+\r
+        @media (min-width: 768px) {\r
+            .scrollbar-trigger ::-webkit-scrollbar-thumb {\r
+                visibility:hidden\r
+            }\r
+\r
+            .scrollbar-trigger:hover ::-webkit-scrollbar-thumb {\r
+                visibility: visible\r
+            }\r
+        }\r
+\r
+        body {\r
+            font-family: Söhne,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Helvetica Neue,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;\r
+            font-size: 14px;\r
+            line-height: 1.5;\r
+            color: var(--page-text);\r
+            background-color: var(--page-bg);\r
+            margin: 0;\r
+            padding: 0;\r
+        }\r
+\r
+        [data-theme="light"] .sun {\r
+            display: none;\r
+        }\r
+\r
+        [data-theme="dark"] .moon {\r
+            display: none;\r
+        }\r
+\r
+        .toggle {\r
+            display: inline-flex;\r
+            justify-content: center;\r
+            align-items: center;\r
+            width: 32px;\r
+            height: 32px;\r
+            border-radius: 4px;\r
+            background-color: #fff;\r
+            border: 1px solid #e2e8f0;\r
+        }\r
+\r
+        [data-width="narrow"] .width-toggle .expand {\r
+            display: block;\r
+        }\r
+\r
+        [data-width="wide"] .width-toggle .narrow {\r
+            display: block;\r
+        }\r
+\r
+        .width-toggle {\r
+            display: inline-flex;\r
+            justify-content: center;\r
+            align-items: center;\r
+            width: 32px;\r
+            height: 32px;\r
+            border-radius: 4px;\r
+            background-color: #fff;\r
+            border: 1px solid #e2e8f0;\r
+            margin-left: 8px;\r
+            cursor: pointer;\r
+        }\r
+\r
+        .width-toggle svg {\r
+            display: none;\r
+        }\r
+\r
+        .metadata_container {\r
+            display: flex;\r
+            flex-direction: column;\r
+            margin-top: 8px;\r
+            padding-left: 1rem;\r
+        }\r
+\r
+        .metadata_item {\r
+            display: flex;\r
+            flex-direction: row;\r
+            align-items: center;\r
+            border-radius: 16px;\r
+            padding: 4px 0.5rem;\r
+        }\r
+\r
+        .metadata_item:hover {\r
+            background-color: rgba(0,0,0,.1);\r
+        }\r
+\r
+        .metadata_item > div:first-child {\r
+            flex: 0 1 100px;\r
+            color: var(--meta-title);\r
+        }\r
+\r
+        .metadata_item > div:last-child {\r
+            flex: 1;\r
+        }\r
+\r
+        a {\r
+            color: var(--tw-prose-links);\r
+            font-size: 0.8rem;\r
+            text-decoration-line: underline;\r
+            text-underline-offset: 2px;\r
+        }\r
+\r
+        .conversation-content > p:first-child,\r
+        ol:first-child {\r
+            margin-top: 0;\r
+        }\r
+\r
+        p>code, li>code {\r
+            color: var(--tw-prose-code);\r
+            font-weight: 600;\r
+            font-size: .875em;\r
+        }\r
+\r
+        p>code::before,\r
+        p>code::after,\r
+        li>code::before,\r
+        li>code::after {\r
+            content: "\`";\r
+        }\r
+\r
+        hr {\r
+            width: 100%;\r
+            height: 0;\r
+            border: 1px solid var(--tw-prose-hr);\r
+            margin-bottom: 1em;\r
+            margin-top: 1em;\r
+        }\r
+\r
+        pre {\r
+            color: #ffffff;\r
+            background-color: #000000;\r
+            overflow-x: auto;\r
+            margin: 0 0 1rem 0;\r
+            border-radius: 0.375rem;\r
+        }\r
+\r
+        pre>code {\r
+            font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace !important;\r
+            font-weight: 400;\r
+            font-size: .875em;\r
+            line-height: 1.7142857;\r
+        }\r
+\r
+        h1, h2, h3, h4, h5, h6 {\r
+            color: var(--tw-prose-headings);\r
+            margin: 0;\r
+        }\r
+\r
+        h1 {\r
+            font-size: 2.25em;\r
+            font-weight: 600;\r
+            line-height: 1.1111111;\r
+            margin-bottom: 0.8888889em;\r
+            margin-top: 0;\r
+        }\r
+\r
+        h2 {\r
+            font-size: 1.5em;\r
+            font-weight: 700;\r
+            line-height: 1.3333333;\r
+            margin-bottom: 1em;\r
+            margin-top: 2em;\r
+        }\r
+\r
+        h3 {\r
+            font-size: 1.25em;\r
+            font-weight: 600;\r
+            line-height: 1.6;\r
+            margin-bottom: .6em;\r
+            margin-top: 1.6em;\r
+        }\r
+\r
+        h4 {\r
+            font-weight: 400;\r
+            line-height: 1.5;\r
+            margin-bottom: .5em;\r
+            margin-top: 1.5em\r
+        }\r
+\r
+        h3,h4 {\r
+            margin-bottom: .5rem;\r
+            margin-top: 1rem;\r
+        }\r
+\r
+        h5 {\r
+            font-weight: 600;\r
+        }\r
+\r
+        blockquote {\r
+            border-left: 2px solid rgba(142,142,160,1);\r
+            color: var(--tw-prose-quotes);\r
+            font-style: italic;\r
+            font-style: normal;\r
+            font-weight: 500;\r
+            line-height: 1rem;\r
+            margin: 1.6em 0;\r
+            padding-left: 1em;\r
+            quotes: "\\201C""\\201D""\\2018""\\2019";\r
+        }\r
+\r
+        blockquote p:first-of-type:before {\r
+            content: open-quote;\r
+        }\r
+\r
+        blockquote p:last-of-type:after {\r
+            content: close-quote;\r
+        }\r
+\r
+        ol, ul {\r
+            padding-left: 1.1rem;\r
+        }\r
+\r
+        ::marker {\r
+            color: var(--tw-prose-counters);\r
+            font-weight: 400;\r
+        }\r
+\r
+        table {\r
+            width: 100%;\r
+            border-collapse: separate;\r
+            border-spacing: 0 0;\r
+            table-layout: auto;\r
+            text-align: left;\r
+            font-size: .875em;\r
+            line-height: 1.7142857;\r
+        }\r
+\r
+        table * {\r
+            box-sizing: border-box;\r
+            border-width: 0;\r
+            border-style: solid;\r
+            border-color: #d9d9e3;\r
+        }\r
+\r
+        table thead {\r
+            border-bottom-color: var(--th-borders);\r
+            border-bottom-width: 1px;\r
+        }\r
+\r
+        table th {\r
+            background-color: rgba(236,236,241,.2);\r
+            border-bottom-width: 1px;\r
+            border-left-width: 1px;\r
+            border-top-width: 1px;\r
+            padding: 0.25rem 0.75rem;\r
+        }\r
+\r
+        table th:first-child {\r
+            border-top-left-radius: 0.375rem;\r
+        }\r
+\r
+        table th:last-child {\r
+            border-right-width: 1px;\r
+            border-top-right-radius: 0.375rem;\r
+        }\r
+\r
+        table tbody tr {\r
+            border-bottom-color: var(--td-borders);\r
+            border-bottom-width: 1px;\r
+        }\r
+\r
+        table tbody tr:last-child {\r
+            border-bottom-width: 0;\r
+        }\r
+\r
+        table tbody tr:last-child td:first-child {\r
+            border-bottom-left-radius: 0.375rem;\r
+        }\r
+\r
+        table tbody tr:last-child td:last-child {\r
+            border-bottom-right-radius: 0.375rem;\r
+        }\r
+\r
+        table td {\r
+            border-bottom-width: 1px;\r
+            border-left-width: 1px;\r
+            padding: 0.25rem 0.75rem;\r
+        }\r
+\r
+        table td:last-child {\r
+            border-right-width: 1px;\r
+        }\r
+\r
+        [type=checkbox], [type=radio] {\r
+            accent-color: #2563eb;\r
+        }\r
+\r
+        .conversation {\r
+            margin: 0 auto;\r
+            padding: 1rem;\r
+            max-width: 64rem;\r
+        }\r
+\r
+        [data-width="narrow"] .conversation {\r
+            max-width: 64rem;\r
+        }\r
+\r
+        [data-width="wide"] .conversation {\r
+            max-width: 90%;\r
+        }\r
+\r
+        @media (min-width: 1280px) {\r
+            .conversation {\r
+                max-width: 48rem;\r
+            }\r
+        }\r
+\r
+        @media (min-width: 1024px) {\r
+            .conversation {\r
+                max-width: 40rem;\r
+            }\r
+        }\r
+\r
+        @media (min-width: 768px) {\r
+            .conversation {\r
+                max-width: 48rem;\r
+            }\r
+        }\r
+\r
+        .conversation-header {\r
+            margin-bottom: 1rem;\r
+        }\r
+\r
+        .conversation-header h1 {\r
+            margin: 0;\r
+        }\r
+\r
+        .conversation-header h1 a {\r
+            font-size: 1.5rem;\r
+        }\r
+\r
+        .conversation-header .conversation-export {\r
+            margin-top: 0.5rem;\r
+            font-size: 0.8rem;\r
+        }\r
+\r
+        .conversation-header p {\r
+            margin-top: 0.5rem;\r
+            font-size: 0.8rem;\r
+        }\r
+\r
+        .conversation-item {\r
+            display: flex;\r
+            position: relative;\r
+            padding: 1rem;\r
+            border-left: 1px solid rgba(0,0,0,.1);\r
+            border-right: 1px solid rgba(0,0,0,.1);\r
+            border-bottom: 1px solid rgba(0,0,0,.1);\r
+        }\r
+\r
+        .conversation-item:first-of-type {\r
+            border-top: 1px solid rgba(0,0,0,.1);\r
+        }\r
+\r
+        .author {\r
+            display: flex;\r
+            flex: 0 0 30px;\r
+            justify-content: center;\r
+            align-items: center;\r
+            width: 30px;\r
+            height: 30px;\r
+            border-radius: 0.125rem;\r
+            margin-right: 1rem;\r
+            overflow: hidden;\r
+        }\r
+\r
+        .author svg {\r
+            color: #fff;\r
+            width: 22px;\r
+            height: 22px;\r
+        }\r
+\r
+        .author img {\r
+            content: url({{avatar}});\r
+            width: 100%;\r
+            height: 100%;\r
+        }\r
+\r
+        .author.GPT-3 {\r
+            background-color: rgb(16, 163, 127);\r
+        }\r
+\r
+        .author.GPT-4 {\r
+            background-color: black;\r
+        }\r
+\r
+        .conversation-content-wrapper {\r
+            display: flex;\r
+            position: relative;\r
+            overflow: hidden;\r
+            flex: 1 1 auto;\r
+            flex-direction: column;\r
+        }\r
+\r
+        .thinking {\r
+            font-size: 0.875rem;\r
+            line-height: 1.5;\r
+            margin-bottom: 0.75rem;\r
+            border: 1px solid #d1d5db;\r
+            border-radius: 0.5rem;\r
+            padding: 0.5rem 0.75rem;\r
+        }\r
+\r
+        .thinking summary {\r
+            cursor: pointer;\r
+            font-weight: 500;\r
+            color: #6b7280;\r
+        }\r
+\r
+        .thinking p {\r
+            margin: 0.5rem 0;\r
+            color: #6b7280;\r
+        }\r
+\r
+        .dark .thinking {\r
+            border-color: #4b5563;\r
+        }\r
+\r
+        .dark .thinking summary,\r
+        .dark .thinking p {\r
+            color: #9ca3af;\r
+        }\r
+\r
+        .conversation-content {\r
+            font-size: 1rem;\r
+            line-height: 1.5;\r
+        }\r
+\r
+        .conversation-content p {\r
+            white-space: pre-wrap;\r
+            line-height: 28px;\r
+        }\r
+\r
+        .conversation-content img, .conversation-content video {\r
+            display: block;\r
+            max-width: 100%;\r
+            height: auto;\r
+            margin-bottom: 2em;\r
+            margin-top: 2em;\r
+        }\r
+\r
+        .time {\r
+            position: absolute;\r
+            right: 8px;\r
+            bottom: 0;\r
+            font-size: 0.8rem;\r
+            color: #acacbe\r
+        }\r
+\r
+    </style>\r
+</head>\r
+\r
+<body>\r
+    <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\r
+        <symbol id="chatgpt" viewBox="0 0 41 41">\r
+            <path d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.500197C16.1708 0.495044 14.0893 1.16803 12.3614 2.42214C10.6335 3.67624 9.34853 5.44666 8.6917 7.47815C7.30085 7.76286 5.98686 8.3414 4.8377 9.17505C3.68854 10.0087 2.73073 11.0782 2.02839 12.312C0.956464 14.1591 0.498905 16.2988 0.721698 18.4228C0.944492 20.5467 1.83612 22.5449 3.268 24.1293C2.81966 25.4759 2.66413 26.9026 2.81182 28.3141C2.95951 29.7256 3.40701 31.0892 4.12437 32.3138C5.18791 34.1659 6.8123 35.6322 8.76321 36.5013C10.7141 37.3704 12.8907 37.5973 14.9789 37.1492C15.9208 38.2107 17.0786 39.0587 18.3747 39.6366C19.6709 40.2144 21.0755 40.5087 22.4946 40.4998C24.6307 40.5054 26.7133 39.8321 28.4418 38.5772C30.1704 37.3223 31.4556 35.5506 32.1119 33.5179C33.5027 33.2332 34.8167 32.6547 35.9659 31.821C37.115 30.9874 38.0728 29.9178 38.7752 28.684C39.8458 26.8371 40.3023 24.6979 40.0789 22.5748C39.8556 20.4517 38.9639 18.4544 37.5324 16.8707ZM22.4978 37.8849C20.7443 37.8874 19.0459 37.2733 17.6994 36.1501C17.7601 36.117 17.8666 36.0586 17.936 36.0161L25.9004 31.4156C26.1003 31.3019 26.2663 31.137 26.3813 30.9378C26.4964 30.7386 26.5563 30.5124 26.5549 30.2825V19.0542L29.9213 20.998C29.9389 21.0068 29.9541 21.0198 29.9656 21.0359C29.977 21.052 29.9842 21.0707 29.9867 21.0902V30.3889C29.9842 32.375 29.1946 34.2791 27.7909 35.6841C26.3872 37.0892 24.4838 37.8806 22.4978 37.8849ZM6.39227 31.0064C5.51397 29.4888 5.19742 27.7107 5.49804 25.9832C5.55718 26.0187 5.66048 26.0818 5.73461 26.1244L13.699 30.7248C13.8975 30.8408 14.1233 30.902 14.3532 30.902C14.583 30.902 14.8088 30.8408 15.0073 30.7248L24.731 25.1103V28.9979C24.7321 29.0177 24.7283 29.0376 24.7199 29.0556C24.7115 29.0736 24.6988 29.0893 24.6829 29.1012L16.6317 33.7497C14.9096 34.7416 12.8643 35.0097 10.9447 34.4954C9.02506 33.9811 7.38785 32.7263 6.39227 31.0064ZM4.29707 13.6194C5.17156 12.0998 6.55279 10.9364 8.19885 10.3327C8.19885 10.4013 8.19491 10.5228 8.19491 10.6071V19.808C8.19351 20.0378 8.25334 20.2638 8.36823 20.4629C8.48312 20.6619 8.64893 20.8267 8.84863 20.9404L18.5723 26.5542L15.206 28.4979C15.1894 28.5089 15.1703 28.5155 15.1505 28.5173C15.1307 28.5191 15.1107 28.516 15.0924 28.5082L7.04046 23.8557C5.32135 22.8601 4.06716 21.2235 3.55289 19.3046C3.03862 17.3858 3.30624 15.3413 4.29707 13.6194ZM31.955 20.0556L22.2312 14.4411L25.5976 12.4981C25.6142 12.4872 25.6333 12.4805 25.6531 12.4787C25.6729 12.4769 25.6928 12.4801 25.7111 12.4879L33.7631 17.1364C34.9967 17.849 36.0017 18.8982 36.6606 20.1613C37.3194 21.4244 37.6047 22.849 37.4832 24.2684C37.3617 25.6878 36.8382 27.0432 35.9743 28.1759C35.1103 29.3086 33.9415 30.1717 32.6047 30.6641C32.6047 30.5947 32.6047 30.4733 32.6047 30.3889V21.188C32.6066 20.9586 32.5474 20.7328 32.4332 20.5338C32.319 20.3348 32.154 20.1698 31.955 20.0556ZM35.3055 15.0128C35.2464 14.9765 35.1431 14.9142 35.069 14.8717L27.1045 10.2712C26.906 10.1554 26.6803 10.0943 26.4504 10.0943C26.2206 10.0943 25.9948 10.1554 25.7963 10.2712L16.0726 15.8858V11.9982C16.0715 11.9783 16.0753 11.9585 16.0837 11.9405C16.0921 11.9225 16.1048 11.9068 16.1207 11.8949L24.1719 7.25025C25.4053 6.53903 26.8158 6.19376 28.2383 6.25482C29.6608 6.31589 31.0364 6.78077 32.2044 7.59508C33.3723 8.40939 34.2842 9.53945 34.8334 10.8531C35.3826 12.1667 35.5464 13.6095 35.3055 15.0128ZM14.2424 21.9419L10.8752 19.9981C10.8576 19.9893 10.8423 19.9763 10.8309 19.9602C10.8195 19.9441 10.8122 19.9254 10.8098 19.9058V10.6071C10.8107 9.18295 11.2173 7.78848 11.9819 6.58696C12.7466 5.38544 13.8377 4.42659 15.1275 3.82264C16.4173 3.21869 17.8524 2.99464 19.2649 3.1767C20.6775 3.35876 22.0089 3.93941 23.1034 4.85067C23.0427 4.88379 22.937 4.94215 22.8668 4.98473L14.9024 9.58517C14.7025 9.69878 14.5366 9.86356 14.4215 10.0626C14.3065 10.2616 14.2466 10.4877 14.2479 10.7175L14.2424 21.9419ZM16.071 17.9991L20.4018 15.4978L24.7325 17.9975V22.9985L20.4018 25.4983L16.071 22.9985V17.9991Z" fill="currentColor"></path>\r
+        </symbol>\r
+    </svg>\r
+    <div class="conversation">\r
+        <div class="conversation-header">\r
+            <h1>\r
+                <a href="{{source}}" target="_blank" rel="noopener noreferrer">{{title}}</a>\r
+                <button class="toggle">\r
+                    <svg class="sun" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>\r
+                    <svg class="moon" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>\r
+                </button>\r
+                <button class="toggle width-toggle">\r
+                    <svg class="expand" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="display: block;">\r
+                        <path d="M3 12h18M6 8l-4 4 4 4M18 8l4 4-4 4"></path>\r
+                    </svg>\r
+                    <svg class="narrow" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="display: none;">\r
+                        <path d="M3 12h7M14 12h7M6 16l4-4-4-4M18 16l-4-4 4-4"></path>\r
+                    </svg>\r
+                </button>\r
+            </h1>\r
+            <div class="conversation-export">\r
+                <p>Exported by\r
+                <a href="https://github.com/pionxzh/chatgpt-exporter.git">ChatGPT Exporter</a>\r
+                at {{time}}</p>\r
+            </div>\r
+            {{details}}\r
+        </div>\r
+\r
+        {{content}}\r
+    </div>\r
+\r
+\r
+    <script>\r
+        function toggleDarkMode(mode) {\r
+            const html = document.querySelector('html');\r
+            const isDarkMode = html.getAttribute('data-theme') === 'dark';\r
+            const newMode = mode || (isDarkMode ? 'light' : 'dark');\r
+            if (newMode !== 'dark' && newMode !== 'light') return;\r
+            html.setAttribute('data-theme', newMode);\r
+\r
+            const url = new URL(window.location);\r
+            url.searchParams.set('theme', newMode);\r
+            window.history.replaceState({}, '', url);\r
+        }\r
+        function toggleWidthMode(mode) {\r
+            const body = document.querySelector('body');\r
+            const widthToggleButton = document.querySelector('.width-toggle');\r
+            const isWide = body.getAttribute('data-width') === 'wide';\r
+            const newWidthMode = mode || (isWide ? 'narrow' : 'wide');\r
+            if (newWidthMode !== 'narrow' && newWidthMode !== 'wide') return;\r
+            body.setAttribute('data-width', newWidthMode);\r
+\r
+            const url = new URL(window.location);\r
+            url.searchParams.set('width', newWidthMode);\r
+            window.history.replaceState({}, '', url);\r
+\r
+            // Update the icon based on the current mode\r
+            const narrowIcon = widthToggleButton.querySelector('.narrow');\r
+            const expandIcon = widthToggleButton.querySelector('.expand');\r
+\r
+            if (newWidthMode === 'wide') {\r
+                expandIcon.style.display = "none";\r
+                narrowIcon.style.display = "block";\r
+            } else {\r
+                expandIcon.style.display = "block";\r
+                narrowIcon.style.display = "none";\r
+            }\r
+        }\r
+\r
+        const urlParams = new URLSearchParams(window.location.search);\r
+        const theme = urlParams.get('theme');\r
+        const width = urlParams.get('width');\r
+\r
+        if (theme) toggleDarkMode(theme);\r
+        if (width) toggleWidthMode(width);\r
+\r
+        document.querySelector('.toggle').addEventListener('click', () => toggleDarkMode());\r
+        document.querySelector('.width-toggle').addEventListener('click', () => toggleWidthMode());\r
+    <\/script>\r
+</body>\r
+\r
+</html>\r
 `;
+  const CitationMarkerRegex = /\uE200cite(?:\uE202[^\uE200\uE201]*)+\uE201/gu;
+  function normalizeCitationText(input) {
+    return input.replaceAll(/[\u00A0\u202F\u2007\u2060]/gu, " ").replaceAll(/[\u2010-\u2015\u2212]/gu, "-").replaceAll(/[\uE203\uE204]/gu, "");
+  }
+  function transformContentReferences(input, metadata, options = {}) {
+    const outputType = options.output ?? "markdown";
+    const inlineReferenceMode = options.inlineReferenceMode ?? "expanded";
+    const contentRefs = (metadata == null ? void 0 : metadata.content_references) ?? [];
+    let output2 = normalizeCitationText(input);
+    const sortedRefs = [...contentRefs].filter((ref) => ref.type !== "sources_footnote").sort((a2, b2) => {
+      var _a, _b;
+      return (((_a = b2.matched_text) == null ? void 0 : _a.length) || 0) - (((_b = a2.matched_text) == null ? void 0 : _b.length) || 0);
+    });
+    for (const ref of sortedRefs) {
+      if (!ref.matched_text) continue;
+      const matchedText = normalizeCitationText(ref.matched_text);
+      if (!matchedText) continue;
+      const replacement = formatInlineReference(ref, outputType, inlineReferenceMode);
+      output2 = output2.replaceAll(matchedText, replacement);
+    }
+    output2 = output2.replace(CitationMarkerRegex, "");
+    if (options.includeSourceList !== false) {
+      const sources = getSourcesFootnoteSources(contentRefs);
+      if (sources.length > 0) {
+        output2 = appendSourcesSection(output2, sources, outputType, options.sourceListLabel ?? "Sources");
+      }
+    }
+    return output2;
+  }
+  function formatCitationSource(source, output2) {
+    var _a;
+    const label = getSourceLabel(source);
+    const url = (_a = source.url) == null ? void 0 : _a.trim();
+    if (!url) return output2 === "markdown" ? escapeMarkdownText(label) : label;
+    if (output2 === "text") {
+      return `${label}: ${url}`;
+    }
+    return `[${escapeMarkdownText(label)}](<${escapeMarkdownUrl(url)}>)`;
+  }
+  function formatInlineReference(ref, output2, mode) {
+    if (mode === "alt") return ref.alt || "";
+    const sources = getInlineSources(ref);
+    if (sources.length > 0) {
+      const separator = output2 === "markdown" ? ", " : "; ";
+      return `(${sources.map((source) => formatCitationSource(source, output2)).join(separator)})`;
+    }
+    if (ref.alt) return ref.alt;
+    return "";
+  }
+  function getInlineSources(ref) {
+    var _a;
+    const sources = [];
+    for (const item of ref.items ?? []) {
+      sources.push(item);
+      sources.push(...item.supporting_websites ?? []);
+    }
+    sources.push(...ref.fallback_items ?? []);
+    if (sources.length === 0 && (ref.url || ref.title || ref.attribution)) {
+      sources.push(ref);
+    }
+    if (sources.length === 0 && ((_a = ref.safe_urls) == null ? void 0 : _a.length)) {
+      sources.push(...ref.safe_urls.map((url) => ({ title: url, url })));
+    }
+    return dedupeSources(sources);
+  }
+  function getSourcesFootnoteSources(contentRefs) {
+    const sources = contentRefs.filter((ref) => ref.type === "sources_footnote").flatMap((ref) => {
+      var _a, _b, _c, _d;
+      if ((_a = ref.sources) == null ? void 0 : _a.length) return ref.sources;
+      if ((_b = ref.items) == null ? void 0 : _b.length) return ref.items;
+      if ((_c = ref.fallback_items) == null ? void 0 : _c.length) return ref.fallback_items;
+      if ((_d = ref.safe_urls) == null ? void 0 : _d.length) return ref.safe_urls.map((url) => ({ title: url, url }));
+      return [];
+    });
+    return dedupeSources(sources);
+  }
+  function appendSourcesSection(input, sources, output2, label) {
+    const trimmed = input.trimEnd();
+    const sourceList = output2 === "markdown" ? [
+      `**${escapeMarkdownText(label)}:**`,
+      "",
+      ...sources.map((source) => `- ${formatCitationSource(source, output2)}`)
+    ].join("\n") : [
+      `${label}:`,
+      ...sources.map((source, index2) => `${index2 + 1}. ${formatCitationSource(source, output2)}`)
+    ].join("\n");
+    return trimmed ? `${trimmed}
+
+${sourceList}` : sourceList;
+  }
+  function dedupeSources(sources) {
+    var _a;
+    const seen = /* @__PURE__ */ new Set();
+    const result = [];
+    for (const source of sources) {
+      const key2 = ((_a = source.url) == null ? void 0 : _a.trim()) || getSourceLabel(source);
+      if (!key2 || seen.has(key2)) continue;
+      seen.add(key2);
+      result.push(source);
+    }
+    return result;
+  }
+  function getSourceLabel(source) {
+    var _a, _b, _c;
+    return ((_a = source.attribution) == null ? void 0 : _a.trim()) || ((_b = source.title) == null ? void 0 : _b.trim()) || ((_c = source.url) == null ? void 0 : _c.trim()) || "Source";
+  }
+  function escapeMarkdownText(input) {
+    return input.replaceAll("\\", "\\\\").replaceAll("[", "\\[").replaceAll("]", "\\]").replaceAll("\n", " ");
+  }
+  function escapeMarkdownUrl(input) {
+    return input.replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "");
+  }
   function isHighSurrogate$1(codePoint) {
     return codePoint >= 55296 && codePoint <= 56319;
   }
@@ -21296,6 +21442,7 @@ html {
     const enableTimestamp = ScriptStorage.get(KEY_TIMESTAMP_ENABLED) ?? false;
     const timeStampHtml = ScriptStorage.get(KEY_TIMESTAMP_HTML) ?? false;
     const timeStamp24H = ScriptStorage.get(KEY_TIMESTAMP_24H) ?? false;
+    const enableSources = ScriptStorage.get(KEY_SOURCES_ENABLED) ?? true;
     const LatexRegex2 = /(\s\$\$.+?\$\$\s|\s\$.+?\$\s|\\\[.+?\\\]|\\\(.+?\\\))|(^\$$[\S\s]+?^\$$)|(^\$\$[\S\s]+?^\$\$\$)/gm;
     const conversationHtml = conversationNodes.map(({ message, thinking }) => {
       var _a;
@@ -21308,7 +21455,10 @@ html {
       let postSteps = [];
       if (message.author.role === "assistant") {
         postSteps.push((input) => transformFootNotes$2(input, message.metadata));
-        postSteps.push((input) => transformContentReferences$2(input, message.metadata));
+        postSteps.push((input) => transformContentReferences(input, message.metadata, {
+          includeSourceList: enableSources,
+          sourceListLabel: instance.t("Sources")
+        }));
         postSteps.push((input) => {
           const matches = input.match(LatexRegex2);
           const isCodeBlock = /```/.test(input);
@@ -21398,42 +21548,6 @@ html {
       if (citation) return "";
       return match;
     });
-  }
-  function transformContentReferences$2(input, metadata) {
-    var _a;
-    const contentRefs = metadata == null ? void 0 : metadata.content_references;
-    if (!contentRefs || contentRefs.length === 0) return input;
-    const sortedRefs = [...contentRefs].sort((a2, b2) => {
-      var _a2, _b;
-      return (((_a2 = b2.matched_text) == null ? void 0 : _a2.length) || 0) - (((_b = a2.matched_text) == null ? void 0 : _b.length) || 0);
-    });
-    const normalize2 = (s2) => s2.replaceAll(/[\u00A0\u202F\u2007\u2060]/gu, " ").replaceAll(/[\u2010-\u2015\u2212]/gu, "-");
-    let output2 = normalize2(input);
-    for (const ref of sortedRefs) {
-      if (!ref.matched_text) continue;
-      const matchedText = normalize2(ref.matched_text);
-      switch (ref.type) {
-        case "sources_footnote":
-          break;
-        case "grouped_webpages": {
-          const item = (_a = ref.items) == null ? void 0 : _a[0];
-          if (item) {
-            const links = [];
-            links.push(`[${item.attribution || item.title}](${item.url})`);
-            for (const sw of item.supporting_websites || []) {
-              links.push(`[${sw.attribution || sw.title}](${sw.url})`);
-            }
-            output2 = output2.replaceAll(matchedText, `(${links.join(", ")})`);
-          } else {
-            output2 = output2.replaceAll(matchedText, ref.alt || "");
-          }
-          break;
-        }
-        default:
-          output2 = output2.replaceAll(matchedText, ref.alt || "");
-      }
-    }
-    return output2;
   }
   function transformContent$2(content2, metadata, postProcess) {
     var _a, _b, _c, _d;
@@ -21860,6 +21974,7 @@ ${_metaList.join("\n")}
     const enableTimestamp = ScriptStorage.get(KEY_TIMESTAMP_ENABLED) ?? false;
     const timeStampMarkdown = ScriptStorage.get(KEY_TIMESTAMP_MARKDOWN) ?? false;
     const timeStamp24H = ScriptStorage.get(KEY_TIMESTAMP_24H) ?? false;
+    const enableSources = ScriptStorage.get(KEY_SOURCES_ENABLED) ?? true;
     const content2 = conversationNodes.map(({ message, thinking }) => {
       if (!message || !message.content) return null;
       if (shouldSkipMessageInExport(message)) return null;
@@ -21877,7 +21992,10 @@ ${_metaList.join("\n")}
       const thinkingBlock = thinking ? formatThinkingMarkdown(thinking) : "";
       const postSteps = [];
       if (message.author.role === "assistant") {
-        postSteps.push((input) => transformContentReferences$1(input, message.metadata));
+        postSteps.push((input) => transformContentReferences(input, message.metadata, {
+          includeSourceList: enableSources,
+          sourceListLabel: instance.t("Sources")
+        }));
         postSteps.push((input) => transformFootNotes$1(input, message.metadata));
       }
       if (message.author.role === "assistant") {
@@ -21946,42 +22064,6 @@ ${content2}`;
     return `${output2}
 
 ${citationText}`;
-  }
-  function transformContentReferences$1(input, metadata) {
-    var _a;
-    const contentRefs = metadata == null ? void 0 : metadata.content_references;
-    if (!contentRefs || contentRefs.length === 0) return input;
-    const sortedRefs = [...contentRefs].sort((a2, b2) => {
-      var _a2, _b;
-      return (((_a2 = b2.matched_text) == null ? void 0 : _a2.length) || 0) - (((_b = a2.matched_text) == null ? void 0 : _b.length) || 0);
-    });
-    const normalize2 = (s2) => s2.replaceAll(/[\u00A0\u202F\u2007\u2060]/gu, " ").replaceAll(/[\u2010-\u2015\u2212]/gu, "-");
-    let output2 = normalize2(input);
-    for (const ref of sortedRefs) {
-      if (!ref.matched_text) continue;
-      const matchedText = normalize2(ref.matched_text);
-      switch (ref.type) {
-        case "sources_footnote":
-          break;
-        case "grouped_webpages": {
-          const item = (_a = ref.items) == null ? void 0 : _a[0];
-          if (item) {
-            const links = [];
-            links.push(`[${item.attribution || item.title}](${item.url})`);
-            for (const sw of item.supporting_websites || []) {
-              links.push(`[${sw.attribution || sw.title}](${sw.url})`);
-            }
-            output2 = output2.replaceAll(matchedText, `(${links.join(", ")})`);
-          } else {
-            output2 = output2.replaceAll(matchedText, ref.alt || "");
-          }
-          break;
-        }
-        default:
-          output2 = output2.replaceAll(matchedText, ref.alt || "");
-      }
-    }
-    return output2;
   }
   function transformContent$1(content2, metadata, postProcess) {
     var _a, _b, _c, _d;
@@ -22085,7 +22167,11 @@ ${body2}
       });
     }
     if (message.author.role === "assistant") {
-      content2 = transformContentReferences(content2, message.metadata);
+      content2 = transformContentReferences(content2, message.metadata, {
+        output: "text",
+        inlineReferenceMode: "alt",
+        includeSourceList: false
+      });
       content2 = transformFootNotes(content2, message.metadata);
     }
     if (message.author.role === "assistant" && content2) {
@@ -22162,27 +22248,6 @@ ${content2}`;
         return author.role;
     }
   }
-  function transformContentReferences(input, metadata) {
-    const contentRefs = metadata == null ? void 0 : metadata.content_references;
-    if (!contentRefs || contentRefs.length === 0) return input;
-    const sortedRefs = [...contentRefs].sort((a2, b2) => {
-      var _a, _b;
-      return (((_a = b2.matched_text) == null ? void 0 : _a.length) || 0) - (((_b = a2.matched_text) == null ? void 0 : _b.length) || 0);
-    });
-    const normalize2 = (s2) => s2.replaceAll(/[\u00A0\u202F\u2007\u2060]/gu, " ").replaceAll(/[\u2010-\u2015\u2212]/gu, "-");
-    let output2 = normalize2(input);
-    for (const ref of sortedRefs) {
-      if (!ref.matched_text) continue;
-      const matchedText = normalize2(ref.matched_text);
-      switch (ref.type) {
-        case "sources_footnote":
-          break;
-        default:
-          output2 = output2.replaceAll(matchedText, ref.alt || "");
-      }
-    }
-    return output2;
-  }
   function transformFootNotes(input, metadata) {
     const footNoteMarkRegex = /【(\d+)†\((.+?)\)】/g;
     return input.replace(footNoteMarkRegex, (match, citeIndex, _evidenceText) => {
@@ -22203,6 +22268,311 @@ ${content2}`;
     return () => window.removeEventListener("resize", callback);
   }
   const Divider = () => /* @__PURE__ */ o$8("div", { className: "h-px bg-token-border-light" });
+  const FILE_ID_KEYS = /* @__PURE__ */ new Set([
+    "file_id",
+    "fileId",
+    "fileID",
+    "file_identifier",
+    "fileIdentifier"
+  ]);
+  const ASSET_POINTER_KEYS = /* @__PURE__ */ new Set([
+    "asset_pointer",
+    "audio_asset_pointer",
+    "image_asset_pointer",
+    "video_container_asset_pointer",
+    "url",
+    "image_url",
+    "download_url"
+  ]);
+  const FILE_NAME_KEYS = /* @__PURE__ */ new Set([
+    "file_name",
+    "filename",
+    "name",
+    "title"
+  ]);
+  const MIME_KEYS = /* @__PURE__ */ new Set([
+    "mime_type",
+    "mimetype",
+    "mimedata",
+    "content_type"
+  ]);
+  const SIZE_KEYS = /* @__PURE__ */ new Set([
+    "size_bytes",
+    "file_size_bytes",
+    "bytes"
+  ]);
+  function scanConversationForFiles(conversation) {
+    const references = [];
+    for (const node2 of Object.values(conversation.mapping ?? {})) {
+      if (!(node2 == null ? void 0 : node2.message)) continue;
+      const message = node2.message;
+      const context = buildMessageContext(conversation, node2.id, message);
+      walkObject(message, "message", (value, path2) => {
+        if (typeof value !== "string" && typeof value !== "number") return;
+        const stringValue = String(value);
+        const key2 = lastPathSegment(path2);
+        if (FILE_ID_KEYS.has(key2) || looksLikeFileId(stringValue)) {
+          references.push({
+            ...context,
+            sourceType: inferSourceType(message, path2, stringValue),
+            fileId: normaliseFileId(stringValue),
+            filename: inferNearbyFilename(message, path2),
+            extension: inferExtension(inferNearbyFilename(message, path2)),
+            mimeType: inferNearbyMimeType(message, path2),
+            sizeBytes: inferNearbySizeBytes(message, path2),
+            sourceField: path2,
+            rawValue: value
+          });
+          return;
+        }
+        if (ASSET_POINTER_KEYS.has(key2) || looksLikeAssetPointer(stringValue) || looksLikeSandboxPath(stringValue)) {
+          references.push({
+            ...context,
+            sourceType: inferSourceType(message, path2, stringValue),
+            assetPointer: normaliseAssetPointer(stringValue),
+            rawPath: looksLikeSandboxPath(stringValue) ? stringValue : void 0,
+            rawUrl: looksLikeUrl(stringValue) ? stringValue : void 0,
+            filename: inferFilename(stringValue) ?? inferNearbyFilename(message, path2),
+            extension: inferExtension(inferFilename(stringValue) ?? inferNearbyFilename(message, path2)),
+            mimeType: inferNearbyMimeType(message, path2),
+            sizeBytes: inferNearbySizeBytes(message, path2),
+            sourceField: path2,
+            rawValue: value
+          });
+          return;
+        }
+        if (looksLikeGeneratedFileText(stringValue)) {
+          references.push({
+            ...context,
+            sourceType: "generated",
+            rawPath: stringValue,
+            filename: inferFilename(stringValue),
+            extension: inferExtension(inferFilename(stringValue)),
+            sourceField: path2,
+            rawValue: value
+          });
+        }
+      });
+    }
+    return references;
+  }
+  function buildMessageContext(conversation, nodeId, message) {
+    var _a;
+    return {
+      conversationId: conversation.id,
+      conversationTitle: conversation.title || "ChatGPT Conversation",
+      conversationCreateTime: conversation.create_time,
+      conversationUpdateTime: conversation.update_time,
+      messageId: message.id || nodeId,
+      messageCreateTime: message.create_time,
+      authorRole: (_a = message.author) == null ? void 0 : _a.role
+    };
+  }
+  function walkObject(value, path2, visitor, seen = /* @__PURE__ */ new WeakSet()) {
+    visitor(value, path2);
+    if (value === null || typeof value !== "object") return;
+    if (seen.has(value)) return;
+    seen.add(value);
+    if (Array.isArray(value)) {
+      value.forEach((item, index2) => walkObject(item, `${path2}[${index2}]`, visitor, seen));
+      return;
+    }
+    Object.entries(value).forEach(([key2, child]) => {
+      walkObject(child, `${path2}.${key2}`, visitor, seen);
+    });
+  }
+  function lastPathSegment(path2) {
+    var _a;
+    return ((_a = path2.split(".").at(-1)) == null ? void 0 : _a.replace(/\[\d+\]$/, "")) ?? path2;
+  }
+  function looksLikeFileId(value) {
+    return /^file-[A-Za-z0-9_-]+$/.test(value);
+  }
+  function normaliseFileId(value) {
+    return value.replace(/^sediment:\/\//, "");
+  }
+  function looksLikeAssetPointer(value) {
+    return value.startsWith("sediment://") || value.startsWith("file-") || value.includes("/files/download/");
+  }
+  function normaliseAssetPointer(value) {
+    return value.trim();
+  }
+  function looksLikeSandboxPath(value) {
+    return value.startsWith("sandbox:/mnt/data/") || value.startsWith("/mnt/data/");
+  }
+  function looksLikeUrl(value) {
+    return /^https?:\/\//.test(value);
+  }
+  function looksLikeGeneratedFileText(value) {
+    return value.includes("sandbox:/mnt/data/") || value.includes("/mnt/data/");
+  }
+  function inferSourceType(message, path2, value) {
+    var _a, _b, _c;
+    const isStructuredUploadedAsset = path2.includes("asset_pointer") || path2.includes("image_asset_pointer") || path2.includes("audio_asset_pointer") || path2.includes("video_container_asset_pointer") || value.startsWith("data:image/") || value.startsWith("sediment://") || looksLikeFileId(value);
+    if (value.startsWith("sediment://") || path2.includes("image_asset_pointer") || path2.includes("audio_asset_pointer") || path2.includes("image_url") || path2.includes("aggregate_result.messages")) {
+      return "image";
+    }
+    if (value.includes("sandbox:/mnt/data/") || value.includes("/mnt/data/") || message.content.content_type === "execution_output" || ((_a = message.author) == null ? void 0 : _a.role) === "assistant" || ((_b = message.author) == null ? void 0 : _b.role) === "tool") {
+      return "generated";
+    }
+    if (((_c = message.author) == null ? void 0 : _c.role) === "user" && isStructuredUploadedAsset) {
+      return "uploaded";
+    }
+    return "unknown";
+  }
+  function inferFilename(value) {
+    var _a;
+    if (!value) return void 0;
+    const sandboxMatch = value.match(/(?:sandbox:)?\/mnt\/data\/([^)\]\s"'<>]+)/);
+    if (sandboxMatch == null ? void 0 : sandboxMatch[1]) return safeDecode(sandboxMatch[1]);
+    const urlFile = (_a = value.split("/").at(-1)) == null ? void 0 : _a.split("?")[0];
+    if (urlFile && /\.[A-Za-z0-9]{1,8}$/.test(urlFile)) return safeDecode(urlFile);
+    return void 0;
+  }
+  function inferExtension(filename) {
+    var _a;
+    if (!filename) return void 0;
+    const match = filename.match(/\.([A-Za-z0-9]{1,8})$/);
+    return (_a = match == null ? void 0 : match[1]) == null ? void 0 : _a.toLowerCase();
+  }
+  function inferNearbyFilename(root2, sourcePath) {
+    const parent = getParentObject(root2, sourcePath);
+    if (!parent || typeof parent !== "object") return void 0;
+    for (const key2 of FILE_NAME_KEYS) {
+      const value = parent[key2];
+      if (typeof value === "string" && value.trim()) return value;
+    }
+    return void 0;
+  }
+  function inferNearbyMimeType(root2, sourcePath) {
+    const parent = getParentObject(root2, sourcePath);
+    if (!parent || typeof parent !== "object") return void 0;
+    for (const key2 of MIME_KEYS) {
+      const value = parent[key2];
+      if (typeof value === "string" && value.includes("/")) return value;
+    }
+    return void 0;
+  }
+  function inferNearbySizeBytes(root2, sourcePath) {
+    const parent = getParentObject(root2, sourcePath);
+    if (!parent || typeof parent !== "object") return void 0;
+    for (const key2 of SIZE_KEYS) {
+      const value = parent[key2];
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+    }
+    return void 0;
+  }
+  function getParentObject(root2, sourcePath) {
+    const cleanPath = sourcePath.replace(/^message\./, "");
+    const segments = cleanPath.replace(/\[(\d+)\]/g, ".$1").split(".").slice(0, -1);
+    let current = root2;
+    for (const segment of segments) {
+      if (current === null || typeof current !== "object") return void 0;
+      current = current[segment];
+    }
+    return current;
+  }
+  function safeDecode(value) {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  }
+  function buildInventory(conversations) {
+    const inventory = [];
+    const seen = /* @__PURE__ */ new Map();
+    let messagesScanned = 0;
+    for (const conversation of conversations) {
+      messagesScanned += Object.values(conversation.mapping ?? {}).filter((node2) => node2.message).length;
+      const references = scanConversationForFiles(conversation);
+      for (const reference of references) {
+        const row = toInventoryRow(reference);
+        const key2 = buildReferenceKey(reference);
+        if (key2 && seen.has(key2)) {
+          const original = seen.get(key2);
+          inventory.push({
+            ...row,
+            downloadStatus: "skipped_duplicate",
+            duplicateOf: original ? buildReferenceKey(original) : key2
+          });
+          continue;
+        }
+        if (key2) seen.set(key2, row);
+        inventory.push(row);
+      }
+    }
+    const stats = buildStats(conversations.length, messagesScanned, inventory);
+    return {
+      inventory,
+      stats
+    };
+  }
+  function toInventoryRow(reference) {
+    return {
+      ...reference,
+      downloadStatus: reference.fileId || reference.assetPointer ? "pending" : "metadata_only",
+      zipPath: buildZipPath(reference)
+    };
+  }
+  function buildReferenceKey(reference) {
+    return [
+      reference.fileId,
+      reference.assetPointer,
+      reference.rawPath,
+      reference.rawUrl,
+      reference.filename,
+      reference.conversationId,
+      reference.messageId,
+      reference.sourceField
+    ].filter(Boolean).join("|");
+  }
+  function buildZipPath(reference) {
+    const folder = reference.sourceType || "unknown";
+    const filename = safeFilename(
+      reference.filename || reference.fileId || reference.assetPointer || reference.rawPath || "unknown-file"
+    );
+    return `${folder}/${filename}`;
+  }
+  function safeFilename(value) {
+    return value.replace(/^sediment:\/\//, "").replace(/^sandbox:\/mnt\/data\//, "").replace(/^\/mnt\/data\//, "").replace(/[<>:"/\\\\|?*]/g, "_").slice(0, 180);
+  }
+  function buildStats(conversationsScanned, messagesScanned, inventory) {
+    return {
+      conversationsScanned,
+      messagesScanned,
+      referencesFound: inventory.length,
+      downloaded: inventory.filter((row) => row.downloadStatus === "downloaded").length,
+      metadataOnly: inventory.filter((row) => row.downloadStatus === "metadata_only").length,
+      failed: inventory.filter((row) => row.downloadStatus === "failed").length,
+      skippedDuplicates: inventory.filter((row) => row.downloadStatus === "skipped_duplicate").length
+    };
+  }
+  async function exportAllFileDiscovery(fileNameFormat, apiConversations) {
+    return exportFileDiscovery(fileNameFormat, apiConversations, "chatgpt-file-discovery");
+  }
+  function exportFileDiscovery(fileNameFormat, apiConversations, title2 = "chatgpt-file-discovery", chatId = "") {
+    const result = buildInventory(apiConversations);
+    const discoveryPayload = {
+      generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      mode: "discovery_only",
+      stats: result.stats,
+      inventory: result.inventory
+    };
+    const fileName = getFileNameWithFormat(fileNameFormat, "file-discovery.json", {
+      title: title2,
+      chatId
+    });
+    downloadFile(
+      fileName,
+      "application/json",
+      JSON.stringify(discoveryPayload, null, 2)
+    );
+    return true;
+  }
+  async function exportAllToFileDiscovery(fileNameFormat, apiConversations, _metaList, _projectName, _partIndex, _totalParts) {
+    return exportAllFileDiscovery(fileNameFormat, apiConversations);
+  }
   function EventEmitter(n2) {
     return { all: n2 = n2 || /* @__PURE__ */ new Map(), on: function(t2, e2) {
       var i2 = n2.get(t2);
@@ -22506,6 +22876,9 @@ ${content2}`;
     enableThinking: false,
     setEnableThinking: (_24) => {
     },
+    enableSources: true,
+    setEnableSources: (_24) => {
+    },
     exportAllLimit: defaultExportAllLimit,
     setExportAllLimit: (_24) => {
     },
@@ -22521,6 +22894,7 @@ ${content2}`;
     const [enableMeta, setEnableMeta] = useGMStorage(KEY_META_ENABLED, false);
     const [exportMetaList, setExportMetaList] = useGMStorage(KEY_META_LIST, defaultExportMetaList);
     const [enableThinking, setEnableThinking] = useGMStorage(KEY_THINKING_ENABLED, false);
+    const [enableSources, setEnableSources] = useGMStorage(KEY_SOURCES_ENABLED, true);
     const [exportAllLimit, setExportAllLimit] = useGMStorage(KEY_EXPORT_ALL_LIMIT, defaultExportAllLimit);
     const resetDefault = T$4(() => {
       setFormat(defaultFormat);
@@ -22528,6 +22902,7 @@ ${content2}`;
       setEnableMeta(false);
       setExportMetaList(defaultExportMetaList);
       setEnableThinking(false);
+      setEnableSources(true);
       setExportAllLimit(defaultExportAllLimit);
     }, [
       setFormat,
@@ -22535,6 +22910,7 @@ ${content2}`;
       setEnableMeta,
       setExportMetaList,
       setEnableThinking,
+      setEnableSources,
       setExportAllLimit
     ]);
     return /* @__PURE__ */ o$8(
@@ -22557,6 +22933,8 @@ ${content2}`;
           setExportMetaList,
           enableThinking,
           setEnableThinking,
+          enableSources,
+          setEnableSources,
           exportAllLimit,
           setExportAllLimit,
           resetDefault
@@ -22875,7 +23253,8 @@ ${content2}`;
       { label: "Markdown", callback: exportAllToMarkdown },
       { label: "HTML", callback: exportAllToHtml },
       { label: "JSON", callback: exportAllToOfficialJson },
-      { label: "JSON (ZIP)", callback: exportAllToJson }
+      { label: "JSON (ZIP)", callback: exportAllToJson },
+      { label: "File Discovery", callback: exportAllToFileDiscovery }
     ], []);
     const fileInputRef = _(null);
     const [exportSource, setExportSource] = h$4("API");
@@ -22910,6 +23289,7 @@ ${content2}`;
     const pendingBatchesRef = _([]);
     const batchIndexRef = _(0);
     const totalBatchesRef = _(0);
+    const totalItemsRef = _(0);
     const cancelledRef = _(false);
     const fetchGenRef = _(0);
     const onUpload = T$4((e2) => {
@@ -22944,8 +23324,11 @@ ${content2}`;
           rateLimitWaitSecs: prog.rateLimitWaitSecs,
           batchIndex: batchIndexRef.current,
           totalBatches: totalBatchesRef.current,
-          completed: batchIndexRef.current * EXPORT_OPERATION_BATCH + prog.completed,
-          total: totalBatchesRef.current * EXPORT_OPERATION_BATCH
+          completed: Math.min(
+            totalItemsRef.current,
+            batchIndexRef.current * EXPORT_OPERATION_BATCH + prog.completed
+          ),
+          total: totalItemsRef.current
         });
       });
       return () => off();
@@ -23022,6 +23405,7 @@ ${content2}`;
       pendingBatchesRef.current = chunks;
       batchIndexRef.current = 0;
       totalBatchesRef.current = chunks.length;
+      totalItemsRef.current = selected.length;
       setProcessing(true);
       setProgress({
         total: selected.length,
@@ -23301,7 +23685,7 @@ ${content2}`;
     );
   };
   const TIMEOUT = 2500;
-  const MenuItem = ({ text: text2, successText, disabled = false, title: title2, icon: Icon, onClick, className }) => {
+  const MenuItem = ({ text: text2, successText, disabled = false, title: title2, ariaLabel, icon: Icon, onClick, className }) => {
     const [loading, setLoading] = h$4(false);
     const [succeed, setSucceed] = h$4(false);
     const handleClick = typeof onClick === "function" ? async (e2) => {
@@ -23333,10 +23717,11 @@ ${content2}`;
         onClick: handleClick,
         onTouchStart: handleClick,
         disabled,
+        "aria-label": ariaLabel,
         title: title2,
         children: loading ? /* @__PURE__ */ o$8("div", { className: "flex justify-center items-center w-full h-full", children: /* @__PURE__ */ o$8(IconLoading, { className: "w-4 h-4" }) }) : /* @__PURE__ */ o$8(k$3, { children: [
           Icon && /* @__PURE__ */ o$8(Icon, {}),
-          succeed && successText ? successText : text2
+          /* @__PURE__ */ o$8("span", { className: "ce-menu-item-text", children: succeed && successText ? successText : text2 })
         ] })
       }
     );
@@ -23735,6 +24120,8 @@ ${content2}`;
       setExportMetaList,
       enableThinking,
       setEnableThinking,
+      enableSources,
+      setEnableSources,
       exportAllLimit,
       setExportAllLimit
       /* eslint-enable pionxzh/consistent-list-newline */
@@ -23814,6 +24201,13 @@ ${content2}`;
                       /* @__PURE__ */ o$8("dd", { className: "text-sm text-gray-700 dark:text-gray-300", children: t2("Export Thinking Process Description") })
                     ] }),
                     /* @__PURE__ */ o$8("div", { className: "absolute right-4", children: /* @__PURE__ */ o$8(Toggle, { label: "", checked: enableThinking, onCheckedUpdate: setEnableThinking }) })
+                  ] }),
+                  /* @__PURE__ */ o$8("div", { className: "relative flex bg-white dark:bg-white/5 rounded p-4", children: [
+                    /* @__PURE__ */ o$8("div", { children: [
+                      /* @__PURE__ */ o$8("dt", { className: "text-md font-medium text-gray-800 dark:text-white", children: t2("Export Sources") }),
+                      /* @__PURE__ */ o$8("dd", { className: "text-sm text-gray-700 dark:text-gray-300", children: t2("Export Sources Description") })
+                    ] }),
+                    /* @__PURE__ */ o$8("div", { className: "absolute right-4", children: /* @__PURE__ */ o$8(Toggle, { label: "", checked: enableSources, onCheckedUpdate: setEnableSources }) })
                   ] }),
                   /* @__PURE__ */ o$8("div", { className: "relative flex bg-white dark:bg-white/5 rounded p-4", children: /* @__PURE__ */ o$8("div", { children: [
                     /* @__PURE__ */ o$8("dt", { className: "text-md font-medium text-gray-800 dark:text-white", children: [
@@ -23974,6 +24368,50 @@ ${content2}`;
       }
     );
   };
+  function useCollapsedSidebar(container, isMobile) {
+    const [isCollapsed, setIsCollapsed] = h$4(false);
+    p$6(() => {
+      if (isMobile) {
+        setIsCollapsed(false);
+        return;
+      }
+      let frame = 0;
+      const observed = /* @__PURE__ */ new Set();
+      const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+      function sidebarElement() {
+        return container.closest('nav, aside, [aria-label="Sidebar"], [data-testid="sidebar"]') ?? container.parentElement;
+      }
+      function observe(element2) {
+        if (!observer || !element2 || observed.has(element2)) return;
+        observer.observe(element2);
+        observed.add(element2);
+      }
+      function update() {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          var _a, _b;
+          const parentWidth = ((_a = container.parentElement) == null ? void 0 : _a.getBoundingClientRect().width) ?? 0;
+          const sidebarWidth = ((_b = sidebarElement()) == null ? void 0 : _b.getBoundingClientRect().width) ?? parentWidth;
+          const nextCollapsed = parentWidth > 0 && parentWidth < 96 || sidebarWidth > 0 && sidebarWidth < 96;
+          setIsCollapsed(nextCollapsed);
+          container.toggleAttribute("data-ce-sidebar-collapsed", nextCollapsed);
+          observe(container.parentElement);
+          observe(sidebarElement());
+        });
+      }
+      observe(container.parentElement);
+      observe(sidebarElement());
+      update();
+      window.addEventListener("resize", update);
+      return () => {
+        cancelAnimationFrame(frame);
+        window.removeEventListener("resize", update);
+        observer == null ? void 0 : observer.disconnect();
+        container.removeAttribute("data-ce-sidebar-collapsed");
+      };
+    }, [container, isMobile]);
+    return isCollapsed;
+  }
   function MenuInner({ container }) {
     const { t: t2 } = useTranslation();
     const [open, setOpen] = h$4(false);
@@ -24008,6 +24446,7 @@ ${content2}`;
     const onClickOoba = T$4(() => exportToOoba(format), [format]);
     const width = useWindowResize(() => window.innerWidth);
     const isMobile = width < 768;
+    const isCollapsedSidebar = useCollapsedSidebar(container, isMobile);
     const Portal = isMobile ? "div" : $cef8881cdc69808e$export$602eac185826482c;
     return /* @__PURE__ */ o$8(k$3, { children: [
       isMobile && open && /* @__PURE__ */ o$8(
@@ -24028,8 +24467,9 @@ ${content2}`;
             /* @__PURE__ */ o$8($cef8881cdc69808e$export$41fb9f06171c75f4, { children: /* @__PURE__ */ o$8(
               MenuItem,
               {
-                className: "border-0 ms-2 me-1.5 mb-2",
+                className: isCollapsedSidebar ? "ce-nav-trigger ce-nav-trigger-collapsed" : "ce-nav-trigger border-0 ms-2 me-1.5 mb-2",
                 text: t2("ExportHelper"),
+                ariaLabel: t2("ExportHelper"),
                 icon: IconArrowRightFromBracket,
                 onClick: () => {
                   setOpen(true);
@@ -24194,7 +24634,7 @@ ${content2}`;
           ]
         }
       ),
-      /* @__PURE__ */ o$8(Divider, {})
+      !isCollapsedSidebar && /* @__PURE__ */ o$8(Divider, {})
     ] });
   }
   function Menu({ container }) {
@@ -24213,7 +24653,7 @@ ${content2}`;
         console.log("[Exporter] Injecting nav", target);
         const container = getMenuContainer();
         injectionMap.set(target, container);
-        target.before(container);
+        getNavMenuInsertionTarget(target).before(container);
       };
       const selector = '[data-testid="accounts-profile-button"]';
       sentinel.on("selector", injectNavMenu);
@@ -24267,6 +24707,11 @@ ${content2}`;
     container.style.zIndex = "99";
     D$4(/* @__PURE__ */ o$8(Menu, { container }), container);
     return container;
+  }
+  function getNavMenuInsertionTarget(target) {
+    const wrapper = target.parentElement;
+    if (!wrapper || wrapper.children.length !== 1) return target;
+    return wrapper;
   }
 
 })(JSZip, html2canvas);
