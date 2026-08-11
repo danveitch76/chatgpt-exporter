@@ -637,8 +637,71 @@ export async function fetchAllConversations(project: string | null = null, maxCo
 }
 
 /**
+ * Fetch conversations that are not assigned to one of the user's Projects.
+ *
+ * The main conversation endpoint can also return conversations associated with
+ * Projects. Project membership is represented by `gizmo_id`, so this helper
+ * scans the main list and excludes only gizmo IDs that match known Projects.
+ * Custom GPT conversations are retained unless their gizmo ID is one of the
+ * supplied Project IDs.
+ */
+export async function fetchAllNonProjectConversations(
+    projectIds: string[],
+    maxConversations = 1000,
+    onBatch?: (batch: ApiConversationItem[]) => void,
+    onHasMore?: (hasMore: boolean) => void,
+): Promise<ApiConversationItem[]> {
+    const knownProjectIds = new Set(projectIds)
+    const conversations: ApiConversationItem[] = []
+    const limit = 100
+    let offset = 0
+    let hasMore = false
+
+    while (conversations.length < maxConversations) {
+        try {
+            const result = await fetchConversations(offset, limit)
+            if (!result.items) {
+                console.warn('fetchAllNonProjectConversations received no items at offset:', offset)
+                break
+            }
+            if (result.items.length === 0) break
+
+            const matching = result.items.filter(conversation => (
+                !conversation.gizmo_id || !knownProjectIds.has(conversation.gizmo_id)
+            ))
+            const remaining = maxConversations - conversations.length
+            const accepted = matching.slice(0, remaining)
+
+            conversations.push(...accepted)
+            if (accepted.length > 0) onBatch?.(accepted)
+
+            const nextOffset = offset + result.items.length
+            const apiHasMore = result.total !== null
+                ? nextOffset < result.total
+                : result.items.length >= limit
+            const matchingOverflow = matching.length > accepted.length
+
+            if (conversations.length >= maxConversations) {
+                hasMore = matchingOverflow || apiHasMore
+                break
+            }
+            if (!apiHasMore) break
+
+            offset = nextOffset
+        }
+        catch (error) {
+            console.error('Error fetching non-project conversations batch:', error)
+            break
+        }
+    }
+
+    onHasMore?.(hasMore)
+    return conversations
+}
+
+/**
  * Fetch conversations from every source: the main conversation list (no-project)
- * plus each project's own list.  Deduplicates by ID so a conversation that
+ * plus each project's own list. Deduplicates by ID so a conversation that
  * appears in both won't be exported twice.
  */
 export async function fetchAllConversationsAll(

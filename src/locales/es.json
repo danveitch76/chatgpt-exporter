@@ -51,5 +51,6 @@
   "Select a source to load conversations": "Selecciona un proyecto arriba para cargar conversaciones.",
   "Search": "Buscar",
   "Last 100": "Últimas 100",
-  "No results": "Sin resultados"
+  "No results": "Sin resultados",
+  "Not in a project": "No está en un proyecto"
 }

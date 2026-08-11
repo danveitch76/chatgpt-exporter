@@ -236,7 +236,13 @@ Click the upload icon button to upload a JSON file of conversations, such as one
 
 **Export from API**
 
-In the list of all your conversations, select which conversations you want to export. Check the "Select All" checkbox to export all your conversations.
+Use the project selector to choose the conversation scope:
+
+- **All conversations** — load the normal conversation list returned by ChatGPT.
+- **Not in a project** — load conversations whose project identifier does not match any known ChatGPT Project. Custom GPT conversations are retained unless they belong to a Project.
+- **Project name** — load conversations from that specific Project.
+
+In the resulting list, select which conversations you want to export. Check the "Select All" checkbox to export every conversation currently loaded in that scope.
 
 Select your export format from the dropdown on the bottom left. **JSON (ZIP)** is the default.
 

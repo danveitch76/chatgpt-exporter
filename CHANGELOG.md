@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.33.4](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.3...userscript-v2.33.4) (2026-08-10)
+
+### Features
+
+* add **Not in a project** to the project selector to load conversations that are not assigned to any ChatGPT Project
+* retain custom GPT conversations unless their gizmo identifier matches a known Project
+* support incremental loading for the non-project conversation scope
+
+
 ## [2.33.3](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.2...userscript-v2.33.3) (2026-07-12)
 
 ### Features

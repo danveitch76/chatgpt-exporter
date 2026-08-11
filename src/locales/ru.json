@@ -51,5 +51,6 @@
   "Select a source to load conversations": "Выберите проект выше, чтобы загрузить беседы.",
   "Search": "Поиск",
   "Last 100": "Последние 100",
-  "No results": "Нет результатов"
+  "No results": "Нет результатов",
+  "Not in a project": "Не в проекте"
 }

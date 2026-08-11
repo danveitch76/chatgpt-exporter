@@ -1,7 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { useTranslation } from 'react-i18next'
-import { archiveConversation, deleteConversation, fetchAllConversations, fetchConversation, fetchConversationsPage, fetchProjects, probeApi } from '../api'
+import { archiveConversation, deleteConversation, fetchAllConversations, fetchAllNonProjectConversations, fetchConversation, fetchConversationsPage, fetchProjects, probeApi } from '../api'
 import { EXPORT_OPERATION_BATCH } from '../constants'
 import { exportAllToFileDiscovery } from '../exporter/discovery'
 import { exportAllToHtml } from '../exporter/html'
@@ -21,6 +21,7 @@ import type { ChangeEvent } from 'preact/compat'
  * Lets the parent gate ESC / outside-click dismissal without lifting state.
  */
 const exportingRef = { current: false }
+const NOT_IN_PROJECT_ID = '__not_in_project__'
 
 // ---------------------------------------------------------------------------
 // Utilities
@@ -107,6 +108,7 @@ const ProjectSelect: FC<ProjectSelectProps> = ({ projects, selected, setSelected
                     }}
                 >
                     <option value="">{t('All conversations')}</option>
+                    <option value={NOT_IN_PROJECT_ID}>{t('Not in a project')}</option>
                     {projects.map(project => (
                         <option key={project.id} value={project.id}>{project.display.name}</option>
                     ))}
@@ -375,6 +377,9 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
     const [projectsLoading, setProjectsLoading] = useState(false)
     const selectedProject = projects.find(p => p.id === selectedProjectId) ?? null
+    const projectIds = useMemo(() => projects.map(project => project.id), [projects])
+    const isNotInProject = selectedProjectId === NOT_IN_PROJECT_ID
+    const selectedProjectName = isNotInProject ? t('Not in a project') : selectedProject?.display.name
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -405,7 +410,8 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
 
     const pendingBatchesRef = useRef<ApiConversationItem[][]>([])
     const batchIndexRef = useRef(0)
-    const totalBatchesRef = useRef(0)
+    const totalBatchesRef = useRef(0)
+
     const totalItemsRef = useRef(0)
     /** Set to true when the user clicks Cancel — prevents the 'done' handler from starting the next batch */
     const cancelledRef = useRef(false)
@@ -485,7 +491,7 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
             const partIndex = batchIdx + 1
             const callback = exportAllOptions.find(o => o.label === exportType)?.callback
             if (callback) {
-                await callback(format, results, metaList, selectedProject?.display.name, partIndex, totalBatches)
+                await callback(format, results, metaList, selectedProjectName, partIndex, totalBatches)
             }
             if (partIndex < totalBatches) {
                 await sleep(400)
@@ -498,7 +504,7 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
             }
         })
         return () => off()
-    }, [requestQueue, exportAllOptions, exportType, format, metaList, startApiBatch, selectedProject])
+    }, [requestQueue, exportAllOptions, exportType, format, metaList, startApiBatch, selectedProjectName])
 
     useEffect(() => {
         const off = archiveQueue.on('done', () => {
@@ -533,7 +539,8 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
         const chunks = chunkArray(selected, EXPORT_OPERATION_BATCH)
         pendingBatchesRef.current = chunks
         batchIndexRef.current = 0
-        totalBatchesRef.current = chunks.length
+        totalBatchesRef.current = chunks.length
+
         totalItemsRef.current = selected.length
         setProcessing(true)
         setProgress({
@@ -556,11 +563,11 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
         const chunks = chunkArray(results, EXPORT_OPERATION_BATCH)
         setProcessing(true)
         for (let i = 0; i < chunks.length; i++) {
-            await callback(format, chunks[i], metaList, selectedProject?.display.name, i + 1, chunks.length)
+            await callback(format, chunks[i], metaList, selectedProjectName, i + 1, chunks.length)
             if (i < chunks.length - 1) await sleep(400)
         }
         setProcessing(false)
-    }, [disabled, selected, localConversations, exportAllOptions, exportType, format, metaList, selectedProject])
+    }, [disabled, selected, localConversations, exportAllOptions, exportType, format, metaList, selectedProjectName])
 
     const exportAll = useMemo(() => {
         return exportSource === 'API' ? exportAllFromApi : exportAllFromLocal
@@ -621,31 +628,54 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
         setHasMore(false)
         setTotalAvailable(null)
         setLoading(true)
-        fetchAllConversations(
-            selectedProjectId,
-            exportAllLimit,
-            (batch) => { if (alive()) setApiConversations(prev => [...prev, ...batch]) },
-            (hasMore) => { if (alive()) setHasMore(hasMore) },
-        )
+        const onBatch = (batch: ApiConversationItem[]) => {
+            if (alive()) setApiConversations(prev => [...prev, ...batch])
+        }
+        const onHasMore = (hasMore: boolean) => {
+            if (alive()) setHasMore(hasMore)
+        }
+        const request = isNotInProject
+            ? fetchAllNonProjectConversations(projectIds, exportAllLimit, onBatch, onHasMore)
+            : fetchAllConversations(selectedProjectId, exportAllLimit, onBatch, onHasMore)
+
+        request
             .catch((err: Error) => {
                 if (!alive()) return
                 console.error('Error fetching conversations:', err)
                 setError(err.message || 'Failed to load conversations')
             })
             .finally(() => { if (alive()) setLoading(false) })
-    }, [exportAllLimit, selectedProjectId])
+    }, [exportAllLimit, isNotInProject, projectIds, selectedProjectId])
 
     const loadMore = useCallback(async () => {
         if (loadingMore) return
         setLoadingMore(true)
         try {
-            const page = await fetchConversationsPage(selectedProjectId, apiConversations.length, EXPORT_OPERATION_BATCH)
-            setApiConversations(prev => [...prev, ...page.items])
-            if (page.total !== null) setTotalAvailable(page.total)
-            setHasMore(
-                page.items.length >= EXPORT_OPERATION_BATCH
-                && (page.total === null || apiConversations.length + page.items.length < page.total),
-            )
+            if (isNotInProject) {
+                // Re-scan from the start with a larger target. This avoids skipping
+                // matching conversations when a raw API page contains a mixture of
+                // Project and non-Project chats.
+                const target = apiConversations.length + EXPORT_OPERATION_BATCH
+                let more = false
+                const items = await fetchAllNonProjectConversations(
+                    projectIds,
+                    target,
+                    undefined,
+                    (value) => { more = value },
+                )
+                setApiConversations(items)
+                setTotalAvailable(null)
+                setHasMore(more)
+            }
+            else {
+                const page = await fetchConversationsPage(selectedProjectId, apiConversations.length, EXPORT_OPERATION_BATCH)
+                setApiConversations(prev => [...prev, ...page.items])
+                if (page.total !== null) setTotalAvailable(page.total)
+                setHasMore(
+                    page.items.length >= EXPORT_OPERATION_BATCH
+                    && (page.total === null || apiConversations.length + page.items.length < page.total),
+                )
+            }
         }
         catch (err) {
             console.error('loadMore error', err)
@@ -653,7 +683,7 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
         finally {
             setLoadingMore(false)
         }
-    }, [loadingMore, apiConversations.length, selectedProjectId])
+    }, [loadingMore, apiConversations.length, isNotInProject, projectIds, selectedProjectId])
 
     const totalBatches = Math.ceil(selected.length / EXPORT_OPERATION_BATCH) || 1
 

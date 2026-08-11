@@ -69,6 +69,7 @@
   "Export batches button": "Export ({{n}} downloads)",
   "Batch progress": "Batch {{current}}/{{total}}",
   "All conversations": "All conversations",
+  "Not in a project": "Not in a project",
   "Load more conversations": "Load {{n}} more",
   "Load more conversations remaining": "Load {{n}} more · {{remaining}} left"
 }
