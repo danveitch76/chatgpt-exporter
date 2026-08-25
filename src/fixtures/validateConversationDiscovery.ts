@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict'
 
-const conversation = (id: string, gizmoId?: string) => ({
-    id,
-    title: `Conversation ${id}`,
-    create_time: '2026-08-25T12:00:00.000Z',
-    gizmo_id: gizmoId ?? null,
-})
+function conversation(id: string, gizmoId?: string) {
+    return {
+        id,
+        title: `Conversation ${id}`,
+        create_time: '2026-08-25T12:00:00.000Z',
+        gizmo_id: gizmoId ?? null,
+    }
+}
 
 const mainItems = [conversation('A'), conversation('B'), conversation('C', 'project-1')]
 const projectOneItems = [conversation('C', 'project-1'), conversation('D', 'project-1'), conversation('E', 'project-1')]
@@ -16,6 +18,11 @@ const requestedConversationSources: string[] = []
 Object.defineProperty(globalThis, 'location', {
     configurable: true,
     value: new URL('https://chatgpt.com/'),
+})
+
+Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: globalThis,
 })
 
 Object.defineProperty(globalThis, 'document', {
@@ -101,4 +108,5 @@ assert.equal(
     'A conversation returned by both the main feed and a Project feed must appear only once.',
 )
 
+// eslint-disable-next-line no-console
 console.log('Conversation discovery regression fixture passed.')
