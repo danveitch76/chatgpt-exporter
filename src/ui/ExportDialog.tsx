@@ -1,7 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { useTranslation } from 'react-i18next'
-import { archiveConversation, deleteConversation, fetchAllConversations, fetchAllNonProjectConversations, fetchConversation, fetchConversationsPage, fetchProjects, probeApi } from '../api'
+import { archiveConversation, deleteConversation, fetchAllConversations, fetchAllConversationsAll, fetchAllNonProjectConversations, fetchConversation, fetchConversationsPage, fetchProjects, probeApi } from '../api'
 import { EXPORT_OPERATION_BATCH } from '../constants'
 import { exportAllToFileDiscovery } from '../exporter/discovery'
 import { exportAllToHtml } from '../exporter/html'
@@ -376,6 +376,7 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
     const [projects, setProjects] = useState<ApiProjectInfo[]>([])
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
     const [projectsLoading, setProjectsLoading] = useState(false)
+    const [projectsLoaded, setProjectsLoaded] = useState(false)
     const selectedProject = projects.find(p => p.id === selectedProjectId) ?? null
     const projectIds = useMemo(() => projects.map(project => project.id), [projects])
     const isNotInProject = selectedProjectId === NOT_IN_PROJECT_ID
@@ -479,7 +480,6 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
 
     useEffect(() => {
         const off = requestQueue.on('done', async (results) => {
-            // If the user cancelled, just stop — don't download or start the next batch
             if (cancelledRef.current) {
                 cancelledRef.current = false
                 setProcessing(false)
@@ -610,17 +610,24 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
         exportingRef.current = processing
     }, [processing])
 
-    // Fetch projects on mount
+    // Fetch projects on mount. Conversation discovery waits for this to finish so
+    // "All conversations" can merge the main feed with every Project in one pass.
     useEffect(() => {
         setProjectsLoading(true)
+        setProjectsLoaded(false)
         fetchProjects()
             .then(setProjects)
             .catch(err => console.error('Error fetching projects:', err))
-            .finally(() => setProjectsLoading(false))
+            .finally(() => {
+                setProjectsLoading(false)
+                setProjectsLoaded(true)
+            })
     }, [])
 
     // Auto-load conversations on dialog open (or when project changes)
     useEffect(() => {
+        if (!projectsLoaded) return
+
         const gen = ++fetchGenRef.current
         const alive = () => gen === fetchGenRef.current
         setSelected([])
@@ -634,9 +641,11 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
         const onHasMore = (hasMore: boolean) => {
             if (alive()) setHasMore(hasMore)
         }
-        const request = isNotInProject
-            ? fetchAllNonProjectConversations(projectIds, exportAllLimit, onBatch, onHasMore)
-            : fetchAllConversations(selectedProjectId, exportAllLimit, onBatch, onHasMore)
+        const request = selectedProjectId === null
+            ? fetchAllConversationsAll(projects, exportAllLimit, onBatch)
+            : isNotInProject
+                ? fetchAllNonProjectConversations(projectIds, exportAllLimit, onBatch, onHasMore)
+                : fetchAllConversations(selectedProjectId, exportAllLimit, onBatch, onHasMore)
 
         request
             .catch((err: Error) => {
@@ -645,16 +654,13 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
                 setError(err.message || 'Failed to load conversations')
             })
             .finally(() => { if (alive()) setLoading(false) })
-    }, [exportAllLimit, isNotInProject, projectIds, selectedProjectId])
+    }, [exportAllLimit, isNotInProject, projectIds, projects, projectsLoaded, selectedProjectId])
 
     const loadMore = useCallback(async () => {
         if (loadingMore) return
         setLoadingMore(true)
         try {
             if (isNotInProject) {
-                // Re-scan from the start with a larger target. This avoids skipping
-                // matching conversations when a raw API page contains a mixture of
-                // Project and non-Project chats.
                 const target = apiConversations.length + EXPORT_OPERATION_BATCH
                 let more = false
                 const items = await fetchAllNonProjectConversations(
