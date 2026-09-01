@@ -10,6 +10,7 @@ import { exportAllToMarkdown } from '../exporter/markdown'
 import { RequestQueue } from '../utils/queue'
 import { sleep } from '../utils/utils'
 import { CheckBox } from './CheckBox'
+import { conversationMatchesDateRange } from './conversationDateFilter'
 import { IconCross, IconLoading, IconUpload } from './Icons'
 import { useSettingContext } from './SettingContext'
 import type { ApiConversationItem, ApiConversationWithId, ApiProjectInfo } from '../api'
@@ -151,6 +152,9 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
     const [selectionSize, setSelectionSize] = useState(EXPORT_OPERATION_BATCH)
     const [sortField, setSortField] = useState<'title' | 'create_time' | 'update_time'>('create_time')
     const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
+    const [dateField, setDateField] = useState<'create_time' | 'update_time'>('update_time')
+    const [fromDate, setFromDate] = useState('')
+    const [toDate, setToDate] = useState('')
 
     // ── Filtering ──
 
@@ -158,6 +162,9 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
         let result = conversations
         const q = query.trim()
         if (q) result = result.filter(c => textSearch(c.title, q))
+        if (fromDate || toDate) {
+            result = result.filter(c => conversationMatchesDateRange(c, dateField, fromDate, toDate))
+        }
         const dir = sortDir === 'asc' ? 1 : -1
         return [...result].sort((a, b) => {
             if (sortField === 'title') {
@@ -167,9 +174,13 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
             const bMs = toMs(sortField === 'update_time' ? b.update_time : b.create_time)
             return dir * (aMs - bMs)
         })
-    }, [conversations, query, sortField, sortDir])
+    }, [conversations, query, dateField, fromDate, toDate, sortField, sortDir])
 
     const allFilteredSelected = filtered.length > 0 && filtered.every(c => selected.some(x => x.id === c.id))
+    const resetDateSelection = () => {
+        lastClickedIndex.current = -1
+        setSelected([])
+    }
 
     return (
         <>
@@ -186,6 +197,77 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
                     setQuery(val)
                 }}
             />
+
+            {/* ── Date range filter ── */}
+            <div className="flex items-center gap-2 flex-wrap mb-2 text-sm text-gray-600 dark:text-gray-300">
+                <span className="font-medium">Date</span>
+                <select
+                    className="Select"
+                    aria-label="Conversation date field"
+                    disabled={disabled}
+                    value={dateField}
+                    onChange={(e) => {
+                        resetDateSelection()
+                        setDateField(e.currentTarget.value as 'create_time' | 'update_time')
+                    }}
+                >
+                    <option value="update_time">Last updated</option>
+                    <option value="create_time">Created</option>
+                </select>
+                <label className="flex items-center gap-1">
+                    From
+                    <input
+                        type="date"
+                        aria-label="Conversation date from"
+                        disabled={disabled}
+                        value={fromDate}
+                        onChange={(e) => {
+                            resetDateSelection()
+                            setFromDate(e.currentTarget.value)
+                        }}
+                        style={{
+                            fontSize: '0.75rem',
+                            padding: '2px 5px',
+                            border: '1px solid #9ca3af',
+                            borderRadius: '3px',
+                            background: 'transparent',
+                            color: 'inherit',
+                        }}
+                    />
+                </label>
+                <label className="flex items-center gap-1">
+                    To
+                    <input
+                        type="date"
+                        aria-label="Conversation date to"
+                        disabled={disabled}
+                        value={toDate}
+                        onChange={(e) => {
+                            resetDateSelection()
+                            setToDate(e.currentTarget.value)
+                        }}
+                        style={{
+                            fontSize: '0.75rem',
+                            padding: '2px 5px',
+                            border: '1px solid #9ca3af',
+                            borderRadius: '3px',
+                            background: 'transparent',
+                            color: 'inherit',
+                        }}
+                    />
+                </label>
+                <button
+                    className="Button neutral"
+                    disabled={disabled || (!fromDate && !toDate)}
+                    onClick={() => {
+                        resetDateSelection()
+                        setFromDate('')
+                        setToDate('')
+                    }}
+                >
+                    Clear dates
+                </button>
+            </div>
 
             {/* ── Toolbar: select-all + configurable selection size + resume + counter ── */}
             <div className="SelectToolbar">

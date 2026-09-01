@@ -23,11 +23,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "tsc --noEmit && pnpm run test:conversation-discovery && pnpm run test:file-extractor && pnpm run test:file-extractor-limits && pnpm run test:generated-asset-classification && pnpm run test:failure-recovery-classification && pnpm run test:uploaded-asset-classification && pnpm run test:file-resolver && pnpm run test:file-reference-classification",
+    "test": "tsc --noEmit && pnpm run test:conversation-discovery && pnpm run test:conversation-date-range && pnpm run test:file-extractor && pnpm run test:file-extractor-limits && pnpm run test:generated-asset-classification && pnpm run test:failure-recovery-classification && pnpm run test:uploaded-asset-classification && pnpm run test:file-resolver && pnpm run test:file-reference-classification",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky",
     "test:conversation-discovery": "tsx ./src/fixtures/validateConversationDiscovery.ts",
+    "test:conversation-date-range": "tsx ./src/fixtures/validateConversationDateFilter.ts",
     "test:file-extractor": "tsx ./src/file-extractor/fixtures/validateFileExtractionFixture.ts",
     "test:file-extractor-limits": "tsx ./src/file-extractor/fixtures/validateExportLimits.ts",
     "test:generated-asset-classification": "tsx ./src/file-extractor/fixtures/validateGeneratedAssetClassification.ts",
