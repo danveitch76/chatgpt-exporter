@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.33.5](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.4...userscript-v2.33.5) (2026-08-25)
+
+### Fixes
+
+* fix **All conversations** discovery so conversations stored within ChatGPT Projects are included alongside the normal conversation feed
+* wait for Project discovery to complete before loading the **All conversations** scope
+* combine conversations from the normal ChatGPT conversation feed with conversations from every discovered Project
+* deduplicate conversations by conversation identifier when the same conversation is encountered through multiple discovery paths
+* preserve existing **Not in a project** and specific-Project filtering behaviour
+* avoid the previous visible clear-and-reload cycle caused by Project discovery retriggering conversation loading
+
+### Tests
+
+* add regression coverage for aggregate conversation discovery and deduplication
+* make the conversation-discovery regression fixture safe to run under Node.js as part of the normal test suite
+
+### References
+
+* Issue #68
+* Pull request #69
+
+
 ## [2.33.4](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.3...userscript-v2.33.4) (2026-08-10)
 
 ### Features
