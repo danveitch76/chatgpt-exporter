@@ -37,7 +37,8 @@ Use downstream tags in downstream changelog comparison links.
 6. Run all quality gates and confirm the build does not leave an uncommitted generated-userscript diff.
 7. Create the annotated `userscript-vX.Y.Z` tag on that exact final release commit.
 8. Push the tag only after the commit is present on `master`.
-9. Complete the live userscript smoke tests.
+9. The tag workflow re-runs the release validation and, only if every check succeeds, creates the GitHub Release object for that tag.
+10. Complete the live userscript smoke tests.
 
 If release packaging is accidentally split across adjacent build/documentation commits before publication, squash them before tagging rather than accepting a split release boundary.
 
@@ -82,12 +83,12 @@ Release Please runs on `master` and uses component name `userscript`. It prepare
 
 The normal `Check` workflow runs lint, tests and a production build, then fails if the build changes `dist/chatgpt.user.js`. This prevents source changes from landing without the corresponding generated userscript.
 
-The `Release Validation` workflow runs only for `userscript-v*` tag pushes. It is validation-only: it never commits or pushes repository changes. It verifies lint, tests, build reproducibility, tag/package/manifest/userscript version equality, namespace, README version and changelog presence.
+The `Release Validation` workflow runs only for `userscript-v*` tag pushes. It never commits or pushes repository content. It verifies lint, tests, build reproducibility, tag/package/manifest/userscript version equality, namespace, README version and changelog presence. Only after all of those checks pass does it create the GitHub Release object for the existing validated tag. The release step is idempotent and does nothing if the GitHub Release already exists.
 
 ## Post-release checks
 
 1. Confirm the tag resolves to the intended final release commit.
-2. Confirm the release badge or release surface, where used.
+2. Confirm the GitHub Release exists for that exact tag and the release badge resolves correctly.
 3. Inspect raw userscript metadata.
 4. Install or update in Tampermonkey.
 5. Smoke-test single export, Export All with **JSON (ZIP)**, File Discovery, source export and collapsed-sidebar behaviour.
