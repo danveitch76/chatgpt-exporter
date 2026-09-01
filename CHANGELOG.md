@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.33.6](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.5...userscript-v2.33.6) (2026-09-01)
+
+### Features
+
+* make the conversation selection batch size configurable in the multi-conversation export dialog
+* retain `100` as the default selection size while allowing users to choose a different number
+* update the **Last ###** selector dynamically to reflect the configured selection size
+* apply the configured selection size to resume selections and resume-position guidance
+
+### Compatibility
+
+* preserve the internal export-processing batch size of `100`
+* avoid changing existing rate-limit handling, progress calculation, memory behaviour or multi-download processing
+
+### References
+
+* Issue #71
+* Pull request #72
+
+
 ## [2.33.5](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.4...userscript-v2.33.5) (2026-08-25)
 
 ### Fixes

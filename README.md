@@ -21,10 +21,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp
 > [!NOTE]
 > This repository is a maintained downstream fork of [`pionxzh/chatgpt-exporter`](https://github.com/pionxzh/chatgpt-exporter). It preserves upstream attribution while adding File Discovery, asset classification, validation tooling and governed upstream-maintenance automation.
 
-**Current downstream version:** `2.33.5`
-
-> [!NOTE]
-> The historical `userscript-v2.33.5` tag was retrospectively restored on 1 September 2026 and points to the final generated 2.33.5 userscript commit.
+**Current downstream version:** `2.33.6`
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 

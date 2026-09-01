@@ -3,7 +3,7 @@
 // @name:zh-CN         ChatGPT Exporter
 // @name:zh-TW         ChatGPT Exporter
 // @namespace          danveitch76
-// @version            2.33.5
+// @version            2.33.6
 // @author             danveitch76
 // @description        Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.
 // @description:zh-CN  一键导出 ChatGPT 对话，轻松备份与分享
@@ -23095,6 +23095,10 @@ ${content2}`;
     }
     return result;
   }
+  function normaliseSelectionSize(value) {
+    if (!Number.isFinite(value)) return EXPORT_OPERATION_BATCH;
+    return Math.max(1, Math.floor(value));
+  }
   function formatConvDate(time) {
     if (!time) return "—";
     const ms = typeof time === "number" ? time * 1e3 : new Date(time).getTime();
@@ -23157,6 +23161,7 @@ ${content2}`;
     const [query2, setQuery] = h$4("");
     const lastClickedIndex = _(-1);
     const [skipFirst, setSkipFirst] = h$4(0);
+    const [selectionSize, setSelectionSize] = h$4(EXPORT_OPERATION_BATCH);
     const [sortField, setSortField] = h$4("create_time");
     const [sortDir, setSortDir] = h$4("desc");
     const filtered = F$1(() => {
@@ -23212,12 +23217,34 @@ ${content2}`;
             ")"
           ] }),
           /* @__PURE__ */ o$8(
+            "input",
+            {
+              type: "number",
+              min: "1",
+              step: "1",
+              value: selectionSize,
+              title: "Number of conversations to select",
+              "aria-label": "Conversation selection size",
+              disabled: disabled || conversations.length === 0,
+              onChange: (e2) => setSelectionSize(normaliseSelectionSize(Number(e2.currentTarget.value))),
+              style: {
+                width: "4rem",
+                fontSize: "0.75rem",
+                padding: "2px 5px",
+                border: "1px solid #9ca3af",
+                borderRadius: "3px",
+                background: "transparent",
+                color: "inherit"
+              }
+            }
+          ),
+          /* @__PURE__ */ o$8(
             "button",
             {
               className: "Button neutral",
               disabled: disabled || conversations.length === 0,
-              onClick: () => setSelected(filtered.slice(0, EXPORT_OPERATION_BATCH)),
-              children: t2("Last 100")
+              onClick: () => setSelected(filtered.slice(0, selectionSize)),
+              children: t2("Last 100").replace("100", String(selectionSize))
             }
           ),
           /* @__PURE__ */ o$8(
@@ -23225,9 +23252,9 @@ ${content2}`;
             {
               type: "number",
               min: "0",
-              step: "100",
+              step: selectionSize,
               value: skipFirst,
-              title: "Starting position for next batch (e.g. 200 to resume after 2 batches)",
+              title: `Starting position for next batch (e.g. ${selectionSize * 2} to resume after 2 batches)`,
               disabled: disabled || conversations.length === 0,
               onChange: (e2) => setSkipFirst(Math.max(0, Math.floor(Number(e2.currentTarget.value)))),
               style: {
@@ -23245,10 +23272,13 @@ ${content2}`;
             "button",
             {
               className: "Button neutral",
-              title: `Select 100 conversations starting at position #${skipFirst + 1}`,
+              title: `Select ${selectionSize} conversations starting at position #${skipFirst + 1}`,
               disabled: disabled || conversations.length === 0 || skipFirst >= filtered.length,
-              onClick: () => setSelected(filtered.slice(skipFirst, skipFirst + EXPORT_OPERATION_BATCH)),
-              children: "→ 100"
+              onClick: () => setSelected(filtered.slice(skipFirst, skipFirst + selectionSize)),
+              children: [
+                "→ ",
+                selectionSize
+              ]
             }
           ),
           /* @__PURE__ */ o$8("span", { className: "text-sm font-medium tabular-nums text-gray-500 dark:text-gray-400", children: [
