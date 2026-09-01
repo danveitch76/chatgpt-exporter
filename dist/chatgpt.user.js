@@ -22974,6 +22974,38 @@ ${content2}`;
       /* @__PURE__ */ o$8("span", { className: "LabelText", children: label })
     ] });
   };
+  function conversationTimeToMs(time) {
+    if (time == null) return 0;
+    if (typeof time === "number") {
+      const ms2 = time * 1e3;
+      return Number.isFinite(ms2) ? ms2 : 0;
+    }
+    const ms = new Date(time).getTime();
+    return Number.isNaN(ms) ? 0 : ms;
+  }
+  function localDateBoundary(date, endOfDay) {
+    if (!date) return null;
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+    if (!match) return null;
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const day = Number(match[3]);
+    const boundary = endOfDay ? new Date(year, month, day, 23, 59, 59, 999) : new Date(year, month, day, 0, 0, 0, 0);
+    if (boundary.getFullYear() !== year || boundary.getMonth() !== month || boundary.getDate() !== day) return null;
+    return boundary.getTime();
+  }
+  function conversationMatchesDateRange(conversation, field, fromDate, toDate) {
+    if (!fromDate && !toDate) return true;
+    const fromMs = localDateBoundary(fromDate, false);
+    const toMs2 = localDateBoundary(toDate, true);
+    if (fromDate && fromMs == null || toDate && toMs2 == null) return false;
+    if (fromMs != null && toMs2 != null && fromMs > toMs2) return false;
+    const valueMs = conversationTimeToMs(conversation[field]);
+    if (valueMs <= 0) return false;
+    if (fromMs != null && valueMs < fromMs) return false;
+    if (toMs2 != null && valueMs > toMs2) return false;
+    return true;
+  }
   function useGMStorage(key2, initialValue) {
     const [storedValue, setStoredValue] = h$4(() => ScriptStorage.get(key2) ?? initialValue);
     const setValue = (value) => {
@@ -23164,10 +23196,16 @@ ${content2}`;
     const [selectionSize, setSelectionSize] = h$4(EXPORT_OPERATION_BATCH);
     const [sortField, setSortField] = h$4("create_time");
     const [sortDir, setSortDir] = h$4("desc");
+    const [dateField, setDateField] = h$4("update_time");
+    const [fromDate, setFromDate] = h$4("");
+    const [toDate, setToDate] = h$4("");
     const filtered = F$1(() => {
       let result = conversations;
       const q2 = query2.trim();
       if (q2) result = result.filter((c2) => textSearch(c2.title, q2));
+      if (fromDate || toDate) {
+        result = result.filter((c2) => conversationMatchesDateRange(c2, dateField, fromDate, toDate));
+      }
       const dir = sortDir === "asc" ? 1 : -1;
       return [...result].sort((a2, b2) => {
         if (sortField === "title") {
@@ -23177,8 +23215,12 @@ ${content2}`;
         const bMs = toMs(sortField === "update_time" ? b2.update_time : b2.create_time);
         return dir * (aMs - bMs);
       });
-    }, [conversations, query2, sortField, sortDir]);
+    }, [conversations, query2, dateField, fromDate, toDate, sortField, sortDir]);
     const allFilteredSelected = filtered.length > 0 && filtered.every((c2) => selected.some((x2) => x2.id === c2.id));
+    const resetDateSelection = () => {
+      lastClickedIndex.current = -1;
+      setSelected([]);
+    };
     return /* @__PURE__ */ o$8(k$3, { children: [
       /* @__PURE__ */ o$8(
         "input",
@@ -23195,6 +23237,87 @@ ${content2}`;
           }
         }
       ),
+      /* @__PURE__ */ o$8("div", { className: "flex items-center gap-2 flex-wrap mb-2 text-sm text-gray-600 dark:text-gray-300", children: [
+        /* @__PURE__ */ o$8("span", { className: "font-medium", children: "Date" }),
+        /* @__PURE__ */ o$8(
+          "select",
+          {
+            className: "Select",
+            "aria-label": "Conversation date field",
+            disabled,
+            value: dateField,
+            onChange: (e2) => {
+              resetDateSelection();
+              setDateField(e2.currentTarget.value);
+            },
+            children: [
+              /* @__PURE__ */ o$8("option", { value: "update_time", children: "Last updated" }),
+              /* @__PURE__ */ o$8("option", { value: "create_time", children: "Created" })
+            ]
+          }
+        ),
+        /* @__PURE__ */ o$8("label", { className: "flex items-center gap-1", children: [
+          "From",
+          /* @__PURE__ */ o$8(
+            "input",
+            {
+              type: "date",
+              "aria-label": "Conversation date from",
+              disabled,
+              value: fromDate,
+              onChange: (e2) => {
+                resetDateSelection();
+                setFromDate(e2.currentTarget.value);
+              },
+              style: {
+                fontSize: "0.75rem",
+                padding: "2px 5px",
+                border: "1px solid #9ca3af",
+                borderRadius: "3px",
+                background: "transparent",
+                color: "inherit"
+              }
+            }
+          )
+        ] }),
+        /* @__PURE__ */ o$8("label", { className: "flex items-center gap-1", children: [
+          "To",
+          /* @__PURE__ */ o$8(
+            "input",
+            {
+              type: "date",
+              "aria-label": "Conversation date to",
+              disabled,
+              value: toDate,
+              onChange: (e2) => {
+                resetDateSelection();
+                setToDate(e2.currentTarget.value);
+              },
+              style: {
+                fontSize: "0.75rem",
+                padding: "2px 5px",
+                border: "1px solid #9ca3af",
+                borderRadius: "3px",
+                background: "transparent",
+                color: "inherit"
+              }
+            }
+          )
+        ] }),
+        /* @__PURE__ */ o$8(
+          "button",
+          {
+            className: "Button neutral",
+            disabled: disabled || !fromDate && !toDate,
+            onClick: () => {
+              resetDateSelection();
+              setFromDate("");
+              setToDate("");
+            },
+            children: "Clear dates"
+          }
+        )
+      ] }),
       /* @__PURE__ */ o$8("div", { className: "SelectToolbar", children: [
         /* @__PURE__ */ o$8(
           CheckBox,
