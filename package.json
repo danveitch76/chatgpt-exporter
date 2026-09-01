@@ -1,7 +1,7 @@
 {
   "name": "@danveitch76/chatgpt-exporter",
   "type": "module",
-  "version": "2.33.6",
+  "version": "2.33.7",
   "private": true,
   "packageManager": "pnpm@8.14.1",
   "title": "ChatGPT Exporter",
@@ -59,7 +59,7 @@
     "react-i18next": "^12.3.1",
     "sanitize-filename": "^1.6.3",
     "sentinel-js": "^0.0.7",
-    "urlcat": "^2.0.4",
+    "urlcat": "^3.1.0",
     "vite-plugin-monkey": "^3.5.2"
   },
   "devDependencies": {
