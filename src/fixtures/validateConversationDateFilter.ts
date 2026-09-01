@@ -44,5 +44,3 @@ assert.equal(conversationMatchesDateRange(conversation, 'create_time', '2026-08-
 
 // No date criterion leaves the conversation unfiltered, including missing timestamps.
 assert.equal(conversationMatchesDateRange({}, 'create_time', '', ''), true)
-
-console.log('Conversation date range regression fixture passed.')
