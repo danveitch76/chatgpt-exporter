@@ -4,6 +4,7 @@
   "pull-request-title-pattern": "chore: release${component} ${version}",
   "release-type": "node",
   "include-component-in-tag": true,
+  "skip-github-release": true,
   "packages": {
     ".": {
       "component": "userscript"
