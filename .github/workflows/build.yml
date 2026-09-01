@@ -5,6 +5,9 @@ on:
     tags:
       - 'userscript-v*'
 
+permissions:
+  contents: write
+
 jobs:
   validate-release:
     runs-on: ubuntu-latest
@@ -56,3 +59,20 @@ jobs:
           grep -Fq "## [$tag_version]" CHANGELOG.md
 
           echo "Validated userscript-v$tag_version against package, manifest, userscript, README and CHANGELOG."
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag_version="${GITHUB_REF_NAME#userscript-v}"
+
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "GitHub Release already exists for $GITHUB_REF_NAME."
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --title "ChatGPT Exporter $tag_version" \
+              --generate-notes
+          fi
