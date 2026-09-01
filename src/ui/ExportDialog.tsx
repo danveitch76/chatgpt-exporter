@@ -45,6 +45,11 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
     return result
 }
 
+function normaliseSelectionSize(value: number): number {
+    if (!Number.isFinite(value)) return EXPORT_OPERATION_BATCH
+    return Math.max(1, Math.floor(value))
+}
+
 /** Compact date label — always includes year to avoid ambiguity */
 function formatConvDate(time: number | string | undefined): string {
     if (!time) return '—'
@@ -143,6 +148,7 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
     const [query, setQuery] = useState('')
     const lastClickedIndex = useRef<number>(-1)
     const [skipFirst, setSkipFirst] = useState(0)
+    const [selectionSize, setSelectionSize] = useState(EXPORT_OPERATION_BATCH)
     const [sortField, setSortField] = useState<'title' | 'create_time' | 'update_time'>('create_time')
     const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
 
@@ -181,7 +187,7 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
                 }}
             />
 
-            {/* ── Toolbar: select-all + last-100 + resume + counter ── */}
+            {/* ── Toolbar: select-all + configurable selection size + resume + counter ── */}
             <div className="SelectToolbar">
                 <CheckBox
                     label={t('Select All')}
@@ -199,20 +205,39 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
                             {t('Loading')}... ({conversations.length})
                         </span>
                     )}
+                    <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={selectionSize}
+                        title="Number of conversations to select"
+                        aria-label="Conversation selection size"
+                        disabled={disabled || conversations.length === 0}
+                        onChange={e => setSelectionSize(normaliseSelectionSize(Number(e.currentTarget.value)))}
+                        style={{
+                            width: '4rem',
+                            fontSize: '0.75rem',
+                            padding: '2px 5px',
+                            border: '1px solid #9ca3af',
+                            borderRadius: '3px',
+                            background: 'transparent',
+                            color: 'inherit',
+                        }}
+                    />
                     <button
                         className="Button neutral"
                         disabled={disabled || conversations.length === 0}
-                        onClick={() => setSelected(filtered.slice(0, EXPORT_OPERATION_BATCH))}
+                        onClick={() => setSelected(filtered.slice(0, selectionSize))}
                     >
-                        {t('Last 100')}
+                        {t('Last 100').replace('100', String(selectionSize))}
                     </button>
-                    {/* Resume control: select the next 100 starting at a given offset */}
+                    {/* Resume control: select the next chosen number starting at a given offset */}
                     <input
                         type="number"
                         min="0"
-                        step="100"
+                        step={selectionSize}
                         value={skipFirst}
-                        title="Starting position for next batch (e.g. 200 to resume after 2 batches)"
+                        title={`Starting position for next batch (e.g. ${selectionSize * 2} to resume after 2 batches)`}
                         disabled={disabled || conversations.length === 0}
                         onChange={e => setSkipFirst(Math.max(0, Math.floor(Number(e.currentTarget.value))))}
                         style={{
@@ -227,11 +252,11 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
                     />
                     <button
                         className="Button neutral"
-                        title={`Select 100 conversations starting at position #${skipFirst + 1}`}
+                        title={`Select ${selectionSize} conversations starting at position #${skipFirst + 1}`}
                         disabled={disabled || conversations.length === 0 || skipFirst >= filtered.length}
-                        onClick={() => setSelected(filtered.slice(skipFirst, skipFirst + EXPORT_OPERATION_BATCH))}
+                        onClick={() => setSelected(filtered.slice(skipFirst, skipFirst + selectionSize))}
                     >
-                        → 100
+                        → {selectionSize}
                     </button>
                     <span className="text-sm font-medium tabular-nums text-gray-500 dark:text-gray-400">
                         {selected.length} / {filtered.length}
