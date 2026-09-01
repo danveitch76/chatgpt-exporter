@@ -1,5 +1,34 @@
 # Changelog
 
+## [2.33.7](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.6...userscript-v2.33.7) (2026-09-01)
+
+### Features
+
+* add conversation date-range filtering to the multi-conversation export dialog
+* allow the date criterion to use either **Last updated** or **Created**
+* support inclusive optional **From** and **To** dates
+* keep **Last updated** as the default date criterion
+* allow date filters to be cleared independently of project and text-search filters
+* apply existing **Select All**, configurable **Last N**, Resume and sorting controls to the filtered result set
+
+### Compatibility
+
+* preserve project discovery and project filtering behaviour
+* preserve the internal export-processing batch size of `100`
+* preserve existing rate-limit handling, archive/delete queues and export formats
+* support both ISO timestamps and legacy Unix-second timestamps
+
+### Tests
+
+* add regression coverage for Created vs Last updated filtering
+* cover inclusive boundaries and open-ended ranges
+* cover legacy timestamps, missing/invalid timestamps and reversed ranges
+
+### References
+
+* Issue #81
+* Pull request #82
+
 ## [2.33.6](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.5...userscript-v2.33.6) (2026-09-01)
 
 ### Features
