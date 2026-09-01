@@ -21,8 +21,10 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp
 > [!NOTE]
 > This repository is a maintained downstream fork of [`pionxzh/chatgpt-exporter`](https://github.com/pionxzh/chatgpt-exporter). It preserves upstream attribution while adding File Discovery, asset classification, validation tooling and governed upstream-maintenance automation.
 
-**Current downstream release:** `2.33.3`
+**Current downstream version:** `2.33.5`
 
+> [!IMPORTANT]
+> Version `2.33.5` exists in repository package and generated userscript metadata, but the downstream repository does not currently contain a matching GitHub Release or `userscript-v2.33.5` tag. The documentation therefore describes it as the current downstream version rather than claiming a formal GitHub release.
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
@@ -238,7 +240,7 @@ Click the upload icon button to upload a JSON file of conversations, such as one
 
 Use the project selector to choose the conversation scope:
 
-- **All conversations** — load the normal conversation list returned by ChatGPT.
+- **All conversations** — combine the normal ChatGPT conversation feed with every discovered Project feed and deduplicate by conversation identifier.
 - **Not in a project** — load conversations whose project identifier does not match any known ChatGPT Project. Custom GPT conversations are retained unless they belong to a Project.
 - **Project name** — load conversations from that specific Project.
 
@@ -285,7 +287,7 @@ The inventory includes:
 
 ### Current capability boundary
 
-Version 2.33.3 includes discovery, classification, resolver proof, backend-path mapping, archive-limit planning and validation fixtures.
+Version 2.33.5 includes discovery, classification, resolver proof, backend-path mapping, archive-limit planning and validation fixtures, plus corrected All-conversations discovery across normal and Project feeds.
 
 The **File Discovery** user-interface option remains inventory-only. It does not yet perform complete live bulk download and ZIP packaging of all discovered assets. Backend file routes have been identified, but live authenticated download remains subject to further Phase 1 validation.
 
