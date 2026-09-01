@@ -1,13 +1,12 @@
-name: Release
+name: Release Validation
 
 on:
   push:
-    branches:
-      - '**'
+    tags:
+      - 'userscript-v*'
 
 jobs:
-  release:
-    if: "contains(github.event.head_commit.message, 'chore: release')"
+  validate-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,10 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: https://registry.npmjs.org/
           cache: pnpm
 
-      - run: pnpm install
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm run lint
@@ -35,24 +34,25 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Git commit
-        id: commit
+      - name: Verify generated userscript is committed
+        run: git diff --exit-code -- dist/chatgpt.user.js
+
+      - name: Verify release metadata
+        shell: bash
         run: |
-          git config --local user.email github-actions[bot]@users.noreply.github.com
-          git config --local user.name github-actions[bot]
-          git config --global core.autocrlf true
-          git config --global core.safecrlf false
-          git add .
-          git commit -m "chore: ci build" -a
-        continue-on-error: true
+          set -euo pipefail
 
-      - name: Git push
-        uses: ad-m/github-push-action@master
-        if: ${{ steps.commit.outcome == 'success' }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          tag_version="${GITHUB_REF_NAME#userscript-v}"
+          package_version="$(node -p "require('./package.json').version")"
+          manifest_version="$(node -p "require('./.release-please-manifest.json')['.']")"
+          userscript_version="$(sed -n 's#^// @version[[:space:]]*##p' dist/chatgpt.user.js | head -n 1)"
+          userscript_namespace="$(sed -n 's#^// @namespace[[:space:]]*##p' dist/chatgpt.user.js | head -n 1)"
 
-      - name: Log
-        if: ${{ steps.commit.outcome != 'success' }}
-        run: echo Nothing to commit.
+          test "$tag_version" = "$package_version"
+          test "$tag_version" = "$manifest_version"
+          test "$tag_version" = "$userscript_version"
+          test "$userscript_namespace" = "danveitch76"
+          grep -Fq "**Current downstream version:** \`$tag_version\`" README.md
+          grep -Fq "## [$tag_version]" CHANGELOG.md
+
+          echo "Validated userscript-v$tag_version against package, manifest, userscript, README and CHANGELOG."
