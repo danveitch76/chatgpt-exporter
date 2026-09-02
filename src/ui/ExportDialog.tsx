@@ -100,26 +100,23 @@ const ProjectSelect: FC<ProjectSelectProps> = ({ projects, selected, setSelected
     const { t } = useTranslation()
 
     return (
-        <div className="ProjectSelect flex items-center text-gray-600 dark:text-gray-300 justify-between mb-3">
-            {t('Select Project')}
-            <div className="flex items-center gap-2">
-                {loading && <IconLoading className="w-3 h-3" />}
-                <select
-                    disabled={disabled}
-                    className="Select"
-                    value={selected ?? ''}
-                    onChange={(e) => {
-                        const val = e.currentTarget.value
-                        setSelected(val || null)
-                    }}
-                >
-                    <option value="">{t('All conversations')}</option>
-                    <option value={NOT_IN_PROJECT_ID}>{t('Not in a project')}</option>
-                    {projects.map(project => (
-                        <option key={project.id} value={project.id}>{project.display.name}</option>
-                    ))}
-                </select>
-            </div>
+        <div className="ProjectSelect ExportFilterRow" aria-busy={loading}>
+            <span className="ExportFilterLabel">Project</span>
+            <select
+                disabled={disabled}
+                className="Select"
+                value={selected ?? ''}
+                onChange={(e) => {
+                    const val = e.currentTarget.value
+                    setSelected(val || null)
+                }}
+            >
+                <option value="">{t('All conversations')}</option>
+                <option value={NOT_IN_PROJECT_ID}>{t('Not in a project')}</option>
+                {projects.map(project => (
+                    <option key={project.id} value={project.id}>{project.display.name}</option>
+                ))}
+            </select>
         </div>
     )
 }
@@ -135,6 +132,10 @@ interface ConversationSelectProps {
     disabled: boolean
     loading: boolean
     error: string
+    query: string
+    dateField: 'create_time' | 'update_time'
+    fromDate: string
+    toDate: string
 }
 
 const ConversationSelect: FC<ConversationSelectProps> = ({
@@ -144,17 +145,17 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
     disabled,
     loading,
     error,
+    query,
+    dateField,
+    fromDate,
+    toDate,
 }) => {
     const { t } = useTranslation()
-    const [query, setQuery] = useState('')
     const lastClickedIndex = useRef<number>(-1)
     const [skipFirst, setSkipFirst] = useState(0)
     const [selectionSize, setSelectionSize] = useState(EXPORT_OPERATION_BATCH)
     const [sortField, setSortField] = useState<'title' | 'create_time' | 'update_time'>('create_time')
     const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
-    const [dateField, setDateField] = useState<'create_time' | 'update_time'>('update_time')
-    const [fromDate, setFromDate] = useState('')
-    const [toDate, setToDate] = useState('')
 
     // ── Filtering ──
 
@@ -177,27 +178,9 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
     }, [conversations, query, dateField, fromDate, toDate, sortField, sortDir])
 
     const allFilteredSelected = filtered.length > 0 && filtered.every(c => selected.some(x => x.id === c.id))
-    const resetDateSelection = () => {
-        lastClickedIndex.current = -1
-        setSelected([])
-    }
 
     return (
         <>
-            {/* ── Search input ── */}
-            <input
-                type="search"
-                className="SelectSearch"
-                placeholder={t('Search')}
-                value={query}
-                disabled={disabled}
-                onInput={(e) => {
-                    const val = (e.currentTarget as HTMLInputElement).value
-                    lastClickedIndex.current = -1
-                    setQuery(val)
-                }}
-            />
-
             {/* ── Toolbar: select-all + configurable selection size + resume + counter ── */}
             <div className="SelectToolbar">
                 <CheckBox
@@ -210,12 +193,6 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
                     }}
                 />
                 <div className="flex items-center gap-2 ml-auto flex-wrap">
-                    {loading && conversations.length > 0 && (
-                        <span className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-                            <IconLoading className="w-3 h-3" />
-                            {t('Loading')}... ({conversations.length})
-                        </span>
-                    )}
                     <input
                         type="number"
                         min="1"
@@ -275,77 +252,6 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
                 </div>
             </div>
 
-            {/* ── Date range filter ── */}
-            <div className="flex items-center gap-2 flex-wrap mb-2 text-sm text-gray-600 dark:text-gray-300">
-                <span className="font-medium">Date</span>
-                <select
-                    className="Select"
-                    aria-label="Conversation date field"
-                    disabled={disabled}
-                    value={dateField}
-                    onChange={(e) => {
-                        resetDateSelection()
-                        setDateField(e.currentTarget.value as 'create_time' | 'update_time')
-                    }}
-                >
-                    <option value="update_time">Last updated</option>
-                    <option value="create_time">Created</option>
-                </select>
-                <label className="flex items-center gap-1">
-                    From
-                    <input
-                        type="date"
-                        aria-label="Conversation date from"
-                        disabled={disabled}
-                        value={fromDate}
-                        onChange={(e) => {
-                            resetDateSelection()
-                            setFromDate(e.currentTarget.value)
-                        }}
-                        style={{
-                            fontSize: '0.75rem',
-                            padding: '2px 5px',
-                            border: '1px solid #9ca3af',
-                            borderRadius: '3px',
-                            background: 'transparent',
-                            color: 'inherit',
-                        }}
-                    />
-                </label>
-                <label className="flex items-center gap-1">
-                    To
-                    <input
-                        type="date"
-                        aria-label="Conversation date to"
-                        disabled={disabled}
-                        value={toDate}
-                        onChange={(e) => {
-                            resetDateSelection()
-                            setToDate(e.currentTarget.value)
-                        }}
-                        style={{
-                            fontSize: '0.75rem',
-                            padding: '2px 5px',
-                            border: '1px solid #9ca3af',
-                            borderRadius: '3px',
-                            background: 'transparent',
-                            color: 'inherit',
-                        }}
-                    />
-                </label>
-                <button
-                    className="Button neutral"
-                    disabled={disabled || (!fromDate && !toDate)}
-                    onClick={() => {
-                        resetDateSelection()
-                        setFromDate('')
-                        setToDate('')
-                    }}
-                >
-                    Clear
-                </button>
-            </div>
-
             {/* ── Column headers with sort controls ── */}
             <div className="SelectListHeader">
                 <button
@@ -394,8 +300,6 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
 
             {/* ── Conversation list ── */}
             <ul className="SelectList">
-                {loading && conversations.length === 0 && <li className="SelectItem">{t('Loading')}...</li>}
-                {error && <li className="SelectItem">{t('Error')}: {error}</li>}
                 {filtered.map((c, index) => {
                     const isSelected = selected.some(x => x.id === c.id)
                     return (
@@ -443,8 +347,10 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
                         </li>
                     )
                 })}
-                {!loading && !error && filtered.length === 0 && conversations.length > 0 && (
-                    <li className="SelectItem text-gray-400 dark:text-gray-500">{t('No results')}</li>
+                {!loading && !error && filtered.length === 0 && (
+                    <li className="SelectItem text-gray-400 dark:text-gray-500">
+                        {conversations.length > 0 ? t('No results') : 'No conversations to display.'}
+                    </li>
                 )}
             </ul>
         </>
@@ -494,6 +400,10 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
     const [processing, setProcessing] = useState(false)
 
     const [selected, setSelected] = useState<ApiConversationItem[]>([])
+    const [query, setQuery] = useState('')
+    const [dateField, setDateField] = useState<'create_time' | 'update_time'>('update_time')
+    const [fromDate, setFromDate] = useState('')
+    const [toDate, setToDate] = useState('')
     const [exportType, setExportType] = useState(exportAllOptions[0].label)
     const disabled = processing || !!error || selected.length === 0
 
@@ -525,6 +435,10 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
     const cancelledRef = useRef(false)
     /** Incremented on each new fetch; callbacks check this to discard stale results after remount */
     const fetchGenRef = useRef(0)
+
+    const resetDateSelection = useCallback(() => {
+        setSelected([])
+    }, [])
 
     const onUpload = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         const file = (e.target as HTMLInputElement)?.files?.[0]
@@ -824,42 +738,92 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
         }
     }, [])
 
-    const probeLabel = probeStatus === 'testing'
-        ? '⏳ Testing…'
-        : probeStatus === 'ok'
-            ? '✅ API ready'
-            : probeStatus === 'rate_limited'
-                ? `🚫 Rate limited${probeRetryAfterSecs != null ? ` · wait ${probeRetryAfterSecs}s` : ''}`
-                : probeStatus === 'error'
-                    ? '⚠️ Error'
-                    : null
+    let statusText = 'Ready'
+    let statusDetail = conversations.length > 0 ? `${conversations.length} conversations loaded` : ''
+    let statusBusy = false
+    let statusPercent: number | null = null
+
+    if (error) {
+        statusText = `Error: ${error}`
+        statusDetail = ''
+    }
+    else if (processing) {
+        statusBusy = true
+        statusText = progress.currentStatus === 'rate_limited'
+            ? `Rate limited — waiting ${progress.rateLimitWaitSecs ?? '…'}s`
+            : progress.currentName || 'Processing conversations...'
+        statusDetail = progress.total > 0
+            ? `${progress.completed} / ${progress.total}`
+            : 'Processing'
+        statusPercent = progress.total > 0
+            ? Math.round((progress.completed / progress.total) * 100)
+            : null
+    }
+    else if (loadingMore) {
+        statusBusy = true
+        statusText = 'Loading more conversations...'
+        statusDetail = totalAvailable !== null
+            ? `${conversations.length} / ${totalAvailable}`
+            : `${conversations.length} loaded`
+    }
+    else if (projectsLoading && !projectsLoaded) {
+        statusBusy = true
+        statusText = 'Loading projects...'
+        statusDetail = ''
+    }
+    else if (loading) {
+        statusBusy = true
+        statusText = 'Loading conversations...'
+        statusDetail = totalAvailable !== null
+            ? `${conversations.length} / ${totalAvailable}`
+            : `${conversations.length} loaded`
+    }
+    else if (probeStatus === 'testing') {
+        statusBusy = true
+        statusText = 'Testing ChatGPT API...'
+        statusDetail = ''
+    }
+    else if (probeStatus === 'rate_limited') {
+        statusText = 'ChatGPT API is rate limited'
+        statusDetail = probeRetryAfterSecs != null ? `Retry in ${probeRetryAfterSecs}s` : ''
+    }
+    else if (probeStatus === 'error') {
+        statusText = 'ChatGPT API test failed'
+        statusDetail = ''
+    }
+    else if (probeStatus === 'ok') {
+        statusText = 'ChatGPT API ready'
+        statusDetail = conversations.length > 0 ? `${conversations.length} conversations loaded` : ''
+    }
+    else if (exportSource === 'Local' && localConversations.length === 0) {
+        statusText = 'Select an official export file to load conversations'
+        statusDetail = ''
+    }
 
     return (
         <>
             <Dialog.Title className="DialogTitle">{t('Export Dialog Title')}</Dialog.Title>
-            <div className="flex items-center text-gray-600 dark:text-gray-300 flex justify-between border-b-[1px] pb-3 mb-3 dark:border-gray-700">
-                {t('Export from official export file')} (conversations.json)&nbsp;
-                <div className="flex items-center gap-2">
-                    {exportSource === 'API' && (
-                        <button
-                            className="Button neutral"
-                            style={{ fontSize: '0.72rem', padding: '2px 8px', whiteSpace: 'nowrap' }}
-                            disabled={probeStatus === 'testing' || processing}
-                            title={Object.keys(probeHeaders).length > 0
-                                ? `Rate-limit headers: ${JSON.stringify(probeHeaders)}`
-                                : 'Check if the API is currently rate-limiting requests'}
-                            onClick={runProbe}
-                        >
-                            {probeLabel ?? 'Test API'}
-                        </button>
-                    )}
-                    {exportSource === 'API' && (
-                        <button className="btn relative btn-neutral" onClick={() => fileInputRef.current?.click()}>
-                            <IconUpload className="w-4 h-4" />
-                        </button>
-                    )}
+
+            {/* Fixed status area: always present so state changes never resize the dialog. */}
+            <div className="ExportStatusBox" role="status" aria-live="polite">
+                {statusBusy && <IconLoading className="w-4 h-4 shrink-0" />}
+                <span className="ExportStatusText">{statusText}</span>
+                {statusDetail && <span className="ExportStatusDetail">{statusDetail}</span>}
+                {processing && (
+                    <button
+                        className="Button red"
+                        style={{ fontSize: '0.75rem', padding: '3px 10px', height: 'auto' }}
+                        title="Stop the export — any batches already downloaded are kept"
+                        onClick={cancelExport}
+                    >
+                        Cancel
+                    </button>
+                )}
+                <div className="ExportStatusProgress" aria-hidden="true">
+                    <span style={{ width: `${statusPercent ?? 0}%` }} />
                 </div>
             </div>
+
             <input
                 type="file"
                 accept="application/json"
@@ -867,15 +831,153 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
                 ref={fileInputRef}
                 onChange={onUpload}
             />
-            {exportSource === 'API' && (
-                <ProjectSelect
-                    projects={projects}
-                    selected={selectedProjectId}
-                    setSelected={setSelectedProjectId}
-                    disabled={processing}
-                    loading={projectsLoading}
-                />
-            )}
+
+            {/* Filters: source defines the dataset, then project/date/search narrow it. */}
+            <section className="ExportFilters" aria-label="Conversation filters">
+                <div className="ExportFiltersTitle">Filters</div>
+
+                <div className="ExportFilterRow ExportSourceRow">
+                    <span className="ExportFilterLabel">Export from</span>
+                    <select
+                        className="Select ExportFilterControl"
+                        disabled={processing}
+                        value={exportSource}
+                        onChange={(e) => {
+                            setSelected([])
+                            setExportSource(e.currentTarget.value as ExportSource)
+                        }}
+                    >
+                        <option value="API">ChatGPT API</option>
+                        <option value="Local">Official export file (conversations.json)</option>
+                    </select>
+                    <div className="ExportSourceActions">
+                        {exportSource === 'API'
+                            ? (
+                                <button
+                                    className="Button neutral"
+                                    disabled={probeStatus === 'testing' || processing}
+                                    title={Object.keys(probeHeaders).length > 0
+                                        ? `Rate-limit headers: ${JSON.stringify(probeHeaders)}`
+                                        : 'Check if the API is currently rate-limiting requests'}
+                                    onClick={runProbe}
+                                >
+                                    Test API
+                                </button>
+                                )
+                            : (
+                                <button
+                                    className="Button neutral flex items-center gap-1"
+                                    disabled={processing}
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <IconUpload className="w-4 h-4" />
+                                    Select file...
+                                </button>
+                                )}
+                    </div>
+                </div>
+
+                {exportSource === 'API'
+                    ? (
+                        <ProjectSelect
+                            projects={projects}
+                            selected={selectedProjectId}
+                            setSelected={setSelectedProjectId}
+                            disabled={processing}
+                            loading={projectsLoading}
+                        />
+                        )
+                    : (
+                        <div className="ExportFilterRow">
+                            <span className="ExportFilterLabel">Project</span>
+                            <select className="Select" disabled value="">
+                                <option value="">Not applicable for file import</option>
+                            </select>
+                        </div>
+                        )}
+
+                <div className="ExportFilterRow ExportDateRow">
+                    <span className="ExportFilterLabel">Date</span>
+                    <select
+                        className="Select"
+                        aria-label="Conversation date field"
+                        disabled={processing}
+                        value={dateField}
+                        onChange={(e) => {
+                            resetDateSelection()
+                            setDateField(e.currentTarget.value as 'create_time' | 'update_time')
+                        }}
+                    >
+                        <option value="update_time">Last updated</option>
+                        <option value="create_time">Created</option>
+                    </select>
+                    <label htmlFor="conversation-date-from">From</label>
+                    <input
+                        id="conversation-date-from"
+                        type="date"
+                        aria-label="Conversation date from"
+                        disabled={processing}
+                        value={fromDate}
+                        onChange={(e) => {
+                            resetDateSelection()
+                            setFromDate(e.currentTarget.value)
+                        }}
+                        style={{
+                            fontSize: '0.75rem',
+                            padding: '2px 5px',
+                            border: '1px solid #9ca3af',
+                            borderRadius: '3px',
+                            background: 'transparent',
+                            color: 'inherit',
+                        }}
+                    />
+                    <label htmlFor="conversation-date-to">To</label>
+                    <input
+                        id="conversation-date-to"
+                        type="date"
+                        aria-label="Conversation date to"
+                        disabled={processing}
+                        value={toDate}
+                        onChange={(e) => {
+                            resetDateSelection()
+                            setToDate(e.currentTarget.value)
+                        }}
+                        style={{
+                            fontSize: '0.75rem',
+                            padding: '2px 5px',
+                            border: '1px solid #9ca3af',
+                            borderRadius: '3px',
+                            background: 'transparent',
+                            color: 'inherit',
+                        }}
+                    />
+                    <button
+                        className="Button neutral"
+                        disabled={processing || (!fromDate && !toDate)}
+                        onClick={() => {
+                            resetDateSelection()
+                            setFromDate('')
+                            setToDate('')
+                        }}
+                    >
+                        Clear dates
+                    </button>
+                </div>
+
+                <div className="ExportFilterRow ExportSearchRow">
+                    <label className="ExportFilterLabel" htmlFor="conversation-search">Search</label>
+                    <input
+                        id="conversation-search"
+                        type="search"
+                        className="SelectSearch"
+                        placeholder="Search conversations..."
+                        value={query}
+                        disabled={processing}
+                        onInput={(e) => setQuery((e.currentTarget as HTMLInputElement).value)}
+                    />
+                </div>
+            </section>
+
             <ConversationSelect
                 conversations={conversations}
                 selected={selected}
@@ -883,6 +985,10 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
                 disabled={processing}
                 loading={loading}
                 error={error}
+                query={query}
+                dateField={dateField}
+                fromDate={fromDate}
+                toDate={toDate}
             />
 
             {/* Load-more button */}
@@ -934,36 +1040,6 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
                 <p className="mt-1.5 text-xs text-right text-gray-400 dark:text-gray-500">
                     {`${totalBatches} downloads · 100 conversations each`}
                 </p>
-            )}
-            {processing && (
-                <>
-                    <div className="mt-2 mb-1 justify-between flex items-center gap-2">
-                        <span className="truncate text-sm text-gray-600 dark:text-gray-300">
-                            {progress.currentStatus === 'rate_limited'
-                                ? `⏳ Rate limited — waiting ${progress.rateLimitWaitSecs ?? '…'}s`
-                                : progress.currentName}
-                        </span>
-                        <span className="shrink-0 tabular-nums text-sm text-gray-500 dark:text-gray-400">
-                            {progress.totalBatches > 1
-                                ? `${t('Batch progress').replace('{{current}}', String(progress.batchIndex + 1)).replace('{{total}}', String(progress.totalBatches))} · ${progress.completed}/${progress.total}`
-                                : `${progress.completed}/${progress.total}`}
-                        </span>
-                        <button
-                            className="Button red"
-                            style={{ fontSize: '0.75rem', padding: '3px 10px', height: 'auto' }}
-                            title="Stop the export — any batches already downloaded are kept"
-                            onClick={cancelExport}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
-                        <div
-                            className={`h-2.5 rounded-full ${progress.currentStatus === 'rate_limited' ? 'bg-amber-500' : 'bg-blue-600'}`}
-                            style={{ width: `${progress.total > 0 ? (progress.completed / progress.total) * 100 : 0}%` }}
-                        />
-                    </div>
-                </>
             )}
             {processing
                 ? (
