@@ -198,77 +198,6 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
                 }}
             />
 
-            {/* ── Date range filter ── */}
-            <div className="flex items-center gap-2 flex-wrap mb-2 text-sm text-gray-600 dark:text-gray-300">
-                <span className="font-medium">Date</span>
-                <select
-                    className="Select"
-                    aria-label="Conversation date field"
-                    disabled={disabled}
-                    value={dateField}
-                    onChange={(e) => {
-                        resetDateSelection()
-                        setDateField(e.currentTarget.value as 'create_time' | 'update_time')
-                    }}
-                >
-                    <option value="update_time">Last updated</option>
-                    <option value="create_time">Created</option>
-                </select>
-                <label className="flex items-center gap-1">
-                    From
-                    <input
-                        type="date"
-                        aria-label="Conversation date from"
-                        disabled={disabled}
-                        value={fromDate}
-                        onChange={(e) => {
-                            resetDateSelection()
-                            setFromDate(e.currentTarget.value)
-                        }}
-                        style={{
-                            fontSize: '0.75rem',
-                            padding: '2px 5px',
-                            border: '1px solid #9ca3af',
-                            borderRadius: '3px',
-                            background: 'transparent',
-                            color: 'inherit',
-                        }}
-                    />
-                </label>
-                <label className="flex items-center gap-1">
-                    To
-                    <input
-                        type="date"
-                        aria-label="Conversation date to"
-                        disabled={disabled}
-                        value={toDate}
-                        onChange={(e) => {
-                            resetDateSelection()
-                            setToDate(e.currentTarget.value)
-                        }}
-                        style={{
-                            fontSize: '0.75rem',
-                            padding: '2px 5px',
-                            border: '1px solid #9ca3af',
-                            borderRadius: '3px',
-                            background: 'transparent',
-                            color: 'inherit',
-                        }}
-                    />
-                </label>
-                <button
-                    className="Button neutral"
-                    disabled={disabled || (!fromDate && !toDate)}
-                    onClick={() => {
-                        resetDateSelection()
-                        setFromDate('')
-                        setToDate('')
-                    }}
-                >
-                    Clear dates
-                </button>
-            </div>
-
             {/* ── Toolbar: select-all + configurable selection size + resume + counter ── */}
             <div className="SelectToolbar">
                 <CheckBox
@@ -344,6 +273,77 @@ const ConversationSelect: FC<ConversationSelectProps> = ({
                         {selected.length} / {filtered.length}
                     </span>
                 </div>
+            </div>
+
+            {/* ── Date range filter ── */}
+            <div className="flex items-center gap-2 flex-wrap mb-2 text-sm text-gray-600 dark:text-gray-300">
+                <span className="font-medium">Date</span>
+                <select
+                    className="Select"
+                    aria-label="Conversation date field"
+                    disabled={disabled}
+                    value={dateField}
+                    onChange={(e) => {
+                        resetDateSelection()
+                        setDateField(e.currentTarget.value as 'create_time' | 'update_time')
+                    }}
+                >
+                    <option value="update_time">Last updated</option>
+                    <option value="create_time">Created</option>
+                </select>
+                <label className="flex items-center gap-1">
+                    From
+                    <input
+                        type="date"
+                        aria-label="Conversation date from"
+                        disabled={disabled}
+                        value={fromDate}
+                        onChange={(e) => {
+                            resetDateSelection()
+                            setFromDate(e.currentTarget.value)
+                        }}
+                        style={{
+                            fontSize: '0.75rem',
+                            padding: '2px 5px',
+                            border: '1px solid #9ca3af',
+                            borderRadius: '3px',
+                            background: 'transparent',
+                            color: 'inherit',
+                        }}
+                    />
+                </label>
+                <label className="flex items-center gap-1">
+                    To
+                    <input
+                        type="date"
+                        aria-label="Conversation date to"
+                        disabled={disabled}
+                        value={toDate}
+                        onChange={(e) => {
+                            resetDateSelection()
+                            setToDate(e.currentTarget.value)
+                        }}
+                        style={{
+                            fontSize: '0.75rem',
+                            padding: '2px 5px',
+                            border: '1px solid #9ca3af',
+                            borderRadius: '3px',
+                            background: 'transparent',
+                            color: 'inherit',
+                        }}
+                    />
+                </label>
+                <button
+                    className="Button neutral"
+                    disabled={disabled || (!fromDate && !toDate)}
+                    onClick={() => {
+                        resetDateSelection()
+                        setFromDate('')
+                        setToDate('')
+                    }}
+                >
+                    Clear
+                </button>
             </div>
 
             {/* ── Column headers with sort controls ── */}
@@ -932,7 +932,7 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
             </div>
             {totalBatches > 1 && !processing && (
                 <p className="mt-1.5 text-xs text-right text-gray-400 dark:text-gray-500">
-                    {`${totalBatches} downloads \u00B7 100 conversations each`}
+                    {`${totalBatches} downloads · 100 conversations each`}
                 </p>
             )}
             {processing && (
@@ -945,7 +945,7 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
                         </span>
                         <span className="shrink-0 tabular-nums text-sm text-gray-500 dark:text-gray-400">
                             {progress.totalBatches > 1
-                                ? `${t('Batch progress').replace('{{current}}', String(progress.batchIndex + 1)).replace('{{total}}', String(progress.totalBatches))} \u00B7 ${progress.completed}/${progress.total}`
+                                ? `${t('Batch progress').replace('{{current}}', String(progress.batchIndex + 1)).replace('{{total}}', String(progress.totalBatches))} · ${progress.completed}/${progress.total}`
                                 : `${progress.completed}/${progress.total}`}
                         </span>
                         <button
