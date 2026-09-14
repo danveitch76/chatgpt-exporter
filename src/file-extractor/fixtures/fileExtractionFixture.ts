@@ -33,7 +33,16 @@ export const fileExtractionFixture: ApiConversationWithId = {
                 },
                 status: 'finished_successfully',
                 weight: 1,
-                metadata: {},
+                metadata: {
+                    attachments: [
+                        {
+                            id: 'file_user-uploaded-document',
+                            name: 'brief.pdf',
+                            mime_type: 'application/pdf',
+                            size: 3210,
+                        },
+                    ],
+                },
                 recipient: 'all',
             },
         },
