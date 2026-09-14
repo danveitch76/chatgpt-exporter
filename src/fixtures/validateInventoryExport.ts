@@ -140,4 +140,4 @@ const markdown = serialiseInventoryMarkdown('chats', chatRows)
 assert.ok(markdown.includes('| URL | Token | Slug | Actual Chat Name | Project Name |'))
 assert.ok(markdown.includes('Chat list \\| in markdown'))
 
-console.log('Inventory export validation passed.')
+process.stdout.write('Inventory export validation passed.\n')
