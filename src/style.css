@@ -168,6 +168,71 @@ body[data-time-format="24"] span[data-time-format="24"] {
     border-radius: 5px;
 }
 
+.InventoryPreview {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 5px;
+    color: var(--ce-text-primary);
+}
+
+.InventoryPreviewHeader,
+.InventoryPreviewRow {
+    display: grid;
+    grid-template-columns: minmax(16rem, 1.6fr) minmax(12rem, 1fr) minmax(12rem, 1fr) minmax(20rem, 1.8fr);
+    align-items: center;
+}
+
+.InventoryPreviewHeader {
+    flex: 0 0 auto;
+    border-bottom: 1px solid var(--ce-border-light);
+    background: var(--ce-menu-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.InventoryPreviewHeaderCell,
+.InventoryPreviewCell {
+    min-width: 0;
+    padding: 0.45rem 0.6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.InventoryPreviewHeaderCell + .InventoryPreviewHeaderCell,
+.InventoryPreviewCell + .InventoryPreviewCell {
+    border-left: 1px solid var(--ce-border-light);
+}
+
+.InventoryPreviewBody {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+.InventoryPreviewRow {
+    min-width: 70rem;
+    border-bottom: 1px solid var(--ce-border-light);
+    font-size: 0.8125rem;
+}
+
+.InventoryPreviewRow:last-child {
+    border-bottom: 0;
+}
+
+.InventoryPreviewCellPrimary {
+    font-weight: 500;
+}
+
+.InventoryPreviewEmpty {
+    padding: 1rem;
+    color: #9ca3af;
+}
+
 @media (max-width: 820px) {
     .DialogContent._export {
         width: min(96vw, 48rem);
@@ -186,6 +251,11 @@ body[data-time-format="24"] span[data-time-format="24"] {
 
     .ExportSourceActions {
         justify-content: flex-start;
+    }
+
+    .InventoryPreviewHeader,
+    .InventoryPreviewRow {
+        grid-template-columns: minmax(14rem, 1.5fr) minmax(10rem, 1fr) minmax(10rem, 1fr) minmax(18rem, 1.5fr);
     }
 }
 
