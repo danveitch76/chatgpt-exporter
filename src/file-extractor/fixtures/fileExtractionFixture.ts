@@ -57,7 +57,7 @@ export const fileExtractionFixture: ApiConversationWithId = {
                 content: {
                     content_type: 'text',
                     parts: [
-                        'Created file: sandbox:/mnt/data/report.md',
+                        'Created file {{file:file_generated-report}} at sandbox:/mnt/data/report.md',
                     ],
                 },
                 status: 'finished_successfully',
