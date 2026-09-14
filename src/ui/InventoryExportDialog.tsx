@@ -118,6 +118,49 @@ const EXPORTERS: Record<InventoryFormat, (kind: InventoryKind, rows: InventoryRo
     md: exportInventoryMarkdown,
 }
 
+const PROJECT_PREVIEW_HEADERS = ['Actual Project Name', 'GizmoID', 'Slug', 'URL'] as const
+const CHAT_PREVIEW_HEADERS = ['Actual Chat Name', 'Project Name', 'Slug', 'URL'] as const
+
+function inventoryValue(row: InventoryRow, header: string): string {
+    return String((row as unknown as Record<string, string>)[header] ?? '')
+}
+
+const InventoryPreview: FC<{ kind: InventoryKind, rows: InventoryRow[] }> = ({ kind, rows }) => {
+    const headers = kind === 'projects' ? PROJECT_PREVIEW_HEADERS : CHAT_PREVIEW_HEADERS
+
+    return (
+        <div className="InventoryPreview" aria-label={`${kind === 'projects' ? 'Project' : 'Chat'} inventory preview`}>
+            <div className="InventoryPreviewHeader" role="row">
+                {headers.map(header => (
+                    <div className="InventoryPreviewHeaderCell" role="columnheader" key={header}>{header}</div>
+                ))}
+            </div>
+            <div className="InventoryPreviewBody" role="rowgroup">
+                {rows.map((row) => {
+                    const key = inventoryValue(row, 'URL') || inventoryValue(row, 'Token')
+                    return (
+                        <div className="InventoryPreviewRow" role="row" key={key}>
+                            {headers.map(header => (
+                                <div
+                                    className={`InventoryPreviewCell${header === 'Actual Project Name' || header === 'Actual Chat Name' ? ' InventoryPreviewCellPrimary' : ''}`}
+                                    role="cell"
+                                    title={inventoryValue(row, header) || undefined}
+                                    key={header}
+                                >
+                                    {inventoryValue(row, header) || '—'}
+                                </div>
+                            ))}
+                        </div>
+                    )
+                })}
+                {rows.length === 0 && (
+                    <div className="InventoryPreviewEmpty">No rows to display.</div>
+                )}
+            </div>
+        </div>
+    )
+}
+
 export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, onOpenChange, children }) => {
     const { exportAllLimit } = useSettingContext()
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -473,6 +516,8 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
                             />
                         </div>
                     </section>
+
+                    <InventoryPreview kind={kind} rows={rows} />
 
                     <div className="ActionBar flex flex-wrap mt-3 items-center gap-2">
                         <select
