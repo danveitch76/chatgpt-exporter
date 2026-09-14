@@ -3,7 +3,7 @@
 // @name:zh-CN         ChatGPT Exporter
 // @name:zh-TW         ChatGPT Exporter
 // @namespace          danveitch76
-// @version            2.33.7
+// @version            2.33.8
 // @author             danveitch76
 // @description        Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.
 // @description:zh-CN  一键导出 ChatGPT 对话，轻松备份与分享
@@ -116,6 +116,8 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
 .DialogContent._export {\r
     width: min(94vw, 76rem);\r
     max-width: 76rem;\r
+    height: 92vh;\r
+    max-height: 92vh;\r
 }\r
 \r
 .ExportStatusBox {\r
@@ -123,9 +125,9 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
     display: flex;\r
     align-items: center;\r
     gap: 0.65rem;\r
-    min-height: 3.5rem;\r
-    margin: 0.85rem 0 1rem;\r
-    padding: 0.75rem 1rem;\r
+    min-height: 2.75rem;\r
+    margin: 0.4rem 0 0.65rem;\r
+    padding: 0.5rem 0.85rem;\r
     overflow: hidden;\r
     border: 1px solid var(--ce-border-light);\r
     border-radius: 5px;\r
@@ -163,17 +165,15 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
 }\r
 \r
 .ExportFilters {\r
-    margin-bottom: 1rem;\r
-    padding: 0.85rem 1rem 1rem;\r
+    margin-bottom: 0.65rem;\r
+    padding: 0.35rem 1rem;\r
     border: 1px solid var(--ce-border-light);\r
     border-radius: 5px;\r
 }\r
 \r
+/* The filter box itself provides enough context; omit a redundant title row. */\r
 .ExportFiltersTitle {\r
-    margin-bottom: 0.8rem;\r
-    font-size: 0.95rem;\r
-    font-weight: 600;\r
-    color: var(--ce-text-primary);\r
+    display: none;\r
 }\r
 \r
 .ExportFilterRow,\r
@@ -183,7 +183,7 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
     align-items: center;\r
     gap: 0.7rem;\r
     margin: 0;\r
-    padding: 0.65rem 0;\r
+    padding: 0.45rem 0;\r
     color: var(--ce-text-primary);\r
 }\r
 \r
@@ -241,11 +241,17 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
 }\r
 \r
 .ExportSearchRow .SelectSearch {\r
+    width: 100%;\r
+    min-width: 0;\r
     margin: 0;\r
+    box-sizing: border-box;\r
+    border: 1px solid #6f6e77;\r
+    border-radius: 4px;\r
+    box-shadow: none;\r
 }\r
 \r
 .SelectToolbar {\r
-    margin: 0 0 0.85rem;\r
+    margin: 0 0 0.6rem;\r
     border: 1px solid var(--ce-border-light);\r
     border-radius: 5px;\r
 }\r
@@ -253,6 +259,8 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
 @media (max-width: 820px) {\r
     .DialogContent._export {\r
         width: min(96vw, 48rem);\r
+        height: 92vh;\r
+        max-height: 92vh;\r
     }\r
 \r
     .ExportSourceRow,\r
