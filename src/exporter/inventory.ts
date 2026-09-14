@@ -40,6 +40,12 @@ const CHAT_HEADERS: Array<keyof ChatInventoryRow> = [
 
 const PROJECT_ID_PATTERN = /^(g-p-[a-f0-9]{32})(?:-(.+))?$/i
 
+interface ProjectIdentity {
+    gizmoId: string
+    slug: string
+    token: string
+}
+
 export function slugifyInventoryName(value: string): string {
     return value
         .normalize('NFKD')
@@ -50,17 +56,21 @@ export function slugifyInventoryName(value: string): string {
         .replace(/^-+|-+$/g, '')
 }
 
-export function normaliseGizmoId(value: string | null | undefined): string {
-    if (!value) return ''
-    const match = value.match(PROJECT_ID_PATTERN)
-    return match?.[1] ?? value
-}
-
-export function buildProjectToken(projectId: string, projectName: string): string {
+function projectIdentity(projectId: string, projectName: string): ProjectIdentity {
     const match = projectId.match(PROJECT_ID_PATTERN)
     const gizmoId = match?.[1] ?? projectId
     const slug = match?.[2] || slugifyInventoryName(projectName)
-    return slug ? `${gizmoId}-${slug}` : gizmoId
+    const token = slug ? `${gizmoId}-${slug}` : gizmoId
+    return { gizmoId, slug, token }
+}
+
+export function normaliseGizmoId(value: string | null | undefined): string {
+    if (!value) return ''
+    return projectIdentity(value, '').gizmoId
+}
+
+export function buildProjectToken(projectId: string, projectName: string): string {
+    return projectIdentity(projectId, projectName).token
 }
 
 export function buildProjectInventoryRows(
@@ -70,21 +80,19 @@ export function buildProjectInventoryRows(
     const seen = new Set<string>()
 
     return projects.flatMap((project) => {
-        const gizmoId = normaliseGizmoId(project.id)
-        if (!gizmoId || seen.has(gizmoId)) return []
-        if (allowedProjectIds && !allowedProjectIds.has(gizmoId)) return []
+        const projectName = project.display?.name?.trim() || ''
+        const identity = projectIdentity(project.id, projectName)
+        if (!identity.gizmoId || seen.has(identity.gizmoId)) return []
+        if (allowedProjectIds && !allowedProjectIds.has(identity.gizmoId)) return []
 
-        seen.add(gizmoId)
-        const projectName = project.display?.name?.trim() || gizmoId
-        const slug = slugifyInventoryName(projectName)
-        const token = buildProjectToken(project.id, projectName)
+        seen.add(identity.gizmoId)
 
         return [{
-            URL: `https://chatgpt.com/g/${token}/project`,
-            Token: token,
-            GizmoID: gizmoId,
-            Slug: slug,
-            'Actual Project Name': project.display?.name?.trim() || '',
+            URL: `https://chatgpt.com/g/${identity.token}/project`,
+            Token: identity.token,
+            GizmoID: identity.gizmoId,
+            Slug: identity.slug,
+            'Actual Project Name': projectName,
         }]
     })
 }
