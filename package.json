@@ -9,7 +9,7 @@
   "title:zh-TW": "ChatGPT Exporter",
   "description": "Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.",
   "description:zh-CN": "一键导出 ChatGPT 对话，轻松备份与分享",
-  "description:zh-TW": "一鍵導出 ChatGPT 對話，輕鬆備份與分享",
+  "description:zh-TW": "一鍵匯出 ChatGPT 對話，輕鬆備份與分享",
   "author": "danveitch76",
   "license": "MIT",
   "engines": {
@@ -23,12 +23,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "tsc --noEmit && pnpm run test:conversation-discovery && pnpm run test:conversation-date-range && pnpm run test:file-extractor && pnpm run test:file-extractor-limits && pnpm run test:generated-asset-classification && pnpm run test:failure-recovery-classification && pnpm run test:uploaded-asset-classification && pnpm run test:file-resolver && pnpm run test:file-reference-classification",
+    "test": "tsc --noEmit && pnpm run test:conversation-discovery && pnpm run test:conversation-date-range && pnpm run test:inventory-export && pnpm run test:file-extractor && pnpm run test:file-extractor-limits && pnpm run test:generated-asset-classification && pnpm run test:failure-recovery-classification && pnpm run test:uploaded-asset-classification && pnpm run test:file-resolver && pnpm run test:file-reference-classification",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky",
     "test:conversation-discovery": "tsx ./src/fixtures/validateConversationDiscovery.ts",
     "test:conversation-date-range": "tsx ./src/fixtures/validateConversationDateFilter.ts",
+    "test:inventory-export": "tsx ./src/fixtures/validateInventoryExport.ts",
     "test:file-extractor": "tsx ./src/file-extractor/fixtures/validateFileExtractionFixture.ts",
     "test:file-extractor-limits": "tsx ./src/file-extractor/fixtures/validateExportLimits.ts",
     "test:generated-asset-classification": "tsx ./src/file-extractor/fixtures/validateGeneratedAssetClassification.ts",
@@ -74,8 +75,6 @@
     "eslint": "^8.57.0",
     "husky": "^9.0.11",
     "katex": "^0.16.11",
-    "lint-staged": "^15.2.7",
-    "react": "^18.3.1",
     "tsx": "^4.22.4",
     "typescript": "^5.5.2",
     "vite": "^5.3.2"
