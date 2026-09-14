@@ -90,6 +90,18 @@ assert.deepEqual(projectRows[0], {
     'Actual Project Name': 'Windows 11 First Boot Setup',
 })
 
+const renamedProjectRows = buildProjectInventoryRows([{
+    id: 'g-p-6a7b74e2095881919288ff18dc08b1e9-github-chatgpt-exporter',
+    organization_id: 'org-1',
+    display: {
+        name: 'Renamed Project',
+        description: '',
+    },
+}])
+assert.equal(renamedProjectRows[0].Slug, 'github-chatgpt-exporter')
+assert.equal(renamedProjectRows[0].Token, 'g-p-6a7b74e2095881919288ff18dc08b1e9-github-chatgpt-exporter')
+assert.equal(renamedProjectRows[0]['Actual Project Name'], 'Renamed Project')
+
 const allowed = new Set(['g-p-6a7b74e2095881919288ff18dc08b1e9'])
 const filteredProjects = buildProjectInventoryRows(projects, allowed)
 assert.equal(filteredProjects.length, 1)
