@@ -26,12 +26,12 @@ Project exports contain these fields, in this order:
 | Field | Meaning |
 | --- | --- |
 | URL | A direct ChatGPT Project URL generated from the Project token. |
-| Token | The URL token. When only a bare Gizmo ID is available, the exporter appends the deterministic Project slug. |
+| Token | The Project URL token. An existing `GizmoID-Slug` token is preserved; when only a bare Gizmo ID is available, the exporter appends a deterministic slug. |
 | GizmoID | The stable `g-p-...` Project identifier used to associate conversations with Projects. |
-| Slug | A deterministic lower-case, hyphen-separated slug generated from the actual Project name. |
-| Actual Project Name | The Project display name returned by ChatGPT. |
+| Slug | The Project URL slug. An existing token suffix is preserved; otherwise it is generated deterministically from the current Project name. |
+| Actual Project Name | The current Project display name returned by ChatGPT. |
 
-The existing `URL, Token, GizmoID, Slug` Project-map contract is therefore preserved, with `Actual Project Name` appended.
+The existing `URL, Token, GizmoID, Slug` Project-map contract is therefore preserved, with `Actual Project Name` appended. Keeping the URL identity separate from the current display name also means a Project rename does not silently rewrite an existing token/slug when ChatGPT supplies the historical token.
 
 ## Chat list
 
@@ -61,9 +61,15 @@ For Project inventories, search applies to Project names/slugs. Date filtering r
 
 The normal bulk-export conversation limit still bounds API conversation discovery. Project metadata itself is fetched from the Projects endpoint and is not truncated by that conversation limit.
 
+## Project membership
+
+When conversations are loaded from a specific Project endpoint, the inventory exporter retains the endpoint's Project identity even if an individual conversation row omits `gizmo_id`. This allows `Project Name` to remain reliable without modifying the conversation itself.
+
+For the main conversation feed, known Project Gizmo IDs are normalised before identifying conversations that are not in a Project. Custom GPT conversations remain non-Project chats unless their Gizmo ID matches a known Project.
+
 ## Slug generation
 
-Slugs are deterministic and filesystem-friendly:
+When a stable slug is not already present in a Project token, or when a chat slug is needed, slugs are generated deterministically:
 
 1. Unicode text is normalised and combining accents are removed.
 2. Apostrophes are removed.
@@ -86,6 +92,7 @@ For local `conversations.json` input, Project filtering/name resolution depends 
 The repository includes deterministic validation covering:
 
 - Project token, Gizmo ID and slug derivation;
+- Project rename stability when an existing token suffix is available;
 - duplicate suppression;
 - chat URL/token/slug generation;
 - Project-name lookup and unknown Project handling;
