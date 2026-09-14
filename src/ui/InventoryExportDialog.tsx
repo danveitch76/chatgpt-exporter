@@ -88,7 +88,15 @@ function mergeUniqueConversations(
 ): ApiConversationItem[] {
     const byId = new Map(existing.map(conversation => [conversation.id, conversation]))
     for (const conversation of incoming) {
-        if (!byId.has(conversation.id)) byId.set(conversation.id, conversation)
+        const current = byId.get(conversation.id)
+        if (!current) {
+            byId.set(conversation.id, conversation)
+            continue
+        }
+
+        if (!current.gizmo_id && conversation.gizmo_id) {
+            byId.set(conversation.id, { ...current, gizmo_id: conversation.gizmo_id })
+        }
     }
     return [...byId.values()]
 }
@@ -146,15 +154,17 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
         fetchProjects()
             .then((items) => {
                 setProjects(items)
+                setProjectsLoaded(true)
                 setError('')
             })
             .catch((err: Error) => {
                 console.error('Error fetching projects for inventory export:', err)
+                setProjects([])
+                setProjectsLoaded(false)
                 setError(err.message || 'Failed to load projects')
             })
             .finally(() => {
                 setProjectsLoading(false)
-                setProjectsLoaded(true)
             })
     }, [open])
 
@@ -364,7 +374,10 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
                                 className="Select ExportFilterControl"
                                 value={exportSource}
                                 disabled={loading || projectsLoading}
-                                onChange={event => setExportSource(event.currentTarget.value as ExportSource)}
+                                onChange={(event) => {
+                                    setError('')
+                                    setExportSource(event.currentTarget.value as ExportSource)
+                                }}
                             >
                                 <option value="API">ChatGPT API</option>
                                 <option value="Local">Official export file (conversations.json)</option>
@@ -449,7 +462,7 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
                                 placeholder={kind === 'projects' ? 'Search projects...' : 'Search conversations...'}
                                 value={query}
                                 disabled={loading || projectsLoading}
-                                onInput={event => setQuery(event.currentTarget.value)}
+                                onInput={event => setQuery((event.currentTarget as HTMLInputElement).value)}
                             />
                         </div>
                     </section>
