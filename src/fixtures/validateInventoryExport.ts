@@ -83,10 +83,10 @@ assert.equal(
 const projectRows = buildProjectInventoryRows(projects)
 assert.equal(projectRows.length, 2)
 assert.deepEqual(projectRows[0], {
-    URL: 'https://chatgpt.com/g/g-p-68aecdb11a0881919c9cba50a8ac05b8-windows-11-first-boot-setup/project',
-    Token: 'g-p-68aecdb11a0881919c9cba50a8ac05b8-windows-11-first-boot-setup',
-    GizmoID: 'g-p-68aecdb11a0881919c9cba50a8ac05b8',
-    Slug: 'windows-11-first-boot-setup',
+    'URL': 'https://chatgpt.com/g/g-p-68aecdb11a0881919c9cba50a8ac05b8-windows-11-first-boot-setup/project',
+    'Token': 'g-p-68aecdb11a0881919c9cba50a8ac05b8-windows-11-first-boot-setup',
+    'GizmoID': 'g-p-68aecdb11a0881919c9cba50a8ac05b8',
+    'Slug': 'windows-11-first-boot-setup',
     'Actual Project Name': 'Windows 11 First Boot Setup',
 })
 
@@ -110,9 +110,9 @@ assert.equal(filteredProjects[0]['Actual Project Name'], 'GitHub - ChatGPT Expor
 const chatRows = buildChatInventoryRows(conversations, projects)
 assert.equal(chatRows.length, 2)
 assert.deepEqual(chatRows[0], {
-    URL: 'https://chatgpt.com/c/6a0dc2f5-1950-83eb-9a54-e9e6f9391e3c',
-    Token: '6a0dc2f5-1950-83eb-9a54-e9e6f9391e3c',
-    Slug: 'todo-raspberry-pi-travel-router',
+    'URL': 'https://chatgpt.com/c/6a0dc2f5-1950-83eb-9a54-e9e6f9391e3c',
+    'Token': '6a0dc2f5-1950-83eb-9a54-e9e6f9391e3c',
+    'Slug': 'todo-raspberry-pi-travel-router',
     'Actual Chat Name': 'TODO Raspberry Pi Travel Router',
     'Project Name': 'Windows 11 First Boot Setup',
 })
@@ -126,10 +126,10 @@ assert.match(text, /^URL\tToken\tSlug\tActual Chat Name\tProject Name\n/)
 assert.ok(text.includes('TODO Raspberry Pi Travel Router'))
 
 const html = serialiseInventoryHtml('projects', [{
-    URL: 'https://example.test/?a=1&b=2',
-    Token: '<token>',
-    GizmoID: 'g-p-test',
-    Slug: 'example',
+    'URL': 'https://example.test/?a=1&b=2',
+    'Token': '<token>',
+    'GizmoID': 'g-p-test',
+    'Slug': 'example',
     'Actual Project Name': 'A <Project> & "Name"',
 }])
 assert.ok(html.includes('https://example.test/?a=1&amp;b=2'))
