@@ -256,6 +256,71 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
     border-radius: 5px;\r
 }\r
 \r
+.InventoryPreview {\r
+    display: flex;\r
+    min-height: 0;\r
+    flex: 1 1 auto;\r
+    flex-direction: column;\r
+    overflow: hidden;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 5px;\r
+    color: var(--ce-text-primary);\r
+}\r
+\r
+.InventoryPreviewHeader,\r
+.InventoryPreviewRow {\r
+    display: grid;\r
+    grid-template-columns: minmax(16rem, 1.6fr) minmax(12rem, 1fr) minmax(12rem, 1fr) minmax(20rem, 1.8fr);\r
+    align-items: center;\r
+}\r
+\r
+.InventoryPreviewHeader {\r
+    flex: 0 0 auto;\r
+    border-bottom: 1px solid var(--ce-border-light);\r
+    background: var(--ce-menu-secondary);\r
+    font-size: 0.75rem;\r
+    font-weight: 600;\r
+}\r
+\r
+.InventoryPreviewHeaderCell,\r
+.InventoryPreviewCell {\r
+    min-width: 0;\r
+    padding: 0.45rem 0.6rem;\r
+    overflow: hidden;\r
+    text-overflow: ellipsis;\r
+    white-space: nowrap;\r
+}\r
+\r
+.InventoryPreviewHeaderCell + .InventoryPreviewHeaderCell,\r
+.InventoryPreviewCell + .InventoryPreviewCell {\r
+    border-left: 1px solid var(--ce-border-light);\r
+}\r
+\r
+.InventoryPreviewBody {\r
+    min-height: 0;\r
+    flex: 1 1 auto;\r
+    overflow: auto;\r
+}\r
+\r
+.InventoryPreviewRow {\r
+    min-width: 70rem;\r
+    border-bottom: 1px solid var(--ce-border-light);\r
+    font-size: 0.8125rem;\r
+}\r
+\r
+.InventoryPreviewRow:last-child {\r
+    border-bottom: 0;\r
+}\r
+\r
+.InventoryPreviewCellPrimary {\r
+    font-weight: 500;\r
+}\r
+\r
+.InventoryPreviewEmpty {\r
+    padding: 1rem;\r
+    color: #9ca3af;\r
+}\r
+\r
 @media (max-width: 820px) {\r
     .DialogContent._export {\r
         width: min(96vw, 48rem);\r
@@ -274,6 +339,11 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
 \r
     .ExportSourceActions {\r
         justify-content: flex-start;\r
+    }\r
+\r
+    .InventoryPreviewHeader,\r
+    .InventoryPreviewRow {\r
+        grid-template-columns: minmax(14rem, 1.5fr) minmax(10rem, 1fr) minmax(10rem, 1fr) minmax(18rem, 1.5fr);\r
     }\r
 }\r
 \r
@@ -24423,6 +24493,33 @@ ${body2}
     html: exportInventoryHtml,
     md: exportInventoryMarkdown
   };
+  const PROJECT_PREVIEW_HEADERS = ["Actual Project Name", "GizmoID", "Slug", "URL"];
+  const CHAT_PREVIEW_HEADERS = ["Actual Chat Name", "Project Name", "Slug", "URL"];
+  function inventoryValue(row, header) {
+    return String(row[header] ?? "");
+  }
+  const InventoryPreview = ({ kind, rows }) => {
+    const headers = kind === "projects" ? PROJECT_PREVIEW_HEADERS : CHAT_PREVIEW_HEADERS;
+    return /* @__PURE__ */ o$8("div", { className: "InventoryPreview", "aria-label": `${kind === "projects" ? "Project" : "Chat"} inventory preview`, children: [
+      /* @__PURE__ */ o$8("div", { className: "InventoryPreviewHeader", role: "row", children: headers.map((header) => /* @__PURE__ */ o$8("div", { className: "InventoryPreviewHeaderCell", role: "columnheader", children: header }, header)) }),
+      /* @__PURE__ */ o$8("div", { className: "InventoryPreviewBody", role: "rowgroup", children: [
+        rows.map((row) => {
+          const key2 = inventoryValue(row, "URL") || inventoryValue(row, "Token");
+          return /* @__PURE__ */ o$8("div", { className: "InventoryPreviewRow", role: "row", children: headers.map((header) => /* @__PURE__ */ o$8(
+            "div",
+            {
+              className: `InventoryPreviewCell${header === "Actual Project Name" || header === "Actual Chat Name" ? " InventoryPreviewCellPrimary" : ""}`,
+              role: "cell",
+              title: inventoryValue(row, header) || void 0,
+              children: inventoryValue(row, header) || "—"
+            },
+            header
+          )) }, key2);
+        }),
+        rows.length === 0 && /* @__PURE__ */ o$8("div", { className: "InventoryPreviewEmpty", children: "No rows to display." })
+      ] })
+    ] });
+  };
   const InventoryExportDialog = ({ open, onOpenChange, children }) => {
     const { exportAllLimit } = useSettingContext();
     const fileInputRef = _(null);
@@ -24758,6 +24855,7 @@ ${body2}
               )
             ] })
           ] }),
+          /* @__PURE__ */ o$8(InventoryPreview, { kind, rows }),
           /* @__PURE__ */ o$8("div", { className: "ActionBar flex flex-wrap mt-3 items-center gap-2", children: [
             /* @__PURE__ */ o$8(
               "select",

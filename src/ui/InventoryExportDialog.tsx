@@ -125,7 +125,7 @@ function inventoryValue(row: InventoryRow, header: string): string {
     return String((row as unknown as Record<string, string>)[header] ?? '')
 }
 
-const InventoryPreview: FC<{ kind: InventoryKind, rows: InventoryRow[] }> = ({ kind, rows }) => {
+const InventoryPreview: FC<{ kind: InventoryKind; rows: InventoryRow[] }> = ({ kind, rows }) => {
     const headers = kind === 'projects' ? PROJECT_PREVIEW_HEADERS : CHAT_PREVIEW_HEADERS
 
     return (
