@@ -973,7 +973,7 @@ const DialogContent: FC<DialogContentProps> = ({ format }) => {
                         placeholder="Search conversations..."
                         value={query}
                         disabled={processing}
-                        onInput={(e) => setQuery((e.currentTarget as HTMLInputElement).value)}
+                        onInput={e => setQuery((e.currentTarget as HTMLInputElement).value)}
                     />
                 </div>
             </section>

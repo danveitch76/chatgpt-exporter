@@ -112,6 +112,163 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
     box-shadow: 0 0 0 1px #6f6e77;\r
 }\r
 \r
+/* Export dialog layout ---------------------------------------------------- */\r
+.DialogContent._export {\r
+    width: min(94vw, 76rem);\r
+    max-width: 76rem;\r
+}\r
+\r
+.ExportStatusBox {\r
+    position: relative;\r
+    display: flex;\r
+    align-items: center;\r
+    gap: 0.65rem;\r
+    min-height: 3.5rem;\r
+    margin: 0.85rem 0 1rem;\r
+    padding: 0.75rem 1rem;\r
+    overflow: hidden;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 5px;\r
+    color: var(--ce-text-primary);\r
+}\r
+\r
+.ExportStatusText {\r
+    min-width: 0;\r
+    flex: 1 1 auto;\r
+    overflow: hidden;\r
+    text-overflow: ellipsis;\r
+    white-space: nowrap;\r
+}\r
+\r
+.ExportStatusDetail {\r
+    flex: 0 0 auto;\r
+    font-variant-numeric: tabular-nums;\r
+    color: #6ea8ff;\r
+}\r
+\r
+.ExportStatusProgress {\r
+    position: absolute;\r
+    right: 0;\r
+    bottom: 0;\r
+    left: 0;\r
+    height: 2px;\r
+    background: transparent;\r
+}\r
+\r
+.ExportStatusProgress > span {\r
+    display: block;\r
+    height: 100%;\r
+    background: #3b82f6;\r
+    transition: width 160ms ease;\r
+}\r
+\r
+.ExportFilters {\r
+    margin-bottom: 1rem;\r
+    padding: 0.85rem 1rem 1rem;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 5px;\r
+}\r
+\r
+.ExportFiltersTitle {\r
+    margin-bottom: 0.8rem;\r
+    font-size: 0.95rem;\r
+    font-weight: 600;\r
+    color: var(--ce-text-primary);\r
+}\r
+\r
+.ExportFilterRow,\r
+.ProjectSelect.ExportFilterRow {\r
+    display: grid;\r
+    grid-template-columns: 7.5rem minmax(0, 1fr);\r
+    align-items: center;\r
+    gap: 0.7rem;\r
+    margin: 0;\r
+    padding: 0.65rem 0;\r
+    color: var(--ce-text-primary);\r
+}\r
+\r
+.ExportFilterRow + .ExportFilterRow,\r
+.ExportFilterRow + .ProjectSelect.ExportFilterRow,\r
+.ProjectSelect.ExportFilterRow + .ExportFilterRow {\r
+    border-top: 1px solid var(--ce-border-light);\r
+}\r
+\r
+.ExportFilterLabel {\r
+    white-space: nowrap;\r
+    font-size: 0.875rem;\r
+    font-weight: 500;\r
+}\r
+\r
+.ExportFilterControl {\r
+    min-width: 0;\r
+}\r
+\r
+.ExportFilterControl > .Select,\r
+.ProjectSelect.ExportFilterRow > .Select {\r
+    width: 100%;\r
+}\r
+\r
+.ExportSourceRow {\r
+    grid-template-columns: 7.5rem minmax(16rem, 1fr) auto;\r
+}\r
+\r
+.ExportSourceActions {\r
+    display: flex;\r
+    align-items: center;\r
+    justify-content: flex-end;\r
+    gap: 0.5rem;\r
+    white-space: nowrap;\r
+}\r
+\r
+.ExportDateRow {\r
+    grid-template-columns: 7.5rem 9rem auto minmax(8.5rem, 1fr) auto minmax(8.5rem, 1fr) auto;\r
+}\r
+\r
+.ExportDateRow label {\r
+    white-space: nowrap;\r
+    font-size: 0.875rem;\r
+}\r
+\r
+.ExportDateRow input[type="date"] {\r
+    width: 100%;\r
+    min-width: 0;\r
+    height: 1.95rem;\r
+    box-sizing: border-box;\r
+}\r
+\r
+.ExportSearchRow {\r
+    grid-template-columns: 7.5rem minmax(0, 1fr);\r
+}\r
+\r
+.ExportSearchRow .SelectSearch {\r
+    margin: 0;\r
+}\r
+\r
+.SelectToolbar {\r
+    margin: 0 0 0.85rem;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 5px;\r
+}\r
+\r
+@media (max-width: 820px) {\r
+    .DialogContent._export {\r
+        width: min(96vw, 48rem);\r
+    }\r
+\r
+    .ExportSourceRow,\r
+    .ExportDateRow,\r
+    .ExportFilterRow,\r
+    .ProjectSelect.ExportFilterRow,\r
+    .ExportSearchRow {\r
+        grid-template-columns: 1fr;\r
+        gap: 0.4rem;\r
+    }\r
+\r
+    .ExportSourceActions {\r
+        justify-content: flex-start;\r
+    }\r
+}\r
+\r
 html {\r
     --ce-text-primary: var(--text-primary, #0d0d0d);\r
     --ce-menu-primary: #ffffff;\r
@@ -23157,28 +23314,25 @@ ${content2}`;
   }
   const ProjectSelect = ({ projects, selected, setSelected, disabled, loading }) => {
     const { t: t2 } = useTranslation();
-    return /* @__PURE__ */ o$8("div", { className: "ProjectSelect flex items-center text-gray-600 dark:text-gray-300 justify-between mb-3", children: [
-      t2("Select Project"),
-      /* @__PURE__ */ o$8("div", { className: "flex items-center gap-2", children: [
-        loading && /* @__PURE__ */ o$8(IconLoading, { className: "w-3 h-3" }),
-        /* @__PURE__ */ o$8(
-          "select",
-          {
-            disabled,
-            className: "Select",
-            value: selected ?? "",
-            onChange: (e2) => {
-              const val = e2.currentTarget.value;
-              setSelected(val || null);
-            },
-            children: [
-              /* @__PURE__ */ o$8("option", { value: "", children: t2("All conversations") }),
-              /* @__PURE__ */ o$8("option", { value: NOT_IN_PROJECT_ID, children: t2("Not in a project") }),
-              projects.map((project) => /* @__PURE__ */ o$8("option", { value: project.id, children: project.display.name }, project.id))
-            ]
-          }
-        )
-      ] })
+    return /* @__PURE__ */ o$8("div", { className: "ProjectSelect ExportFilterRow", "aria-busy": loading, children: [
+      /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Project" }),
+      /* @__PURE__ */ o$8(
+        "select",
+        {
+          disabled,
+          className: "Select",
+          value: selected ?? "",
+          onChange: (e2) => {
+            const val = e2.currentTarget.value;
+            setSelected(val || null);
+          },
+          children: [
+            /* @__PURE__ */ o$8("option", { value: "", children: t2("All conversations") }),
+            /* @__PURE__ */ o$8("option", { value: NOT_IN_PROJECT_ID, children: t2("Not in a project") }),
+            projects.map((project) => /* @__PURE__ */ o$8("option", { value: project.id, children: project.display.name }, project.id))
+          ]
+        }
+      )
     ] });
   };
   const ConversationSelect = ({
@@ -23187,18 +23341,18 @@ ${content2}`;
     setSelected,
     disabled,
     loading,
-    error: error2
+    error: error2,
+    query: query2,
+    dateField,
+    fromDate,
+    toDate
   }) => {
     const { t: t2 } = useTranslation();
-    const [query2, setQuery] = h$4("");
     const lastClickedIndex = _(-1);
     const [skipFirst, setSkipFirst] = h$4(0);
     const [selectionSize, setSelectionSize] = h$4(EXPORT_OPERATION_BATCH);
     const [sortField, setSortField] = h$4("create_time");
     const [sortDir, setSortDir] = h$4("desc");
-    const [dateField, setDateField] = h$4("update_time");
-    const [fromDate, setFromDate] = h$4("");
-    const [toDate, setToDate] = h$4("");
     const filtered = F$1(() => {
       let result = conversations;
       const q2 = query2.trim();
@@ -23217,107 +23371,7 @@ ${content2}`;
       });
     }, [conversations, query2, dateField, fromDate, toDate, sortField, sortDir]);
     const allFilteredSelected = filtered.length > 0 && filtered.every((c2) => selected.some((x2) => x2.id === c2.id));
-    const resetDateSelection = () => {
-      lastClickedIndex.current = -1;
-      setSelected([]);
-    };
     return /* @__PURE__ */ o$8(k$3, { children: [
-      /* @__PURE__ */ o$8(
-        "input",
-        {
-          type: "search",
-          className: "SelectSearch",
-          placeholder: t2("Search"),
-          value: query2,
-          disabled,
-          onInput: (e2) => {
-            const val = e2.currentTarget.value;
-            lastClickedIndex.current = -1;
-            setQuery(val);
-          }
-        }
-      ),
-      /* @__PURE__ */ o$8("div", { className: "flex items-center gap-2 flex-wrap mb-2 text-sm text-gray-600 dark:text-gray-300", children: [
-        /* @__PURE__ */ o$8("span", { className: "font-medium", children: "Date" }),
-        /* @__PURE__ */ o$8(
-          "select",
-          {
-            className: "Select",
-            "aria-label": "Conversation date field",
-            disabled,
-            value: dateField,
-            onChange: (e2) => {
-              resetDateSelection();
-              setDateField(e2.currentTarget.value);
-            },
-            children: [
-              /* @__PURE__ */ o$8("option", { value: "update_time", children: "Last updated" }),
-              /* @__PURE__ */ o$8("option", { value: "create_time", children: "Created" })
-            ]
-          }
-        ),
-        /* @__PURE__ */ o$8("label", { className: "flex items-center gap-1", children: [
-          "From",
-          /* @__PURE__ */ o$8(
-            "input",
-            {
-              type: "date",
-              "aria-label": "Conversation date from",
-              disabled,
-              value: fromDate,
-              onChange: (e2) => {
-                resetDateSelection();
-                setFromDate(e2.currentTarget.value);
-              },
-              style: {
-                fontSize: "0.75rem",
-                padding: "2px 5px",
-                border: "1px solid #9ca3af",
-                borderRadius: "3px",
-                background: "transparent",
-                color: "inherit"
-              }
-            }
-          )
-        ] }),
-        /* @__PURE__ */ o$8("label", { className: "flex items-center gap-1", children: [
-          "To",
-          /* @__PURE__ */ o$8(
-            "input",
-            {
-              type: "date",
-              "aria-label": "Conversation date to",
-              disabled,
-              value: toDate,
-              onChange: (e2) => {
-                resetDateSelection();
-                setToDate(e2.currentTarget.value);
-              },
-              style: {
-                fontSize: "0.75rem",
-                padding: "2px 5px",
-                border: "1px solid #9ca3af",
-                borderRadius: "3px",
-                background: "transparent",
-                color: "inherit"
-              }
-            }
-          )
-        ] }),
-        /* @__PURE__ */ o$8(
-          "button",
-          {
-            className: "Button neutral",
-            disabled: disabled || !fromDate && !toDate,
-            onClick: () => {
-              resetDateSelection();
-              setFromDate("");
-              setToDate("");
-            },
-            children: "Clear dates"
-          }
-        )
-      ] }),
       /* @__PURE__ */ o$8("div", { className: "SelectToolbar", children: [
         /* @__PURE__ */ o$8(
           CheckBox,
@@ -23332,13 +23386,6 @@ ${content2}`;
           }
         ),
         /* @__PURE__ */ o$8("div", { className: "flex items-center gap-2 ml-auto flex-wrap", children: [
-          loading && conversations.length > 0 && /* @__PURE__ */ o$8("span", { className: "flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400", children: [
-            /* @__PURE__ */ o$8(IconLoading, { className: "w-3 h-3" }),
-            t2("Loading"),
-            "... (",
-            conversations.length,
-            ")"
-          ] }),
           /* @__PURE__ */ o$8(
             "input",
             {
@@ -23468,15 +23515,6 @@ ${content2}`;
         )
       ] }),
       /* @__PURE__ */ o$8("ul", { className: "SelectList", children: [
-        loading && conversations.length === 0 && /* @__PURE__ */ o$8("li", { className: "SelectItem", children: [
-          t2("Loading"),
-          "..."
-        ] }),
-        error2 && /* @__PURE__ */ o$8("li", { className: "SelectItem", children: [
-          t2("Error"),
-          ": ",
-          error2
-        ] }),
         filtered.map((c2, index2) => {
           const isSelected = selected.some((x2) => x2.id === c2.id);
           return /* @__PURE__ */ o$8(
@@ -23533,7 +23571,7 @@ ${content2}`;
             c2.id
           );
         }),
-        !loading && !error2 && filtered.length === 0 && conversations.length > 0 && /* @__PURE__ */ o$8("li", { className: "SelectItem text-gray-400 dark:text-gray-500", children: t2("No results") })
+        !loading && !error2 && filtered.length === 0 && /* @__PURE__ */ o$8("li", { className: "SelectItem text-gray-400 dark:text-gray-500", children: conversations.length > 0 ? t2("No results") : "No conversations to display." })
       ] })
     ] });
   };
@@ -23565,6 +23603,10 @@ ${content2}`;
     const [error2, setError] = h$4("");
     const [processing, setProcessing] = h$4(false);
     const [selected, setSelected] = h$4([]);
+    const [query2, setQuery] = h$4("");
+    const [dateField, setDateField] = h$4("update_time");
+    const [fromDate, setFromDate] = h$4("");
+    const [toDate, setToDate] = h$4("");
     const [exportType, setExportType] = h$4(exportAllOptions[0].label);
     const disabled = processing || !!error2 || selected.length === 0;
     const [hasMore, setHasMore] = h$4(false);
@@ -23588,6 +23630,9 @@ ${content2}`;
     const totalItemsRef = _(0);
     const cancelledRef = _(false);
     const fetchGenRef = _(0);
+    const resetDateSelection = T$4(() => {
+      setSelected([]);
+    }, []);
     const onUpload = T$4((e2) => {
       var _a, _b;
       const file = (_b = (_a = e2.target) == null ? void 0 : _a.files) == null ? void 0 : _b[0];
@@ -23845,29 +23890,64 @@ ${content2}`;
         setProbeStatus("error");
       }
     }, []);
-    const probeLabel = probeStatus === "testing" ? "⏳ Testing…" : probeStatus === "ok" ? "✅ API ready" : probeStatus === "rate_limited" ? `🚫 Rate limited${probeRetryAfterSecs != null ? ` · wait ${probeRetryAfterSecs}s` : ""}` : probeStatus === "error" ? "⚠️ Error" : null;
+    let statusText = "Ready";
+    let statusDetail = conversations.length > 0 ? `${conversations.length} conversations loaded` : "";
+    let statusBusy = false;
+    let statusPercent = null;
+    if (error2) {
+      statusText = `Error: ${error2}`;
+      statusDetail = "";
+    } else if (processing) {
+      statusBusy = true;
+      statusText = progress.currentStatus === "rate_limited" ? `Rate limited — waiting ${progress.rateLimitWaitSecs ?? "…"}s` : progress.currentName || "Processing conversations...";
+      statusDetail = progress.total > 0 ? `${progress.completed} / ${progress.total}` : "Processing";
+      statusPercent = progress.total > 0 ? Math.round(progress.completed / progress.total * 100) : null;
+    } else if (loadingMore) {
+      statusBusy = true;
+      statusText = "Loading more conversations...";
+      statusDetail = totalAvailable !== null ? `${conversations.length} / ${totalAvailable}` : `${conversations.length} loaded`;
+    } else if (projectsLoading && !projectsLoaded) {
+      statusBusy = true;
+      statusText = "Loading projects...";
+      statusDetail = "";
+    } else if (loading) {
+      statusBusy = true;
+      statusText = "Loading conversations...";
+      statusDetail = totalAvailable !== null ? `${conversations.length} / ${totalAvailable}` : `${conversations.length} loaded`;
+    } else if (probeStatus === "testing") {
+      statusBusy = true;
+      statusText = "Testing ChatGPT API...";
+      statusDetail = "";
+    } else if (probeStatus === "rate_limited") {
+      statusText = "ChatGPT API is rate limited";
+      statusDetail = probeRetryAfterSecs != null ? `Retry in ${probeRetryAfterSecs}s` : "";
+    } else if (probeStatus === "error") {
+      statusText = "ChatGPT API test failed";
+      statusDetail = "";
+    } else if (probeStatus === "ok") {
+      statusText = "ChatGPT API ready";
+      statusDetail = conversations.length > 0 ? `${conversations.length} conversations loaded` : "";
+    } else if (exportSource === "Local" && localConversations.length === 0) {
+      statusText = "Select an official export file to load conversations";
+      statusDetail = "";
+    }
     return /* @__PURE__ */ o$8(k$3, { children: [
       /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$f99233281efd08a0, { className: "DialogTitle", children: t2("Export Dialog Title") }),
-      /* @__PURE__ */ o$8("div", { className: "flex items-center text-gray-600 dark:text-gray-300 flex justify-between border-b-[1px] pb-3 mb-3 dark:border-gray-700", children: [
-        t2("Export from official export file"),
-        " (conversations.json) ",
-        /* @__PURE__ */ o$8("div", { className: "flex items-center gap-2", children: [
-          exportSource === "API" && /* @__PURE__ */ o$8(
-            "button",
-            {
-              className: "Button neutral",
-              style: { fontSize: "0.72rem", padding: "2px 8px", whiteSpace: "nowrap" },
-              disabled: probeStatus === "testing" || processing,
-              title: Object.keys(probeHeaders).length > 0 ? `Rate-limit headers: ${JSON.stringify(probeHeaders)}` : "Check if the API is currently rate-limiting requests",
-              onClick: runProbe,
-              children: probeLabel ?? "Test API"
-            }
-          ),
-          exportSource === "API" && /* @__PURE__ */ o$8("button", { className: "btn relative btn-neutral", onClick: () => {
-            var _a;
-            return (_a = fileInputRef.current) == null ? void 0 : _a.click();
-          }, children: /* @__PURE__ */ o$8(IconUpload, { className: "w-4 h-4" }) })
-        ] })
+      /* @__PURE__ */ o$8("div", { className: "ExportStatusBox", role: "status", "aria-live": "polite", children: [
+        statusBusy && /* @__PURE__ */ o$8(IconLoading, { className: "w-4 h-4 shrink-0" }),
+        /* @__PURE__ */ o$8("span", { className: "ExportStatusText", children: statusText }),
+        statusDetail && /* @__PURE__ */ o$8("span", { className: "ExportStatusDetail", children: statusDetail }),
+        processing && /* @__PURE__ */ o$8(
+          "button",
+          {
+            className: "Button red",
+            style: { fontSize: "0.75rem", padding: "3px 10px", height: "auto" },
+            title: "Stop the export — any batches already downloaded are kept",
+            onClick: cancelExport,
+            children: "Cancel"
+          }
+        ),
+        /* @__PURE__ */ o$8("div", { className: "ExportStatusProgress", "aria-hidden": "true", children: /* @__PURE__ */ o$8("span", { style: { width: `${statusPercent ?? 0}%` } }) })
       ] }),
       /* @__PURE__ */ o$8(
         "input",
@@ -23879,16 +23959,159 @@ ${content2}`;
           onChange: onUpload
         }
       ),
-      exportSource === "API" && /* @__PURE__ */ o$8(
-        ProjectSelect,
-        {
-          projects,
-          selected: selectedProjectId,
-          setSelected: setSelectedProjectId,
-          disabled: processing,
-          loading: projectsLoading
-        }
-      ),
+      /* @__PURE__ */ o$8("section", { className: "ExportFilters", "aria-label": "Conversation filters", children: [
+        /* @__PURE__ */ o$8("div", { className: "ExportFiltersTitle", children: "Filters" }),
+        /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSourceRow", children: [
+          /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Export from" }),
+          /* @__PURE__ */ o$8(
+            "select",
+            {
+              className: "Select ExportFilterControl",
+              disabled: processing,
+              value: exportSource,
+              onChange: (e2) => {
+                setSelected([]);
+                setExportSource(e2.currentTarget.value);
+              },
+              children: [
+                /* @__PURE__ */ o$8("option", { value: "API", children: "ChatGPT API" }),
+                /* @__PURE__ */ o$8("option", { value: "Local", children: "Official export file (conversations.json)" })
+              ]
+            }
+          ),
+          /* @__PURE__ */ o$8("div", { className: "ExportSourceActions", children: exportSource === "API" ? /* @__PURE__ */ o$8(
+            "button",
+            {
+              className: "Button neutral",
+              disabled: probeStatus === "testing" || processing,
+              title: Object.keys(probeHeaders).length > 0 ? `Rate-limit headers: ${JSON.stringify(probeHeaders)}` : "Check if the API is currently rate-limiting requests",
+              onClick: runProbe,
+              children: "Test API"
+            }
+          ) : /* @__PURE__ */ o$8(
+            "button",
+            {
+              className: "Button neutral flex items-center gap-1",
+              disabled: processing,
+              onClick: () => {
+                var _a;
+                return (_a = fileInputRef.current) == null ? void 0 : _a.click();
+              },
+              children: [
+                /* @__PURE__ */ o$8(IconUpload, { className: "w-4 h-4" }),
+                "Select file..."
+              ]
+            }
+          ) })
+        ] }),
+        exportSource === "API" ? /* @__PURE__ */ o$8(
+          ProjectSelect,
+          {
+            projects,
+            selected: selectedProjectId,
+            setSelected: setSelectedProjectId,
+            disabled: processing,
+            loading: projectsLoading
+          }
+        ) : /* @__PURE__ */ o$8("div", { className: "ExportFilterRow", children: [
+          /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Project" }),
+          /* @__PURE__ */ o$8("select", { className: "Select", disabled: true, value: "", children: /* @__PURE__ */ o$8("option", { value: "", children: "Not applicable for file import" }) })
+        ] }),
+        /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportDateRow", children: [
+          /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Date" }),
+          /* @__PURE__ */ o$8(
+            "select",
+            {
+              className: "Select",
+              "aria-label": "Conversation date field",
+              disabled: processing,
+              value: dateField,
+              onChange: (e2) => {
+                resetDateSelection();
+                setDateField(e2.currentTarget.value);
+              },
+              children: [
+                /* @__PURE__ */ o$8("option", { value: "update_time", children: "Last updated" }),
+                /* @__PURE__ */ o$8("option", { value: "create_time", children: "Created" })
+              ]
+            }
+          ),
+          /* @__PURE__ */ o$8("label", { htmlFor: "conversation-date-from", children: "From" }),
+          /* @__PURE__ */ o$8(
+            "input",
+            {
+              id: "conversation-date-from",
+              type: "date",
+              "aria-label": "Conversation date from",
+              disabled: processing,
+              value: fromDate,
+              onChange: (e2) => {
+                resetDateSelection();
+                setFromDate(e2.currentTarget.value);
+              },
+              style: {
+                fontSize: "0.75rem",
+                padding: "2px 5px",
+                border: "1px solid #9ca3af",
+                borderRadius: "3px",
+                background: "transparent",
+                color: "inherit"
+              }
+            }
+          ),
+          /* @__PURE__ */ o$8("label", { htmlFor: "conversation-date-to", children: "To" }),
+          /* @__PURE__ */ o$8(
+            "input",
+            {
+              id: "conversation-date-to",
+              type: "date",
+              "aria-label": "Conversation date to",
+              disabled: processing,
+              value: toDate,
+              onChange: (e2) => {
+                resetDateSelection();
+                setToDate(e2.currentTarget.value);
+              },
+              style: {
+                fontSize: "0.75rem",
+                padding: "2px 5px",
+                border: "1px solid #9ca3af",
+                borderRadius: "3px",
+                background: "transparent",
+                color: "inherit"
+              }
+            }
+          ),
+          /* @__PURE__ */ o$8(
+            "button",
+            {
+              className: "Button neutral",
+              disabled: processing || !fromDate && !toDate,
+              onClick: () => {
+                resetDateSelection();
+                setFromDate("");
+                setToDate("");
+              },
+              children: "Clear dates"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSearchRow", children: [
+          /* @__PURE__ */ o$8("label", { className: "ExportFilterLabel", htmlFor: "conversation-search", children: "Search" }),
+          /* @__PURE__ */ o$8(
+            "input",
+            {
+              id: "conversation-search",
+              type: "search",
+              className: "SelectSearch",
+              placeholder: "Search conversations...",
+              value: query2,
+              disabled: processing,
+              onInput: (e2) => setQuery(e2.currentTarget.value)
+            }
+          )
+        ] })
+      ] }),
       /* @__PURE__ */ o$8(
         ConversationSelect,
         {
@@ -23897,7 +24120,11 @@ ${content2}`;
           setSelected,
           disabled: processing,
           loading,
-          error: error2
+          error: error2,
+          query: query2,
+          dateField,
+          fromDate,
+          toDate
         }
       ),
       exportSource === "API" && !loading && !processing && hasMore && /* @__PURE__ */ o$8("div", { className: "flex items-center justify-center mt-2 mb-1 gap-2", children: [
@@ -23934,29 +24161,6 @@ ${content2}`;
         /* @__PURE__ */ o$8("button", { className: "Button green", disabled, onClick: exportAll, children: t2("Export") })
       ] }),
       totalBatches > 1 && !processing && /* @__PURE__ */ o$8("p", { className: "mt-1.5 text-xs text-right text-gray-400 dark:text-gray-500", children: `${totalBatches} downloads · 100 conversations each` }),
-      processing && /* @__PURE__ */ o$8(k$3, { children: [
-        /* @__PURE__ */ o$8("div", { className: "mt-2 mb-1 justify-between flex items-center gap-2", children: [
-          /* @__PURE__ */ o$8("span", { className: "truncate text-sm text-gray-600 dark:text-gray-300", children: progress.currentStatus === "rate_limited" ? `⏳ Rate limited — waiting ${progress.rateLimitWaitSecs ?? "…"}s` : progress.currentName }),
-          /* @__PURE__ */ o$8("span", { className: "shrink-0 tabular-nums text-sm text-gray-500 dark:text-gray-400", children: progress.totalBatches > 1 ? `${t2("Batch progress").replace("{{current}}", String(progress.batchIndex + 1)).replace("{{total}}", String(progress.totalBatches))} · ${progress.completed}/${progress.total}` : `${progress.completed}/${progress.total}` }),
-          /* @__PURE__ */ o$8(
-            "button",
-            {
-              className: "Button red",
-              style: { fontSize: "0.75rem", padding: "3px 10px", height: "auto" },
-              title: "Stop the export — any batches already downloaded are kept",
-              onClick: cancelExport,
-              children: "Cancel"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ o$8("div", { className: "w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700", children: /* @__PURE__ */ o$8(
-          "div",
-          {
-            className: `h-2.5 rounded-full ${progress.currentStatus === "rate_limited" ? "bg-amber-500" : "bg-blue-600"}`,
-            style: { width: `${progress.total > 0 ? progress.completed / progress.total * 100 : 0}%` }
-          }
-        ) })
-      ] }),
       processing ? /* @__PURE__ */ o$8(
         "button",
         {
