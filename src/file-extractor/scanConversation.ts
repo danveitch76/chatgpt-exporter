@@ -75,6 +75,7 @@ export function scanConversationForFiles(conversation: ApiConversationWithId): F
                 references.push({
                     ...context,
                     sourceType: inferSourceType(message, path, stringValue),
+                    fileId: extractFileId(stringValue),
                     assetPointer: normaliseAssetPointer(stringValue),
                     rawPath: looksLikeSandboxPath(stringValue) ? stringValue : undefined,
                     rawUrl: looksLikeUrl(stringValue) ? stringValue : undefined,
@@ -86,6 +87,20 @@ export function scanConversationForFiles(conversation: ApiConversationWithId): F
                     rawValue: value,
                 })
                 return
+            }
+
+            for (const fileId of extractInlineFileIds(stringValue)) {
+                references.push({
+                    ...context,
+                    sourceType: inferSourceType(message, path, fileId),
+                    fileId,
+                    filename: inferNearbyFilename(message, path),
+                    extension: inferExtension(inferNearbyFilename(message, path)),
+                    mimeType: inferNearbyMimeType(message, path),
+                    sizeBytes: inferNearbySizeBytes(message, path),
+                    sourceField: path,
+                    rawValue: value,
+                })
             }
 
             if (looksLikeGeneratedFileText(stringValue)) {
@@ -144,16 +159,35 @@ function lastPathSegment(path: string): string {
 }
 
 function looksLikeFileId(value: string): boolean {
-    return /^file-[A-Za-z0-9_-]+$/.test(value)
+    return /^file[-_][A-Za-z0-9_-]+$/.test(value)
 }
 
 function normaliseFileId(value: string): string {
     return value.replace(/^sediment:\/\//, '')
 }
 
+function extractFileId(value: string): string | undefined {
+    const normalised = normaliseFileId(value.trim())
+    return looksLikeFileId(normalised) ? normalised : undefined
+}
+
+function extractInlineFileIds(value: string): string[] {
+    const ids = new Set<string>()
+    const pattern = /\{\{file:([^}]+)\}\}/g
+    let match: RegExpExecArray | null
+
+    while ((match = pattern.exec(value)) !== null) {
+        const fileId = match[1]?.trim()
+        if (fileId && looksLikeFileId(fileId)) ids.add(fileId)
+    }
+
+    return [...ids]
+}
+
 function looksLikeAssetPointer(value: string): boolean {
     return value.startsWith('sediment://')
         || value.startsWith('file-')
+        || value.startsWith('file_')
         || value.includes('/files/download/')
 }
 

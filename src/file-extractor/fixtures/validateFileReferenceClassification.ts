@@ -25,6 +25,16 @@ const backendAsset: FileReference = {
     sourceField: 'message.metadata.file_id',
 }
 
+const uploadedBackendAsset: FileReference = {
+    conversationId: 'c2-upload',
+    conversationTitle: 'Uploaded File Underscore ID',
+    messageId: 'm2-upload',
+    authorRole: 'user',
+    sourceType: 'uploaded',
+    fileId: 'file_user-uploaded-document',
+    sourceField: 'message.metadata.attachments[0].id',
+}
+
 const sandboxReference: FileReference = {
     conversationId: 'c3',
     conversationTitle: 'Generated Markdown',
@@ -68,6 +78,7 @@ const terminalText: FileReference = {
 
 assert('embedded asset classified', classifyFileReference(embeddedAsset) === 'recoverable_embedded_asset')
 assert('backend asset classified', classifyFileReference(backendAsset) === 'recoverable_backend_asset')
+assert('underscore backend asset classified', classifyFileReference(uploadedBackendAsset) === 'recoverable_backend_asset')
 assert('sandbox reference classified', classifyFileReference(sandboxReference) === 'metadata_only_sandbox_reference')
 assert('citation URL classified', classifyFileReference(citationUrl) === 'citation_url')
 assert('search result URL classified', classifyFileReference(searchResultUrl) === 'search_result_url')
@@ -75,6 +86,7 @@ assert('terminal text classified', classifyFileReference(terminalText) === 'term
 
 assert('embedded asset is recoverable', isRecoverableAssetClass(classifyFileReference(embeddedAsset)))
 assert('backend asset is recoverable', isRecoverableAssetClass(classifyFileReference(backendAsset)))
+assert('underscore backend asset is recoverable', isRecoverableAssetClass(classifyFileReference(uploadedBackendAsset)))
 assert('citation URL is not recoverable', !isRecoverableAssetClass(classifyFileReference(citationUrl)))
 assert('search result URL is not recoverable', !isRecoverableAssetClass(classifyFileReference(searchResultUrl)))
 assert('sandbox reference is not recoverable', !isRecoverableAssetClass(classifyFileReference(sandboxReference)))
