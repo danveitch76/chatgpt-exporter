@@ -17,19 +17,31 @@ const inventory = result.inventory
 const assertions: Assertion[] = [
     assert('scans one conversation', result.stats.conversationsScanned === 1),
     assert('scans fixture messages', result.stats.messagesScanned >= 4),
-    assert('finds file references', result.stats.referencesFound >= 4),
+    assert('finds file references', result.stats.referencesFound >= 5),
     assert(
         'finds uploaded sediment image asset',
         inventory.some(row =>
             row.sourceType === 'image'
-            && row.assetPointer === 'sediment://file-uploaded-image',
+            && row.assetPointer === 'sediment://file-uploaded-image'
+            && row.fileId === 'file-uploaded-image',
+        ),
+    ),
+    assert(
+        'finds underscore attachment identifier with metadata',
+        inventory.some(row =>
+            row.sourceType === 'uploaded'
+            && row.fileId === 'file_user-uploaded-document'
+            && row.filename === 'brief.pdf'
+            && row.mimeType === 'application/pdf'
+            && row.sizeBytes === 3210,
         ),
     ),
     assert(
         'finds generated execution image asset',
         inventory.some(row =>
             row.sourceType === 'image'
-            && row.assetPointer === 'sediment://file-generated-chart',
+            && row.assetPointer === 'sediment://file-generated-chart'
+            && row.fileId === 'file-generated-chart',
         ),
     ),
     assert(
