@@ -146,6 +146,7 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
     const selectedProject = projects.find(project => project.id === selectedProjectId) ?? null
     const isNotInProject = selectedProjectId === NOT_IN_PROJECT_ID
     const conversations = exportSource === 'API' ? apiConversations : localConversations
+    const needsConversationData = kind === 'chats' || !!fromDate || !!toDate
 
     useEffect(() => {
         if (!open) return
@@ -170,6 +171,14 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
 
     useEffect(() => {
         if (!open || exportSource !== 'API' || !projectsLoaded) return
+
+        if (!needsConversationData) {
+            fetchGeneration.current++
+            setApiConversations([])
+            setLoading(false)
+            setError('')
+            return
+        }
 
         const generation = ++fetchGeneration.current
         const alive = () => generation === fetchGeneration.current
@@ -218,7 +227,7 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
         return () => {
             fetchGeneration.current++
         }
-    }, [exportAllLimit, exportSource, isNotInProject, open, projectGizmoIds, projects, projectsLoaded, selectedProjectId])
+    }, [exportAllLimit, exportSource, isNotInProject, needsConversationData, open, projectGizmoIds, projects, projectsLoaded, selectedProjectId])
 
     const filteredConversations = useMemo(() => {
         let result = conversations
@@ -339,7 +348,7 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
                     <div className="ExportStatusBox" role="status" aria-live="polite">
                         {(projectsLoading || loading) && <IconLoading className="w-4 h-4 shrink-0" />}
                         <span className="ExportStatusText">{statusText}</span>
-                        {!error && !loading && !projectsLoading && (
+                        {!error && !loading && !projectsLoading && needsConversationData && (
                             <span className="ExportStatusDetail">Limit: {exportAllLimit} conversations per source scan</span>
                         )}
                     </div>
