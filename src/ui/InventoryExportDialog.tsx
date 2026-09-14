@@ -121,7 +121,6 @@ const EXPORTERS: Record<InventoryFormat, (kind: InventoryKind, rows: InventoryRo
 export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, onOpenChange, children }) => {
     const { exportAllLimit } = useSettingContext()
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const fetchGeneration = useRef(0)
 
     const [kind, setKind] = useState<InventoryKind>('projects')
     const [outputFormat, setOutputFormat] = useState<InventoryFormat>('json')
@@ -173,15 +172,14 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
         if (!open || exportSource !== 'API' || !projectsLoaded) return
 
         if (!needsConversationData) {
-            fetchGeneration.current++
             setApiConversations([])
             setLoading(false)
             setError('')
             return
         }
 
-        const generation = ++fetchGeneration.current
-        const alive = () => generation === fetchGeneration.current
+        let cancelled = false
+        const alive = () => !cancelled
         setApiConversations([])
         setError('')
         setLoading(true)
@@ -225,7 +223,7 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
             })
 
         return () => {
-            fetchGeneration.current++
+            cancelled = true
         }
     }, [exportAllLimit, exportSource, isNotInProject, needsConversationData, open, projectGizmoIds, projects, projectsLoaded, selectedProjectId])
 
