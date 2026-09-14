@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.33.8](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.7...userscript-v2.33.8) (2026-09-14)
+
+### Fixes
+
+* reorganise the multi-conversation export dialog into clear status, filter, selection and results areas
+* keep a fixed status area beneath **Export Conversations** so loading and processing states do not resize the dialog
+* consolidate loading, API-test, export progress, rate-limit and cancellation status into the fixed status area
+* move **Export from**, Project, Date and Search into the filter area, with Project retained on its own row
+* give the Search field a complete bordered control
+* preserve the boxed **Select All** / configurable Last N / Resume toolbar
+* reduce excess vertical spacing around status and filter controls
+* increase the visible conversation-list area within the dialog
+
+### Compatibility
+
+* preserve project discovery and project filtering
+* preserve Created / Last updated date filtering
+* preserve configurable Last N and Resume selection behaviour
+* preserve export batching, archive/delete queues, export formats and rate-limit handling
+
+### Validation
+
+* lint passed
+* full regression test suite passed
+* production userscript build passed
+* dialog layout visually validated with a large conversation set
+
+### References
+
+* Issue #84
+* Pull request #85
+
 ## [2.33.7](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.6...userscript-v2.33.7) (2026-09-01)
 
 ### Features
