@@ -32,6 +32,22 @@ At assessment time:
 
 The mismatch between the package manifest and latest published prerelease, the reliance on undocumented ChatGPT backend routes, and the open long-conversation limitation make the project unsuitable as a direct dependency.
 
+## Current ChatGPT product context
+
+Current OpenAI documentation reduces the value of adopting the external project as a general-purpose file-downloader:
+
+- ChatGPT Library now saves uploaded and created files and supports downloading one or more selected files;
+- official conversation export still supplies `conversations.json` or numbered conversation JSON files for larger exports;
+- OpenAI documents that eligible ChatGPT Edu exports can also include files and other assets used in conversations.
+
+These mechanisms do not remove the need for File Discovery. Library is a separate file store and does not provide the deterministic conversation/message-to-attachment relationship required by this project's archive pipeline. OpenAI also does not document the browser-internal file identifiers and download routes as a stable public interface.
+
+References:
+
+- <https://help.openai.com/en/articles/20001052-file-storage-and-library>
+- <https://help.openai.com/en/articles/9106926>
+- <https://help.openai.com/en/articles/20001279-exporting-data-from-a-chatgpt-edu-workspace>
+
 ## Capability comparison and classification
 
 | External capability | Classification | Rationale |
@@ -54,6 +70,7 @@ The associated branch changes only File Discovery and its deterministic fixture 
 - recognise both `file-...` and `file_...` identifiers;
 - derive a file identifier from direct `sediment://file-...` or `sediment://file_...` pointers when possible;
 - recognise valid `{{file:...}}` placeholders embedded in message text;
+- classify both identifier forms as recoverable backend assets;
 - add synthetic fixture coverage for an uploaded `file_...` attachment and an inline file placeholder.
 
 No external package or runtime service is added.
