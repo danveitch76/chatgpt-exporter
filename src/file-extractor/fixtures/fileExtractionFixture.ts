@@ -1,4 +1,4 @@
-import type { ApiConversationWithId } from '../../api'
+import type { ApiConversationWithId, ConversationNodeMessage } from '../../api'
 
 export const fileExtractionFixture: ApiConversationWithId = {
     id: 'fixture-conversation',
@@ -42,7 +42,7 @@ export const fileExtractionFixture: ApiConversationWithId = {
                             size: 3210,
                         },
                     ],
-                },
+                } as unknown as ConversationNodeMessage['metadata'],
                 recipient: 'all',
             },
         },
