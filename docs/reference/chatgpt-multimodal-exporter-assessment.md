@@ -1,0 +1,81 @@
+# `chatgpt-multimodal-exporter` assessment
+
+Assessment date: 14 September 2026
+
+External project: [`ha0xin/chatgpt-multimodal-exporter`](https://github.com/ha0xin/chatgpt-multimodal-exporter)
+
+## Decision
+
+**INTEGRATE selected discovery techniques only. Do not adopt the external userscript or add it as a dependency.**
+
+The external project remains useful as a reference because it recognises current ChatGPT multimodal file-reference patterns that were not fully covered by this repository's File Discovery scanner. The relevant bounded patterns are:
+
+- uploaded-file identifiers beginning with `file_` as well as backend identifiers beginning with `file-`;
+- file identifiers embedded in `sediment://` asset pointers;
+- inline `{{file:...}}` placeholders;
+- explicit voice-audio, sandbox and attachment-reference discovery patterns.
+
+This repository already has the preferred acquisition, filtering, discovery, classification, validation and resolver structure, so replacing it with the external architecture would add duplication and regression risk.
+
+## Current external state inspected
+
+At assessment time:
+
+- default branch: `main`;
+- latest inspected commit: `941436e1f8e57ee4b2a2b670090b64ac33af396d` dated 3 March 2026;
+- package manifest version: `0.7.2`;
+- latest published release: prerelease `v0.8.0-alpha.0`, published 4 January 2026;
+- licence: MIT;
+- runtime: Tampermonkey/Violentmonkey browser userscript;
+- notable dependencies include Preact, fflate, marked and sonner;
+- an open upstream issue reports incomplete export of very long conversations.
+
+The mismatch between the package manifest and latest published prerelease, the reliance on undocumented ChatGPT backend routes, and the open long-conversation limitation make the project unsuitable as a direct dependency.
+
+## Capability comparison and classification
+
+| External capability | Classification | Rationale |
+|---|---|---|
+| `file_` uploaded-file identifier detection | **INTEGRATE** | Verified gap in current discovery; real-account validation previously found zero `fileId` rows. |
+| Extract file identifier from `sediment://` pointers | **INTEGRATE** | Improves recoverable backend-asset classification without changing acquisition architecture. |
+| `{{file:...}}` inline placeholder detection | **INTEGRATE** | Current generic scalar scanner did not recognise an identifier embedded inside text. |
+| Voice-audio pointer discovery | **REFERENCE** | Current scanner already sees audio asset-pointer fields, but its source taxonomy does not yet distinguish audio from images. Address through existing discovery-hardening work rather than importing the external model. |
+| Sandbox interpreter download route | **REFERENCE** | Potentially useful for live recovery, but it is an undocumented authenticated route and needs real-account validation under the existing resolver issue before integration. |
+| Backend file download handling | **REFERENCE** | Confirms the route family already mapped by this repository and highlights different handling for `file-` and `file_`; live validation remains required. |
+| Batch attachment ZIP model | **REFERENCE** | Useful implementation evidence, but this repository already has its own batching, memory-protection and resolver roadmap. |
+| Auto-save through the File System Access API | **REJECT** | Separate product behaviour with additional state and browser-permission complexity; not required to close the verified discovery gap. |
+| Credential interception by wrapping `fetch`/XMLHttpRequest and inspecting page state | **REJECT** | Expands security and maintenance risk and is unnecessary for the bounded discovery change. |
+| External project as a runtime or source dependency | **REJECT** | Duplicates existing architecture and transfers maintenance risk without sufficient benefit. |
+
+## Implemented bounded changes
+
+The associated branch changes only File Discovery and its deterministic fixture coverage:
+
+- recognise both `file-...` and `file_...` identifiers;
+- derive a file identifier from direct `sediment://file-...` or `sediment://file_...` pointers when possible;
+- recognise valid `{{file:...}}` placeholders embedded in message text;
+- add synthetic fixture coverage for an uploaded `file_...` attachment and an inline file placeholder.
+
+No external package or runtime service is added.
+
+## Security and privacy
+
+The integrated change is local parsing only. It does not:
+
+- transmit conversation data to the external project;
+- add telemetry;
+- add a new external service;
+- capture or persist access tokens;
+- modify ChatGPT credentials or session handling;
+- add a dependency.
+
+The external live-download and credential-interception techniques remain reference material only until separately justified and validated.
+
+## Remaining work
+
+Existing GitHub issues remain the correct traceability points:
+
+- issue #63 — refine discovery to identify recoverable file assets;
+- issue #5 — add and validate the file download resolver.
+
+The next real-account validation should confirm that current conversations now produce `fileId` rows from `file_` attachments and sediment-backed file identifiers before issue #5 is extended to live downloads.
