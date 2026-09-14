@@ -88,10 +88,10 @@ export function buildProjectInventoryRows(
         seen.add(identity.gizmoId)
 
         return [{
-            URL: `https://chatgpt.com/g/${identity.token}/project`,
-            Token: identity.token,
-            GizmoID: identity.gizmoId,
-            Slug: identity.slug,
+            'URL': `https://chatgpt.com/g/${identity.token}/project`,
+            'Token': identity.token,
+            'GizmoID': identity.gizmoId,
+            'Slug': identity.slug,
             'Actual Project Name': projectName,
         }]
     })
@@ -115,9 +115,9 @@ export function buildChatInventoryRows(
         const projectId = normaliseGizmoId(conversation.gizmo_id)
 
         return [{
-            URL: `https://chatgpt.com/c/${token}`,
-            Token: token,
-            Slug: slugifyInventoryName(actualChatName) || token,
+            'URL': `https://chatgpt.com/c/${token}`,
+            'Token': token,
+            'Slug': slugifyInventoryName(actualChatName) || token,
             'Actual Chat Name': actualChatName,
             'Project Name': projectId ? projectNameById.get(projectId) || '' : '',
         }]
@@ -141,7 +141,7 @@ function escapeHtml(value: string): string {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+        .replace(/\"/g, '&quot;')
         .replace(/'/g, '&#39;')
 }
 
