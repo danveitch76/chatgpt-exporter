@@ -2,7 +2,6 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import {
     fetchAllConversations,
-    fetchAllConversationsAll,
     fetchAllNonProjectConversations,
     fetchProjects,
 } from '../api'
@@ -94,6 +93,16 @@ function mergeUniqueConversations(
     return [...byId.values()]
 }
 
+function assignProjectMembership(
+    conversations: ApiConversationItem[],
+    projectId: string,
+): ApiConversationItem[] {
+    return conversations.map(conversation => ({
+        ...conversation,
+        gizmo_id: conversation.gizmo_id || projectId,
+    }))
+}
+
 const EXPORTERS: Record<InventoryFormat, (kind: InventoryKind, rows: InventoryRow[], projectName?: string) => boolean> = {
     json: exportInventoryJson,
     txt: exportInventoryText,
@@ -155,18 +164,35 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
         setError('')
         setLoading(true)
 
-        const onBatch = (batch: ApiConversationItem[]) => {
+        const addConversations = (batch: ApiConversationItem[]) => {
             if (!alive()) return
             setApiConversations(previous => mergeUniqueConversations(previous, batch))
         }
 
-        const request = selectedProjectId === null
-            ? fetchAllConversationsAll(projects, exportAllLimit, onBatch)
-            : isNotInProject
-                ? fetchAllNonProjectConversations(projectIds, exportAllLimit, onBatch)
-                : fetchAllConversations(selectedProjectId, exportAllLimit, onBatch)
+        const loadConversations = async () => {
+            if (selectedProjectId === null) {
+                const nonProject = await fetchAllNonProjectConversations(projectIds, exportAllLimit)
+                addConversations(nonProject)
 
-        request
+                for (const project of projects) {
+                    if (!alive()) return
+                    const projectConversations = await fetchAllConversations(project.id, exportAllLimit)
+                    addConversations(assignProjectMembership(projectConversations, project.id))
+                }
+                return
+            }
+
+            if (isNotInProject) {
+                const nonProject = await fetchAllNonProjectConversations(projectIds, exportAllLimit)
+                addConversations(nonProject)
+                return
+            }
+
+            const projectConversations = await fetchAllConversations(selectedProjectId, exportAllLimit)
+            addConversations(assignProjectMembership(projectConversations, selectedProjectId))
+        }
+
+        loadConversations()
             .catch((err: Error) => {
                 if (!alive()) return
                 console.error('Error fetching conversations for inventory export:', err)
