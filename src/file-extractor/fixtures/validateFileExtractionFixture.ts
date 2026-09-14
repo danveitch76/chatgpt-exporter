@@ -17,7 +17,7 @@ const inventory = result.inventory
 const assertions: Assertion[] = [
     assert('scans one conversation', result.stats.conversationsScanned === 1),
     assert('scans fixture messages', result.stats.messagesScanned >= 4),
-    assert('finds file references', result.stats.referencesFound >= 5),
+    assert('finds file references', result.stats.referencesFound >= 6),
     assert(
         'finds uploaded sediment image asset',
         inventory.some(row =>
@@ -34,6 +34,13 @@ const assertions: Assertion[] = [
             && row.filename === 'brief.pdf'
             && row.mimeType === 'application/pdf'
             && row.sizeBytes === 3210,
+        ),
+    ),
+    assert(
+        'finds inline file placeholder identifier',
+        inventory.some(row =>
+            row.sourceType === 'generated'
+            && row.fileId === 'file_generated-report',
         ),
     ),
     assert(
