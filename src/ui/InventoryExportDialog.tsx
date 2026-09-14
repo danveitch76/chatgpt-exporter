@@ -131,7 +131,10 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
 
-    const projectIds = useMemo(() => projects.map(project => project.id), [projects])
+    const projectGizmoIds = useMemo(
+        () => projects.map(project => normaliseGizmoId(project.id)).filter(Boolean),
+        [projects],
+    )
     const selectedProject = projects.find(project => project.id === selectedProjectId) ?? null
     const isNotInProject = selectedProjectId === NOT_IN_PROJECT_ID
     const conversations = exportSource === 'API' ? apiConversations : localConversations
@@ -171,7 +174,7 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
 
         const loadConversations = async () => {
             if (selectedProjectId === null) {
-                const nonProject = await fetchAllNonProjectConversations(projectIds, exportAllLimit)
+                const nonProject = await fetchAllNonProjectConversations(projectGizmoIds, exportAllLimit)
                 addConversations(nonProject)
 
                 for (const project of projects) {
@@ -183,7 +186,7 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
             }
 
             if (isNotInProject) {
-                const nonProject = await fetchAllNonProjectConversations(projectIds, exportAllLimit)
+                const nonProject = await fetchAllNonProjectConversations(projectGizmoIds, exportAllLimit)
                 addConversations(nonProject)
                 return
             }
@@ -205,13 +208,13 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
         return () => {
             fetchGeneration.current++
         }
-    }, [exportAllLimit, exportSource, isNotInProject, open, projectIds, projects, projectsLoaded, selectedProjectId])
+    }, [exportAllLimit, exportSource, isNotInProject, open, projectGizmoIds, projects, projectsLoaded, selectedProjectId])
 
     const filteredConversations = useMemo(() => {
         let result = conversations
 
         if (exportSource === 'Local' && selectedProjectId) {
-            const knownProjectIds = new Set(projectIds.map(normaliseGizmoId))
+            const knownProjectIds = new Set(projectGizmoIds)
             if (isNotInProject) {
                 result = result.filter((conversation) => {
                     const projectId = normaliseGizmoId(conversation.gizmo_id)
@@ -233,7 +236,7 @@ export const InventoryExportDialog: FC<InventoryExportDialogProps> = ({ open, on
         }
 
         return result
-    }, [conversations, dateField, exportSource, fromDate, isNotInProject, kind, projectIds, query, selectedProjectId, toDate])
+    }, [conversations, dateField, exportSource, fromDate, isNotInProject, kind, projectGizmoIds, query, selectedProjectId, toDate])
 
     const rows = useMemo<InventoryRow[]>(() => {
         if (kind === 'chats') {
