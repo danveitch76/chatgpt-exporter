@@ -153,7 +153,13 @@ body[data-time-format="24"] span[data-time-format="24"] {
 }
 
 .ExportSearchRow .SelectSearch {
+    width: 100%;
+    min-width: 0;
     margin: 0;
+    box-sizing: border-box;
+    border: 1px solid #6f6e77;
+    border-radius: 4px;
+    box-shadow: none;
 }
 
 .SelectToolbar {
