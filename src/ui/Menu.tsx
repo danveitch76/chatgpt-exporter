@@ -8,6 +8,7 @@ import { exportToJson, exportToOoba, exportToTavern } from '../exporter/json'
 import { exportToMarkdown } from '../exporter/markdown'
 import { exportToText } from '../exporter/text'
 import { useWindowResize } from '../hooks/useWindowResize'
+import { BulkRenameDialog } from './BulkRenameDialog'
 import { Divider } from './Divider'
 import { ExportDialog } from './ExportDialog'
 import { FileCode, IconArrowRightFromBracket, IconCamera, IconCopy, IconJSON, IconMarkdown, IconSetting, IconZip } from './Icons'
@@ -81,6 +82,7 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
     const [jsonOpen, setJsonOpen] = useState(false)
     const [exportOpen, setExportOpen] = useState(false)
     const [inventoryOpen, setInventoryOpen] = useState(false)
+    const [renameOpen, setRenameOpen] = useState(false)
     const [settingOpen, setSettingOpen] = useState(false)
 
     const {
@@ -150,7 +152,7 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
                 </HoverCard.Trigger>
                 <Portal
                     container={isMobile ? container : document.body}
-                    forceMount={open || jsonOpen || settingOpen || exportOpen || inventoryOpen}
+                    forceMount={open || jsonOpen || settingOpen || exportOpen || inventoryOpen || renameOpen}
                 >
                     <HoverCard.Content
                         className={`
@@ -267,6 +269,17 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
                                 />
                             </div>
                         </InventoryExportDialog>
+                        <BulkRenameDialog
+                            open={renameOpen}
+                            onOpenChange={setRenameOpen}
+                        >
+                            <div className="row-full">
+                                <MenuItem
+                                    text="Bulk Rename Conversations"
+                                    icon={IconCopy}
+                                />
+                            </div>
+                        </BulkRenameDialog>
 
                         {!isMobile && (
                             <HoverCard.Arrow
