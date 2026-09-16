@@ -256,6 +256,71 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
     border-radius: 5px;\r
 }\r
 \r
+.InventoryPreview {\r
+    display: flex;\r
+    min-height: 0;\r
+    flex: 1 1 auto;\r
+    flex-direction: column;\r
+    overflow: hidden;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 5px;\r
+    color: var(--ce-text-primary);\r
+}\r
+\r
+.InventoryPreviewHeader,\r
+.InventoryPreviewRow {\r
+    display: grid;\r
+    grid-template-columns: minmax(16rem, 1.6fr) minmax(12rem, 1fr) minmax(12rem, 1fr) minmax(20rem, 1.8fr);\r
+    align-items: center;\r
+}\r
+\r
+.InventoryPreviewHeader {\r
+    flex: 0 0 auto;\r
+    border-bottom: 1px solid var(--ce-border-light);\r
+    background: var(--ce-menu-secondary);\r
+    font-size: 0.75rem;\r
+    font-weight: 600;\r
+}\r
+\r
+.InventoryPreviewHeaderCell,\r
+.InventoryPreviewCell {\r
+    min-width: 0;\r
+    padding: 0.45rem 0.6rem;\r
+    overflow: hidden;\r
+    text-overflow: ellipsis;\r
+    white-space: nowrap;\r
+}\r
+\r
+.InventoryPreviewHeaderCell + .InventoryPreviewHeaderCell,\r
+.InventoryPreviewCell + .InventoryPreviewCell {\r
+    border-left: 1px solid var(--ce-border-light);\r
+}\r
+\r
+.InventoryPreviewBody {\r
+    min-height: 0;\r
+    flex: 1 1 auto;\r
+    overflow: auto;\r
+}\r
+\r
+.InventoryPreviewRow {\r
+    min-width: 70rem;\r
+    border-bottom: 1px solid var(--ce-border-light);\r
+    font-size: 0.8125rem;\r
+}\r
+\r
+.InventoryPreviewRow:last-child {\r
+    border-bottom: 0;\r
+}\r
+\r
+.InventoryPreviewCellPrimary {\r
+    font-weight: 500;\r
+}\r
+\r
+.InventoryPreviewEmpty {\r
+    padding: 1rem;\r
+    color: #9ca3af;\r
+}\r
+\r
 @media (max-width: 820px) {\r
     .DialogContent._export {\r
         width: min(96vw, 48rem);\r
@@ -274,6 +339,11 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
 \r
     .ExportSourceActions {\r
         justify-content: flex-start;\r
+    }\r
+\r
+    .InventoryPreviewHeader,\r
+    .InventoryPreviewRow {\r
+        grid-template-columns: minmax(14rem, 1.5fr) minmax(10rem, 1fr) minmax(10rem, 1fr) minmax(18rem, 1.5fr);\r
     }\r
 }\r
 \r
@@ -21701,7 +21771,7 @@ ${sourceList}` : sourceList;
         });
       }
       if (message.author.role === "user") {
-        postSteps = [...postSteps, (input) => `<p class="no-katex">${escapeHtml(input)}</p>`];
+        postSteps = [...postSteps, (input) => `<p class="no-katex">${escapeHtml$1(input)}</p>`];
       }
       const postProcess = (input) => postSteps.reduce((acc, fn2) => fn2(acc), input);
       const content2 = transformContent$2(message.content, message.metadata, postProcess);
@@ -21822,16 +21892,16 @@ ${content2.text}
     const durationLabel = thinking.durationSeconds != null ? `Thought for ${thinking.durationSeconds} seconds` : "Thinking";
     const parts = [];
     if ((_a = thinking.activities) == null ? void 0 : _a.length) {
-      const items = thinking.activities.map((a2) => `<li>${escapeHtml(a2)}</li>`).join("");
+      const items = thinking.activities.map((a2) => `<li>${escapeHtml$1(a2)}</li>`).join("");
       parts.push(`<ul>${items}</ul>`);
     }
-    const thoughts = thinking.thoughts.map((t2) => t2.content || t2.summary).filter(Boolean).map((text2) => `<p>${escapeHtml(text2)}</p>`).join("\n");
+    const thoughts = thinking.thoughts.map((t2) => t2.content || t2.summary).filter(Boolean).map((text2) => `<p>${escapeHtml$1(text2)}</p>`).join("\n");
     if (thoughts) parts.push(thoughts);
     const body2 = parts.join("\n");
     if (!body2) return "";
-    return `<details class="thinking"><summary>${escapeHtml(durationLabel)}</summary>${body2}</details>`;
+    return `<details class="thinking"><summary>${escapeHtml$1(durationLabel)}</summary>${body2}</details>`;
   }
-  function escapeHtml(html2) {
+  function escapeHtml$1(html2) {
     return html2.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   }
   class Effect {
@@ -23279,7 +23349,7 @@ ${content2}`;
   };
   const useSettingContext = () => q$1(SettingContext);
   const exportingRef = { current: false };
-  const NOT_IN_PROJECT_ID = "__not_in_project__";
+  const NOT_IN_PROJECT_ID$1 = "__not_in_project__";
   function toMs(time) {
     if (time == null) return 0;
     if (typeof time === "number") return time * 1e3;
@@ -23306,7 +23376,7 @@ ${content2}`;
     if (diffDays === 1) return "Yesterday";
     return d2.toLocaleDateString(void 0, { year: "numeric", month: "short", day: "numeric" });
   }
-  function textSearch(title2, query2) {
+  function textSearch$1(title2, query2) {
     const q2 = query2.trim();
     if (!q2) return true;
     const lower = q2.toLowerCase();
@@ -23336,7 +23406,7 @@ ${content2}`;
           },
           children: [
             /* @__PURE__ */ o$8("option", { value: "", children: t2("All conversations") }),
-            /* @__PURE__ */ o$8("option", { value: NOT_IN_PROJECT_ID, children: t2("Not in a project") }),
+            /* @__PURE__ */ o$8("option", { value: NOT_IN_PROJECT_ID$1, children: t2("Not in a project") }),
             projects.map((project) => /* @__PURE__ */ o$8("option", { value: project.id, children: project.display.name }, project.id))
           ]
         }
@@ -23364,7 +23434,7 @@ ${content2}`;
     const filtered = F$1(() => {
       let result = conversations;
       const q2 = query2.trim();
-      if (q2) result = result.filter((c2) => textSearch(c2.title, q2));
+      if (q2) result = result.filter((c2) => textSearch$1(c2.title, q2));
       if (fromDate || toDate) {
         result = result.filter((c2) => conversationMatchesDateRange(c2, dateField, fromDate, toDate));
       }
@@ -23605,7 +23675,7 @@ ${content2}`;
     const [projectsLoaded, setProjectsLoaded] = h$4(false);
     const selectedProject = projects.find((p2) => p2.id === selectedProjectId) ?? null;
     const projectIds = F$1(() => projects.map((project) => project.id), [projects]);
-    const isNotInProject = selectedProjectId === NOT_IN_PROJECT_ID;
+    const isNotInProject = selectedProjectId === NOT_IN_PROJECT_ID$1;
     const selectedProjectName = isNotInProject ? t2("Not in a project") : selectedProject == null ? void 0 : selectedProject.display.name;
     const [loading, setLoading] = h$4(false);
     const [error2, setError] = h$4("");
@@ -24210,6 +24280,612 @@ ${content2}`;
         ]
       }
     );
+  };
+  const PROJECT_HEADERS = [
+    "URL",
+    "Token",
+    "GizmoID",
+    "Slug",
+    "Actual Project Name"
+  ];
+  const CHAT_HEADERS = [
+    "URL",
+    "Token",
+    "Slug",
+    "Actual Chat Name",
+    "Project Name"
+  ];
+  const PROJECT_ID_PATTERN = /^(g-p-[a-f0-9]{32})(?:-(.+))?$/i;
+  function slugifyInventoryName(value) {
+    return value.normalize("NFKD").replace(/[\u0300-\u036F]/g, "").replace(/[’']/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  function projectIdentity(projectId, projectName) {
+    const match = projectId.match(PROJECT_ID_PATTERN);
+    const gizmoId = (match == null ? void 0 : match[1]) ?? projectId;
+    const slug = (match == null ? void 0 : match[2]) || slugifyInventoryName(projectName);
+    const token = slug ? `${gizmoId}-${slug}` : gizmoId;
+    return { gizmoId, slug, token };
+  }
+  function normaliseGizmoId(value) {
+    if (!value) return "";
+    return projectIdentity(value, "").gizmoId;
+  }
+  function buildProjectInventoryRows(projects, allowedProjectIds) {
+    const seen = /* @__PURE__ */ new Set();
+    return projects.flatMap((project) => {
+      var _a, _b;
+      const projectName = ((_b = (_a = project.display) == null ? void 0 : _a.name) == null ? void 0 : _b.trim()) || "";
+      const identity = projectIdentity(project.id, projectName);
+      if (!identity.gizmoId || seen.has(identity.gizmoId)) return [];
+      seen.add(identity.gizmoId);
+      return [{
+        "URL": `https://chatgpt.com/g/${identity.token}/project`,
+        "Token": identity.token,
+        "GizmoID": identity.gizmoId,
+        "Slug": identity.slug,
+        "Actual Project Name": projectName
+      }];
+    });
+  }
+  function buildChatInventoryRows(conversations, projects) {
+    const projectNameById = new Map(
+      projects.map((project) => {
+        var _a, _b;
+        return [normaliseGizmoId(project.id), ((_b = (_a = project.display) == null ? void 0 : _a.name) == null ? void 0 : _b.trim()) || ""];
+      })
+    );
+    const seen = /* @__PURE__ */ new Set();
+    return conversations.flatMap((conversation) => {
+      var _a, _b;
+      const token = (_a = conversation.id) == null ? void 0 : _a.trim();
+      if (!token || seen.has(token)) return [];
+      seen.add(token);
+      const actualChatName = ((_b = conversation.title) == null ? void 0 : _b.trim()) || "";
+      const projectId = normaliseGizmoId(conversation.gizmo_id);
+      return [{
+        "URL": `https://chatgpt.com/c/${token}`,
+        "Token": token,
+        "Slug": slugifyInventoryName(actualChatName) || token,
+        "Actual Chat Name": actualChatName,
+        "Project Name": projectId ? projectNameById.get(projectId) || "" : ""
+      }];
+    });
+  }
+  function headersFor(kind) {
+    return kind === "projects" ? PROJECT_HEADERS : CHAT_HEADERS;
+  }
+  function valueFor(row, header) {
+    return String(row[header] ?? "");
+  }
+  function escapePlainText(value) {
+    return value.replace(/[\t\r\n]+/g, " ");
+  }
+  function escapeHtml(value) {
+    return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function escapeMarkdown(value) {
+    return value.replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/[\r\n]+/g, " ");
+  }
+  function serialiseInventoryJson(rows) {
+    return `${JSON.stringify(rows, null, 2)}
+`;
+  }
+  function serialiseInventoryText(kind, rows) {
+    const headers = headersFor(kind);
+    const lines = [headers.join("	")];
+    for (const row of rows) {
+      lines.push(headers.map((header) => escapePlainText(valueFor(row, header))).join("	"));
+    }
+    return `${lines.join("\n")}
+`;
+  }
+  function serialiseInventoryHtml(kind, rows) {
+    const headers = headersFor(kind);
+    const title2 = kind === "projects" ? "ChatGPT Project List" : "ChatGPT Chat List";
+    const head2 = headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("");
+    const body2 = rows.map((row) => `<tr>${headers.map((header) => `<td>${escapeHtml(valueFor(row, header))}</td>`).join("")}</tr>`).join("\n");
+    return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(title2)}</title>
+<style>body{font-family:system-ui,sans-serif;margin:2rem}table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:.4rem;text-align:left;vertical-align:top}th{background:#f3f4f6}td{word-break:break-word}</style>
+</head>
+<body>
+<h1>${escapeHtml(title2)}</h1>
+<table>
+<thead><tr>${head2}</tr></thead>
+<tbody>
+${body2}
+</tbody>
+</table>
+</body>
+</html>
+`;
+  }
+  function serialiseInventoryMarkdown(kind, rows) {
+    const headers = headersFor(kind);
+    const title2 = kind === "projects" ? "# ChatGPT Project List" : "# ChatGPT Chat List";
+    const separator = headers.map(() => "---").join(" | ");
+    const lines = [
+      title2,
+      "",
+      `| ${headers.join(" | ")} |`,
+      `| ${separator} |`,
+      ...rows.map((row) => `| ${headers.map((header) => escapeMarkdown(valueFor(row, header))).join(" | ")} |`)
+    ];
+    return `${lines.join("\n")}
+`;
+  }
+  function buildInventoryFileName(kind, extension2, projectName) {
+    const scope = projectName ? `-project-${normalizeProjectName(projectName)}` : "";
+    const base = kind === "projects" ? "chatgpt-project-list" : "chatgpt-chat-list";
+    return `${base}${scope}.${extension2}`;
+  }
+  function exportInventoryJson(kind, rows, projectName) {
+    downloadFile(buildInventoryFileName(kind, "json", projectName), "application/json", serialiseInventoryJson(rows));
+    return true;
+  }
+  function exportInventoryText(kind, rows, projectName) {
+    downloadFile(buildInventoryFileName(kind, "txt", projectName), "text/plain;charset=utf-8", serialiseInventoryText(kind, rows));
+    return true;
+  }
+  function exportInventoryHtml(kind, rows, projectName) {
+    downloadFile(buildInventoryFileName(kind, "html", projectName), "text/html;charset=utf-8", serialiseInventoryHtml(kind, rows));
+    return true;
+  }
+  function exportInventoryMarkdown(kind, rows, projectName) {
+    downloadFile(buildInventoryFileName(kind, "md", projectName), "text/markdown;charset=utf-8", serialiseInventoryMarkdown(kind, rows));
+    return true;
+  }
+  const NOT_IN_PROJECT_ID = "__not_in_project__";
+  function toConversationItem(value) {
+    const idValue = value.id ?? value.conversation_id;
+    if (typeof idValue !== "string" || !idValue.trim()) return null;
+    const createTime = typeof value.create_time === "number" || typeof value.create_time === "string" ? value.create_time : 0;
+    const updateTime = typeof value.update_time === "number" || typeof value.update_time === "string" ? value.update_time : void 0;
+    return {
+      id: idValue.trim(),
+      title: typeof value.title === "string" ? value.title : "",
+      create_time: createTime,
+      update_time: updateTime,
+      gizmo_id: typeof value.gizmo_id === "string" ? value.gizmo_id : null
+    };
+  }
+  function textSearch(value, query2) {
+    const q2 = query2.trim();
+    if (!q2) return true;
+    const lower = q2.toLowerCase();
+    if (!lower.includes("*") && !lower.includes("?")) {
+      return value.toLowerCase().includes(lower);
+    }
+    const regexSource = lower.replace(/[\\\^$.|+()[\]{}]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
+    try {
+      return new RegExp(regexSource).test(value.toLowerCase());
+    } catch {
+      return value.toLowerCase().includes(lower);
+    }
+  }
+  function mergeUniqueConversations(existing, incoming) {
+    const byId = new Map(existing.map((conversation) => [conversation.id, conversation]));
+    for (const conversation of incoming) {
+      const current = byId.get(conversation.id);
+      if (!current) {
+        byId.set(conversation.id, conversation);
+        continue;
+      }
+      if (!current.gizmo_id && conversation.gizmo_id) {
+        byId.set(conversation.id, { ...current, gizmo_id: conversation.gizmo_id });
+      }
+    }
+    return [...byId.values()];
+  }
+  function assignProjectMembership(conversations, projectId) {
+    return conversations.map((conversation) => ({
+      ...conversation,
+      gizmo_id: conversation.gizmo_id || projectId
+    }));
+  }
+  const EXPORTERS = {
+    json: exportInventoryJson,
+    txt: exportInventoryText,
+    html: exportInventoryHtml,
+    md: exportInventoryMarkdown
+  };
+  const PROJECT_PREVIEW_HEADERS = ["Actual Project Name", "GizmoID", "Slug", "URL"];
+  const CHAT_PREVIEW_HEADERS = ["Actual Chat Name", "Project Name", "Slug", "URL"];
+  function inventoryValue(row, header) {
+    return String(row[header] ?? "");
+  }
+  const InventoryPreview = ({ kind, rows }) => {
+    const headers = kind === "projects" ? PROJECT_PREVIEW_HEADERS : CHAT_PREVIEW_HEADERS;
+    return /* @__PURE__ */ o$8("div", { className: "InventoryPreview", "aria-label": `${kind === "projects" ? "Project" : "Chat"} inventory preview`, children: [
+      /* @__PURE__ */ o$8("div", { className: "InventoryPreviewHeader", role: "row", children: headers.map((header) => /* @__PURE__ */ o$8("div", { className: "InventoryPreviewHeaderCell", role: "columnheader", children: header }, header)) }),
+      /* @__PURE__ */ o$8("div", { className: "InventoryPreviewBody", role: "rowgroup", children: [
+        rows.map((row) => {
+          const key2 = inventoryValue(row, "URL") || inventoryValue(row, "Token");
+          return /* @__PURE__ */ o$8("div", { className: "InventoryPreviewRow", role: "row", children: headers.map((header) => /* @__PURE__ */ o$8(
+            "div",
+            {
+              className: `InventoryPreviewCell${header === "Actual Project Name" || header === "Actual Chat Name" ? " InventoryPreviewCellPrimary" : ""}`,
+              role: "cell",
+              title: inventoryValue(row, header) || void 0,
+              children: inventoryValue(row, header) || "—"
+            },
+            header
+          )) }, key2);
+        }),
+        rows.length === 0 && /* @__PURE__ */ o$8("div", { className: "InventoryPreviewEmpty", children: "No rows to display." })
+      ] })
+    ] });
+  };
+  const InventoryExportDialog = ({ open, onOpenChange, children }) => {
+    const { exportAllLimit } = useSettingContext();
+    const fileInputRef = _(null);
+    const [kind, setKind] = h$4("projects");
+    const [outputFormat, setOutputFormat] = h$4("json");
+    const [exportSource, setExportSource] = h$4("API");
+    const [projects, setProjects] = h$4([]);
+    const [projectsLoaded, setProjectsLoaded] = h$4(false);
+    const [projectsLoading, setProjectsLoading] = h$4(false);
+    const [apiConversations, setApiConversations] = h$4([]);
+    const [localConversations, setLocalConversations] = h$4([]);
+    const [selectedProjectId, setSelectedProjectId] = h$4(null);
+    const [dateField, setDateField] = h$4("update_time");
+    const [fromDate, setFromDate] = h$4("");
+    const [toDate, setToDate] = h$4("");
+    const [query2, setQuery] = h$4("");
+    const [loading, setLoading] = h$4(false);
+    const [error2, setError] = h$4("");
+    const projectGizmoIds = F$1(
+      () => projects.map((project) => normaliseGizmoId(project.id)).filter(Boolean),
+      [projects]
+    );
+    const selectedProject = projects.find((project) => project.id === selectedProjectId) ?? null;
+    const isNotInProject = selectedProjectId === NOT_IN_PROJECT_ID;
+    const conversations = exportSource === "API" ? apiConversations : localConversations;
+    const needsConversationData = kind === "chats" || !!fromDate || !!toDate;
+    p$6(() => {
+      if (!open) return;
+      setProjectsLoading(true);
+      setProjectsLoaded(false);
+      fetchProjects().then((items) => {
+        setProjects(items);
+        setProjectsLoaded(true);
+        setError("");
+      }).catch((err) => {
+        console.error("Error fetching projects for inventory export:", err);
+        setProjects([]);
+        setProjectsLoaded(false);
+        setError(err.message || "Failed to load projects");
+      }).finally(() => {
+        setProjectsLoading(false);
+      });
+    }, [open]);
+    p$6(() => {
+      if (!open || exportSource !== "API" || !projectsLoaded) return;
+      if (!needsConversationData) {
+        setApiConversations([]);
+        setLoading(false);
+        setError("");
+        return;
+      }
+      let cancelled = false;
+      const alive = () => !cancelled;
+      setApiConversations([]);
+      setError("");
+      setLoading(true);
+      const addConversations = (batch) => {
+        if (!alive()) return;
+        setApiConversations((previous2) => mergeUniqueConversations(previous2, batch));
+      };
+      const loadConversations = async () => {
+        if (selectedProjectId === null) {
+          const nonProject = await fetchAllNonProjectConversations(projectGizmoIds, exportAllLimit);
+          addConversations(nonProject);
+          for (const project of projects) {
+            if (!alive()) return;
+            const projectConversations2 = await fetchAllConversations(project.id, exportAllLimit);
+            addConversations(assignProjectMembership(projectConversations2, project.id));
+          }
+          return;
+        }
+        if (isNotInProject) {
+          const nonProject = await fetchAllNonProjectConversations(projectGizmoIds, exportAllLimit);
+          addConversations(nonProject);
+          return;
+        }
+        const projectConversations = await fetchAllConversations(selectedProjectId, exportAllLimit);
+        addConversations(assignProjectMembership(projectConversations, selectedProjectId));
+      };
+      loadConversations().catch((err) => {
+        if (!alive()) return;
+        console.error("Error fetching conversations for inventory export:", err);
+        setError(err.message || "Failed to load conversations");
+      }).finally(() => {
+        if (alive()) setLoading(false);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [exportAllLimit, exportSource, isNotInProject, needsConversationData, open, projectGizmoIds, projects, projectsLoaded, selectedProjectId]);
+    const filteredConversations = F$1(() => {
+      let result = conversations;
+      if (exportSource === "Local" && selectedProjectId) {
+        const knownProjectIds = new Set(projectGizmoIds);
+        if (isNotInProject) {
+          result = result.filter((conversation) => {
+            const projectId = normaliseGizmoId(conversation.gizmo_id);
+            return !projectId || !knownProjectIds.has(projectId);
+          });
+        } else {
+          const targetProjectId = normaliseGizmoId(selectedProjectId);
+          result = result.filter((conversation) => normaliseGizmoId(conversation.gizmo_id) === targetProjectId);
+        }
+      }
+      if (kind === "chats" && query2.trim()) {
+        result = result.filter((conversation) => textSearch(conversation.title ?? "", query2));
+      }
+      if (fromDate || toDate) {
+        result = result.filter((conversation) => conversationMatchesDateRange(conversation, dateField, fromDate, toDate));
+      }
+      return result;
+    }, [conversations, dateField, exportSource, fromDate, isNotInProject, kind, projectGizmoIds, query2, selectedProjectId, toDate]);
+    const rows = F$1(() => {
+      if (kind === "chats") {
+        return buildChatInventoryRows(filteredConversations, projects);
+      }
+      let candidateProjects = projects;
+      if (selectedProjectId && !isNotInProject) {
+        const targetProjectId = normaliseGizmoId(selectedProjectId);
+        candidateProjects = projects.filter((project) => normaliseGizmoId(project.id) === targetProjectId);
+      } else if (isNotInProject) {
+        candidateProjects = [];
+      }
+      if (query2.trim()) {
+        candidateProjects = candidateProjects.filter((project) => {
+          var _a;
+          const name = ((_a = project.display) == null ? void 0 : _a.name) ?? "";
+          const slug = slugifyInventoryName(name);
+          return textSearch(`${name} ${slug}`, query2);
+        });
+      }
+      if (fromDate || toDate) {
+        const projectIdsWithMatchingConversation = new Set(
+          filteredConversations.map((conversation) => normaliseGizmoId(conversation.gizmo_id)).filter(Boolean)
+        );
+        candidateProjects = candidateProjects.filter((project) => projectIdsWithMatchingConversation.has(normaliseGizmoId(project.id)));
+      }
+      return buildProjectInventoryRows(candidateProjects);
+    }, [filteredConversations, fromDate, isNotInProject, kind, projects, query2, selectedProjectId, toDate]);
+    const onUpload = T$4((event) => {
+      var _a;
+      const file = (_a = event.currentTarget.files) == null ? void 0 : _a[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result));
+          if (!Array.isArray(parsed)) throw new Error("The selected file does not contain a conversation array.");
+          const normalised = parsed.map((item) => toConversationItem(item)).filter((item) => item !== null);
+          setLocalConversations(normalised);
+          setError("");
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Invalid JSON file.";
+          setError(message);
+          setLocalConversations([]);
+        }
+      };
+      reader.onerror = () => {
+        setError("Failed to read the selected file.");
+        setLocalConversations([]);
+      };
+      reader.readAsText(file);
+    }, []);
+    const onExport = T$4(() => {
+      var _a;
+      if (rows.length === 0) return;
+      const selectedProjectName = (_a = selectedProject == null ? void 0 : selectedProject.display) == null ? void 0 : _a.name;
+      EXPORTERS[outputFormat](kind, rows, selectedProjectName);
+    }, [kind, outputFormat, rows, selectedProject]);
+    const statusText = error2 ? `Error: ${error2}` : projectsLoading ? "Loading projects..." : loading ? "Loading conversations..." : `${rows.length} ${kind === "projects" ? "projects" : "chats"} ready to export`;
+    return /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$be92b6f5f03c0fe9, { open, onOpenChange, children: [
+      /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$41fb9f06171c75f4, { asChild: true, children }),
+      /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$602eac185826482c, { children: [
+        /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$c6fdb837b070b4ff, { className: "DialogOverlay" }),
+        /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$7c6e2c02157bb7d2, { className: "DialogContent _export", children: [
+          /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$f99233281efd08a0, { className: "DialogTitle", children: "Export Project / Chat Lists" }),
+          /* @__PURE__ */ o$8("div", { className: "ExportStatusBox", role: "status", "aria-live": "polite", children: [
+            (projectsLoading || loading) && /* @__PURE__ */ o$8(IconLoading, { className: "w-4 h-4 shrink-0" }),
+            /* @__PURE__ */ o$8("span", { className: "ExportStatusText", children: statusText }),
+            !error2 && !loading && !projectsLoading && needsConversationData && /* @__PURE__ */ o$8("span", { className: "ExportStatusDetail", children: [
+              "Limit: ",
+              exportAllLimit,
+              " conversations per source scan"
+            ] })
+          ] }),
+          /* @__PURE__ */ o$8(
+            "input",
+            {
+              type: "file",
+              accept: "application/json",
+              className: "hidden",
+              ref: fileInputRef,
+              onChange: onUpload
+            }
+          ),
+          /* @__PURE__ */ o$8("section", { className: "ExportFilters", "aria-label": "Inventory export filters", children: [
+            /* @__PURE__ */ o$8("div", { className: "ExportFiltersTitle", children: "Export" }),
+            /* @__PURE__ */ o$8("div", { className: "ExportFilterRow", children: [
+              /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "List" }),
+              /* @__PURE__ */ o$8(
+                "select",
+                {
+                  className: "Select",
+                  value: kind,
+                  disabled: loading || projectsLoading,
+                  onChange: (event) => setKind(event.currentTarget.value),
+                  children: [
+                    /* @__PURE__ */ o$8("option", { value: "projects", children: "Projects" }),
+                    /* @__PURE__ */ o$8("option", { value: "chats", children: "Chats" })
+                  ]
+                }
+              )
+            ] }),
+            /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSourceRow", children: [
+              /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Export from" }),
+              /* @__PURE__ */ o$8(
+                "select",
+                {
+                  className: "Select ExportFilterControl",
+                  value: exportSource,
+                  disabled: loading || projectsLoading,
+                  onChange: (event) => {
+                    setError("");
+                    setExportSource(event.currentTarget.value);
+                  },
+                  children: [
+                    /* @__PURE__ */ o$8("option", { value: "API", children: "ChatGPT API" }),
+                    /* @__PURE__ */ o$8("option", { value: "Local", children: "Official export file (conversations.json)" })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ o$8("div", { className: "ExportSourceActions", children: exportSource === "Local" && /* @__PURE__ */ o$8(
+                "button",
+                {
+                  className: "Button neutral flex items-center gap-1",
+                  onClick: () => {
+                    var _a;
+                    return (_a = fileInputRef.current) == null ? void 0 : _a.click();
+                  },
+                  children: [
+                    /* @__PURE__ */ o$8(IconUpload, { className: "w-4 h-4" }),
+                    "Select file..."
+                  ]
+                }
+              ) })
+            ] }),
+            /* @__PURE__ */ o$8("div", { className: "ExportFilterRow", children: [
+              /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Project" }),
+              /* @__PURE__ */ o$8(
+                "select",
+                {
+                  className: "Select",
+                  value: selectedProjectId ?? "",
+                  disabled: loading || projectsLoading,
+                  onChange: (event) => {
+                    const value = event.currentTarget.value;
+                    setSelectedProjectId(value || null);
+                  },
+                  children: [
+                    /* @__PURE__ */ o$8("option", { value: "", children: "All conversations" }),
+                    /* @__PURE__ */ o$8("option", { value: NOT_IN_PROJECT_ID, children: "Not in a project" }),
+                    projects.map((project) => {
+                      var _a;
+                      return /* @__PURE__ */ o$8("option", { value: project.id, children: ((_a = project.display) == null ? void 0 : _a.name) ?? project.id }, project.id);
+                    })
+                  ]
+                }
+              )
+            ] }),
+            /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportDateRow", children: [
+              /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Date" }),
+              /* @__PURE__ */ o$8(
+                "select",
+                {
+                  className: "Select",
+                  value: dateField,
+                  disabled: loading || projectsLoading,
+                  onChange: (event) => setDateField(event.currentTarget.value),
+                  children: [
+                    /* @__PURE__ */ o$8("option", { value: "update_time", children: "Last updated" }),
+                    /* @__PURE__ */ o$8("option", { value: "create_time", children: "Created" })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ o$8("label", { htmlFor: "inventory-date-from", children: "From" }),
+              /* @__PURE__ */ o$8(
+                "input",
+                {
+                  id: "inventory-date-from",
+                  type: "date",
+                  value: fromDate,
+                  disabled: loading || projectsLoading,
+                  onChange: (event) => setFromDate(event.currentTarget.value)
+                }
+              ),
+              /* @__PURE__ */ o$8("label", { htmlFor: "inventory-date-to", children: "To" }),
+              /* @__PURE__ */ o$8(
+                "input",
+                {
+                  id: "inventory-date-to",
+                  type: "date",
+                  value: toDate,
+                  disabled: loading || projectsLoading,
+                  onChange: (event) => setToDate(event.currentTarget.value)
+                }
+              ),
+              /* @__PURE__ */ o$8(
+                "button",
+                {
+                  className: "Button neutral",
+                  disabled: !fromDate && !toDate,
+                  onClick: () => {
+                    setFromDate("");
+                    setToDate("");
+                  },
+                  children: "Clear dates"
+                }
+              )
+            ] }),
+            /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSearchRow", children: [
+              /* @__PURE__ */ o$8("label", { className: "ExportFilterLabel", htmlFor: "inventory-search", children: "Search" }),
+              /* @__PURE__ */ o$8(
+                "input",
+                {
+                  id: "inventory-search",
+                  type: "search",
+                  className: "SelectSearch",
+                  placeholder: kind === "projects" ? "Search projects..." : "Search conversations...",
+                  value: query2,
+                  disabled: loading || projectsLoading,
+                  onInput: (event) => setQuery(event.currentTarget.value)
+                }
+              )
+            ] })
+          ] }),
+          /* @__PURE__ */ o$8(InventoryPreview, { kind, rows }),
+          /* @__PURE__ */ o$8("div", { className: "ActionBar flex flex-wrap mt-3 items-center gap-2", children: [
+            /* @__PURE__ */ o$8(
+              "select",
+              {
+                className: "Select shrink-0",
+                value: outputFormat,
+                onChange: (event) => setOutputFormat(event.currentTarget.value),
+                children: [
+                  /* @__PURE__ */ o$8("option", { value: "json", children: "JSON" }),
+                  /* @__PURE__ */ o$8("option", { value: "txt", children: "TXT" }),
+                  /* @__PURE__ */ o$8("option", { value: "html", children: "HTML" }),
+                  /* @__PURE__ */ o$8("option", { value: "md", children: "Markdown" })
+                ]
+              }
+            ),
+            /* @__PURE__ */ o$8("div", { className: "flex flex-grow" }),
+            /* @__PURE__ */ o$8(
+              "button",
+              {
+                className: "Button green",
+                disabled: loading || projectsLoading || !!error2 || rows.length === 0,
+                onClick: onExport,
+                children: "Export"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$f39c2d165cd861fe, { asChild: true, children: /* @__PURE__ */ o$8("button", { className: "IconButton CloseButton", "aria-label": "Close", children: /* @__PURE__ */ o$8(IconCross, {}) }) })
+        ] })
+      ] })
+    ] });
   };
   const TIMEOUT = 2500;
   const MenuItem = ({ text: text2, successText, disabled = false, title: title2, ariaLabel, icon: Icon, onClick, className }) => {
@@ -24944,6 +25620,7 @@ ${content2}`;
     const [open, setOpen] = h$4(false);
     const [jsonOpen, setJsonOpen] = h$4(false);
     const [exportOpen, setExportOpen] = h$4(false);
+    const [inventoryOpen, setInventoryOpen] = h$4(false);
     const [settingOpen, setSettingOpen] = h$4(false);
     const {
       format,
@@ -25008,7 +25685,7 @@ ${content2}`;
               Portal,
               {
                 container: isMobile ? container : document.body,
-                forceMount: open || jsonOpen || settingOpen || exportOpen,
+                forceMount: open || jsonOpen || settingOpen || exportOpen || inventoryOpen,
                 children: /* @__PURE__ */ o$8(
                   $cef8881cdc69808e$export$7c6e2c02157bb7d2,
                   {
@@ -25136,6 +25813,20 @@ ${content2}`;
                             MenuItem,
                             {
                               text: t2("Export All"),
+                              icon: IconZip
+                            }
+                          ) })
+                        }
+                      ),
+                      /* @__PURE__ */ o$8(
+                        InventoryExportDialog,
+                        {
+                          open: inventoryOpen,
+                          onOpenChange: setInventoryOpen,
+                          children: /* @__PURE__ */ o$8("div", { className: "row-full", children: /* @__PURE__ */ o$8(
+                            MenuItem,
+                            {
+                              text: "Export Project / Chat Lists",
                               icon: IconZip
                             }
                           ) })
