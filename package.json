@@ -9,7 +9,7 @@
   "title:zh-TW": "ChatGPT Exporter",
   "description": "Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.",
   "description:zh-CN": "一键导出 ChatGPT 对话，轻松备份与分享",
-  "description:zh-TW": "一鍵匯出 ChatGPT 對話，輕鬆備份與分享",
+  "description:zh-TW": "一鍵導出 ChatGPT 對話，輕鬆備份與分享",
   "author": "danveitch76",
   "license": "MIT",
   "engines": {
