@@ -9,7 +9,7 @@
   "title:zh-TW": "ChatGPT Exporter",
   "description": "Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.",
   "description:zh-CN": "一键导出 ChatGPT 对话，轻松备份与分享",
-  "description:zh-TW": "一鍵導出 ChatGPT 對話，輕鬆備份與分享",
+  "description:zh-TW": "一鍵匯出 ChatGPT 對話，輕鬆備份與分享",
   "author": "danveitch76",
   "license": "MIT",
   "engines": {
@@ -62,7 +62,7 @@
     "sanitize-filename": "^1.6.3",
     "sentinel-js": "^0.0.7",
     "urlcat": "^2.0.4",
-    "vite-plugin-monkey": "^5.3.2"
+    "vite-plugin-monkey": "^3.5.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.6.1",
