@@ -43,7 +43,10 @@ export function transformConversationTitle(
         }
 
         const flags = transform.caseSensitive ? 'g' : 'gi'
-        proposedTitle = title.replace(new RegExp(escapeRegExp(transform.text), flags), transform.replacement)
+        proposedTitle = title.replace(
+            new RegExp(escapeRegExp(transform.text), flags),
+            () => transform.replacement,
+        )
     }
 
     if (!proposedTitle.trim()) {
