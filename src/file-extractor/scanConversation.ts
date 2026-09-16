@@ -39,6 +39,7 @@ const SIZE_KEYS = new Set([
     'size_bytes',
     'file_size_bytes',
     'bytes',
+    'size',
 ])
 
 export function scanConversationForFiles(conversation: ApiConversationWithId): FileReference[] {
@@ -174,11 +175,12 @@ function extractFileId(value: string): string | undefined {
 function extractInlineFileIds(value: string): string[] {
     const ids = new Set<string>()
     const pattern = /\{\{file:([^}]+)\}\}/g
-    let match: RegExpExecArray | null
+    let match = pattern.exec(value)
 
-    while ((match = pattern.exec(value)) !== null) {
+    while (match !== null) {
         const fileId = match[1]?.trim()
         if (fileId && looksLikeFileId(fileId)) ids.add(fileId)
+        match = pattern.exec(value)
     }
 
     return [...ids]
