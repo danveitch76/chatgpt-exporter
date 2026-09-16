@@ -111,3 +111,11 @@ const regexCharacters = transformConversationTitle('A [draft] + notes', {
     replacement: 'final',
 })
 assert.equal(regexCharacters.proposedTitle, 'A final notes')
+
+const literalReplacement = transformConversationTitle('TODO - Project Audit', {
+    ...base,
+    operation: 'replace',
+    text: 'TODO',
+    replacement: '$& $1 $$',
+})
+assert.equal(literalReplacement.proposedTitle, '$& $1 $$ - Project Audit')
