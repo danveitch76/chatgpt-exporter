@@ -48,17 +48,21 @@ export function isRecoverableAssetClass(assetClass?: FileAssetClass): boolean {
         || assetClass === 'recoverable_backend_asset'
 }
 
+function isBackendFileId(value?: string): boolean {
+    return typeof value === 'string' && /^file[-_][A-Za-z0-9_-]+$/.test(value)
+}
+
 function isEmbeddedAsset(reference: FileReference): boolean {
     return typeof reference.assetPointer === 'string'
         && reference.assetPointer.startsWith('data:')
 }
 
 function isBackendAsset(reference: FileReference): boolean {
-    if (typeof reference.fileId === 'string' && reference.fileId.startsWith('file-')) {
+    if (isBackendFileId(reference.fileId)) {
         return true
     }
 
-    if (typeof reference.assetPointer === 'string' && reference.assetPointer.startsWith('file-')) {
+    if (isBackendFileId(reference.assetPointer)) {
         return true
     }
 

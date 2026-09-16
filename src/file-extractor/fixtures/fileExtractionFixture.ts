@@ -1,4 +1,4 @@
-import type { ApiConversationWithId } from '../../api'
+import type { ApiConversationWithId, ConversationNodeMessage } from '../../api'
 
 export const fileExtractionFixture: ApiConversationWithId = {
     id: 'fixture-conversation',
@@ -33,7 +33,16 @@ export const fileExtractionFixture: ApiConversationWithId = {
                 },
                 status: 'finished_successfully',
                 weight: 1,
-                metadata: {},
+                metadata: {
+                    attachments: [
+                        {
+                            id: 'file_user-uploaded-document',
+                            name: 'brief.pdf',
+                            mime_type: 'application/pdf',
+                            size: 3210,
+                        },
+                    ],
+                } as unknown as ConversationNodeMessage['metadata'],
                 recipient: 'all',
             },
         },
@@ -48,7 +57,7 @@ export const fileExtractionFixture: ApiConversationWithId = {
                 content: {
                     content_type: 'text',
                     parts: [
-                        'Created file: sandbox:/mnt/data/report.md',
+                        'Created file {{file:file_generated-report}} at sandbox:/mnt/data/report.md',
                     ],
                 },
                 status: 'finished_successfully',

@@ -22592,14 +22592,17 @@ ${content2}`;
     }
     return "unknown_metadata";
   }
+  function isBackendFileId(value) {
+    return typeof value === "string" && /^file[-_][A-Za-z0-9_-]+$/.test(value);
+  }
   function isEmbeddedAsset(reference) {
     return typeof reference.assetPointer === "string" && reference.assetPointer.startsWith("data:");
   }
   function isBackendAsset(reference) {
-    if (typeof reference.fileId === "string" && reference.fileId.startsWith("file-")) {
+    if (isBackendFileId(reference.fileId)) {
       return true;
     }
-    if (typeof reference.assetPointer === "string" && reference.assetPointer.startsWith("file-")) {
+    if (isBackendFileId(reference.assetPointer)) {
       return true;
     }
     if (typeof reference.assetPointer === "string" && reference.assetPointer.includes("/files/download/")) {
@@ -22669,7 +22672,8 @@ ${content2}`;
   const SIZE_KEYS = /* @__PURE__ */ new Set([
     "size_bytes",
     "file_size_bytes",
-    "bytes"
+    "bytes",
+    "size"
   ]);
   function scanConversationForFiles(conversation) {
     const references = [];
@@ -22699,6 +22703,7 @@ ${content2}`;
           references.push({
             ...context,
             sourceType: inferSourceType(message, path2, stringValue),
+            fileId: extractFileId(stringValue),
             assetPointer: normaliseAssetPointer(stringValue),
             rawPath: looksLikeSandboxPath(stringValue) ? stringValue : void 0,
             rawUrl: looksLikeUrl(stringValue) ? stringValue : void 0,
@@ -22710,6 +22715,19 @@ ${content2}`;
             rawValue: value
           });
           return;
+        }
+        for (const fileId of extractInlineFileIds(stringValue)) {
+          references.push({
+            ...context,
+            sourceType: inferSourceType(message, path2, fileId),
+            fileId,
+            filename: inferNearbyFilename(message, path2),
+            extension: inferExtension(inferNearbyFilename(message, path2)),
+            mimeType: inferNearbyMimeType(message, path2),
+            sizeBytes: inferNearbySizeBytes(message, path2),
+            sourceField: path2,
+            rawValue: value
+          });
         }
         if (looksLikeGeneratedFileText(stringValue)) {
           references.push({
@@ -22756,13 +22774,29 @@ ${content2}`;
     return ((_a = path2.split(".").at(-1)) == null ? void 0 : _a.replace(/\[\d+\]$/, "")) ?? path2;
   }
   function looksLikeFileId(value) {
-    return /^file-[A-Za-z0-9_-]+$/.test(value);
+    return /^file[-_][A-Za-z0-9_-]+$/.test(value);
   }
   function normaliseFileId(value) {
     return value.replace(/^sediment:\/\//, "");
   }
+  function extractFileId(value) {
+    const normalised = normaliseFileId(value.trim());
+    return looksLikeFileId(normalised) ? normalised : void 0;
+  }
+  function extractInlineFileIds(value) {
+    var _a;
+    const ids = /* @__PURE__ */ new Set();
+    const pattern = /\{\{file:([^}]+)\}\}/g;
+    let match = pattern.exec(value);
+    while (match !== null) {
+      const fileId = (_a = match[1]) == null ? void 0 : _a.trim();
+      if (fileId && looksLikeFileId(fileId)) ids.add(fileId);
+      match = pattern.exec(value);
+    }
+    return [...ids];
+  }
   function looksLikeAssetPointer(value) {
-    return value.startsWith("sediment://") || value.startsWith("file-") || value.includes("/files/download/");
+    return value.startsWith("sediment://") || value.startsWith("file-") || value.startsWith("file_") || value.includes("/files/download/");
   }
   function normaliseAssetPointer(value) {
     return value.trim();

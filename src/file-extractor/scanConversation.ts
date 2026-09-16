@@ -39,6 +39,7 @@ const SIZE_KEYS = new Set([
     'size_bytes',
     'file_size_bytes',
     'bytes',
+    'size',
 ])
 
 export function scanConversationForFiles(conversation: ApiConversationWithId): FileReference[] {
@@ -75,6 +76,7 @@ export function scanConversationForFiles(conversation: ApiConversationWithId): F
                 references.push({
                     ...context,
                     sourceType: inferSourceType(message, path, stringValue),
+                    fileId: extractFileId(stringValue),
                     assetPointer: normaliseAssetPointer(stringValue),
                     rawPath: looksLikeSandboxPath(stringValue) ? stringValue : undefined,
                     rawUrl: looksLikeUrl(stringValue) ? stringValue : undefined,
@@ -86,6 +88,20 @@ export function scanConversationForFiles(conversation: ApiConversationWithId): F
                     rawValue: value,
                 })
                 return
+            }
+
+            for (const fileId of extractInlineFileIds(stringValue)) {
+                references.push({
+                    ...context,
+                    sourceType: inferSourceType(message, path, fileId),
+                    fileId,
+                    filename: inferNearbyFilename(message, path),
+                    extension: inferExtension(inferNearbyFilename(message, path)),
+                    mimeType: inferNearbyMimeType(message, path),
+                    sizeBytes: inferNearbySizeBytes(message, path),
+                    sourceField: path,
+                    rawValue: value,
+                })
             }
 
             if (looksLikeGeneratedFileText(stringValue)) {
@@ -144,16 +160,36 @@ function lastPathSegment(path: string): string {
 }
 
 function looksLikeFileId(value: string): boolean {
-    return /^file-[A-Za-z0-9_-]+$/.test(value)
+    return /^file[-_][A-Za-z0-9_-]+$/.test(value)
 }
 
 function normaliseFileId(value: string): string {
     return value.replace(/^sediment:\/\//, '')
 }
 
+function extractFileId(value: string): string | undefined {
+    const normalised = normaliseFileId(value.trim())
+    return looksLikeFileId(normalised) ? normalised : undefined
+}
+
+function extractInlineFileIds(value: string): string[] {
+    const ids = new Set<string>()
+    const pattern = /\{\{file:([^}]+)\}\}/g
+    let match = pattern.exec(value)
+
+    while (match !== null) {
+        const fileId = match[1]?.trim()
+        if (fileId && looksLikeFileId(fileId)) ids.add(fileId)
+        match = pattern.exec(value)
+    }
+
+    return [...ids]
+}
+
 function looksLikeAssetPointer(value: string): boolean {
     return value.startsWith('sediment://')
         || value.startsWith('file-')
+        || value.startsWith('file_')
         || value.includes('/files/download/')
 }
 
