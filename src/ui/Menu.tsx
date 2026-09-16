@@ -11,6 +11,7 @@ import { useWindowResize } from '../hooks/useWindowResize'
 import { Divider } from './Divider'
 import { ExportDialog } from './ExportDialog'
 import { FileCode, IconArrowRightFromBracket, IconCamera, IconCopy, IconJSON, IconMarkdown, IconSetting, IconZip } from './Icons'
+import { InventoryExportDialog } from './InventoryExportDialog'
 import { MenuItem } from './MenuItem'
 import { SettingProvider, useSettingContext } from './SettingContext'
 import { SettingDialog } from './SettingDialog'
@@ -79,6 +80,7 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
     const [open, setOpen] = useState(false)
     const [jsonOpen, setJsonOpen] = useState(false)
     const [exportOpen, setExportOpen] = useState(false)
+    const [inventoryOpen, setInventoryOpen] = useState(false)
     const [settingOpen, setSettingOpen] = useState(false)
 
     const {
@@ -148,7 +150,7 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
                 </HoverCard.Trigger>
                 <Portal
                     container={isMobile ? container : document.body}
-                    forceMount={open || jsonOpen || settingOpen || exportOpen}
+                    forceMount={open || jsonOpen || settingOpen || exportOpen || inventoryOpen}
                 >
                     <HoverCard.Content
                         className={`
@@ -254,6 +256,17 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
                                 />
                             </div>
                         </ExportDialog>
+                        <InventoryExportDialog
+                            open={inventoryOpen}
+                            onOpenChange={setInventoryOpen}
+                        >
+                            <div className="row-full">
+                                <MenuItem
+                                    text="Export Project / Chat Lists"
+                                    icon={IconZip}
+                                />
+                            </div>
+                        </InventoryExportDialog>
 
                         {!isMobile && (
                             <HoverCard.Arrow
