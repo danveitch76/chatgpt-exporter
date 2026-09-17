@@ -13,10 +13,10 @@ import { conversationMatchesDateRange } from './conversationDateFilter'
 import { transformConversationTitle } from './conversationTitleTransform'
 import { IconCross, IconLoading } from './Icons'
 import { useSettingContext } from './SettingContext'
+import type { RenameOperation } from './conversationTitleTransform'
 import type { ApiConversationItem, ApiProjectInfo } from '../api'
 import type { RenameConversationResult } from '../conversationRename'
 import type { FC } from '../type'
-import type { RenameOperation } from './conversationTitleTransform'
 
 const NOT_IN_PROJECT_ID = '__not_in_project__'
 
@@ -222,7 +222,7 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
         caseSensitive,
     }), [caseSensitive, operation, replacement, text])
 
-    const preview = useMemo<RenamePreviewRow[]>(() => selected.map((conversation) => ({
+    const preview = useMemo<RenamePreviewRow[]>(() => selected.map(conversation => ({
         id: conversation.id,
         ...transformConversationTitle(conversation.title ?? '', transform),
     })), [selected, transform])
@@ -326,8 +326,8 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
     const statusDetail = processing
         ? progress.currentName
         : !error && !busy
-            ? `${conversations.length} conversations loaded · source scan limit ${exportAllLimit}`
-            : ''
+                ? `${conversations.length} conversations loaded · source scan limit ${exportAllLimit}`
+                : ''
 
     return (
         <Dialog.Root open={open} onOpenChange={closeGuarded}>
@@ -336,8 +336,12 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                 <Dialog.Overlay className="DialogOverlay" />
                 <Dialog.Content
                     className="DialogContent _export"
-                    onEscapeKeyDown={event => processing && event.preventDefault()}
-                    onPointerDownOutside={event => processing && event.preventDefault()}
+                    onEscapeKeyDown={(event: Event) => {
+                        if (processing) event.preventDefault()
+                    }}
+                    onPointerDownOutside={(event: Event) => {
+                        if (processing) event.preventDefault()
+                    }}
                 >
                     <Dialog.Title className="DialogTitle">Bulk Rename Conversations</Dialog.Title>
 
