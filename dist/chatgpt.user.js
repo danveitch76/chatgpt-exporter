@@ -1562,8 +1562,8 @@ html {\r
     };
     return memorized;
   }
-  const sessionApi = _default(baseUrl, "/api/auth/session");
-  const conversationApi = (id) => _default(apiUrl, "/conversation/:id", { id });
+  const sessionApi$1 = _default(baseUrl, "/api/auth/session");
+  const conversationApi$1 = (id) => _default(apiUrl, "/conversation/:id", { id });
   const conversationsApi = (offset, limit) => _default(apiUrl, "/conversations", { offset, limit });
   const fileDownloadApi = (id) => _default(apiUrl, "/files/download/:id", { id, post_id: "", inline: false });
   const projectsApi = (cursor) => _default(apiUrl, "/gizmos/snorlax/sidebar", { conversations_per_gizmo: 0, cursor });
@@ -1638,7 +1638,7 @@ html {\r
         ...shareConversation
       };
     }
-    const url = conversationApi(chatId);
+    const url = conversationApi$1(chatId);
     const conversation = await fetchApi(url);
     if (shouldReplaceAssets) {
       await replaceImageAssets(conversation);
@@ -1763,7 +1763,7 @@ html {\r
     }
   }
   async function archiveConversation(chatId) {
-    const url = conversationApi(chatId);
+    const url = conversationApi$1(chatId);
     const { success } = await fetchApi(url, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -1772,7 +1772,7 @@ html {\r
     return success;
   }
   async function deleteConversation(chatId) {
-    const url = conversationApi(chatId);
+    const url = conversationApi$1(chatId);
     const { success } = await fetchApi(url, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -1857,15 +1857,15 @@ html {\r
     return { ok: true, rateLimitHeaders };
   }
   async function _fetchSession() {
-    const response = await fetch(sessionApi);
+    const response = await fetch(sessionApi$1);
     if (!response.ok) {
       throw new Error(response.statusText);
     }
     return response.json();
   }
-  const fetchSession = memorize(_fetchSession);
+  const fetchSession$1 = memorize(_fetchSession);
   async function getAccessToken() {
-    const session = await fetchSession();
+    const session = await fetchSession$1();
     return session.accessToken;
   }
   async function _fetchAccountsCheck() {
@@ -22559,6 +22559,1030 @@ ${content2}`;
     window.addEventListener("resize", callback);
     return () => window.removeEventListener("resize", callback);
   }
+  const sessionApi = _default(baseUrl, "/api/auth/session");
+  const conversationApi = (id) => _default(apiUrl, "/conversation/:id", { id });
+  async function fetchSession() {
+    const response = await fetch(sessionApi);
+    if (!response.ok) {
+      throw new Error(response.statusText || "Failed to load ChatGPT session");
+    }
+    return response.json();
+  }
+  const getSession = memorize(fetchSession);
+  async function renameConversation(chatId, title2) {
+    if (!chatId.trim()) throw new Error("Conversation id is required");
+    if (!title2.trim()) throw new Error("Conversation title cannot be empty");
+    const session = await getSession();
+    const accountId = await getTeamAccountId();
+    const response = await fetch(conversationApi(chatId), {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${session.accessToken}`,
+        "X-Authorization": `Bearer ${session.accessToken}`,
+        "Content-Type": "application/json",
+        ...accountId ? { "Chatgpt-Account-Id": accountId } : {}
+      },
+      body: JSON.stringify({ title: title2 })
+    });
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new RateLimitError(response.headers.get("Retry-After"));
+      }
+      throw new Error(response.statusText || `Rename failed (${response.status})`);
+    }
+    const payload = await response.json();
+    if (payload.success !== true) {
+      throw new Error("ChatGPT did not confirm the rename");
+    }
+    return { id: chatId, title: title2 };
+  }
+  function EventEmitter(n2) {
+    return { all: n2 = n2 || /* @__PURE__ */ new Map(), on: function(t2, e2) {
+      var i2 = n2.get(t2);
+      i2 ? i2.push(e2) : n2.set(t2, [e2]);
+    }, off: function(t2, e2) {
+      var i2 = n2.get(t2);
+      i2 && (e2 ? i2.splice(i2.indexOf(e2) >>> 0, 1) : n2.set(t2, []));
+    }, emit: function(t2, e2) {
+      var i2 = n2.get(t2);
+      i2 && i2.slice().map(function(n3) {
+        n3(e2);
+      }), (i2 = n2.get("*")) && i2.slice().map(function(n3) {
+        n3(t2, e2);
+      });
+    } };
+  }
+  const MAX_RETRIES = 5;
+  const MAX_GLOBAL_PAUSES = 5;
+  const DEFAULT_429_PAUSE_MS = 6e4;
+  class RequestQueue {
+    constructor(minBackoff, maxBackoff) {
+      __publicField(this, "eventEmitter", EventEmitter());
+      __publicField(this, "queue", []);
+      __publicField(this, "results", []);
+      __publicField(this, "status", "IDLE");
+      __publicField(this, "backoffMultiplier", 2);
+      __publicField(this, "backoff");
+      __publicField(this, "total", 0);
+      __publicField(this, "completed", 0);
+      /**
+       * Timestamp (ms since epoch) until which the whole queue is frozen after
+       * receiving a 429. While Date.now() < pauseUntil every process() iteration
+       * waits out the remainder before making the next request.
+       */
+      __publicField(this, "pauseUntil", 0);
+      /** How many global rate-limit pauses have been applied so far */
+      __publicField(this, "globalPauses", 0);
+      this.minBackoff = minBackoff;
+      this.maxBackoff = maxBackoff;
+      this.backoff = minBackoff;
+    }
+    add(requestObject) {
+      this.queue.push({ ...requestObject, retries: 0, rateRetries: 0 });
+    }
+    start() {
+      if (this.status === "IDLE") {
+        this.total = this.queue.length;
+        this.process();
+      }
+    }
+    stop() {
+      this.status = "STOPPED";
+      this.eventEmitter.emit("done", this.results);
+    }
+    clear() {
+      this.queue = [];
+      this.results = [];
+      this.status = "IDLE";
+      this.backoff = this.minBackoff;
+      this.pauseUntil = 0;
+      this.globalPauses = 0;
+      this.total = 0;
+      this.completed = 0;
+    }
+    on(event, fn2) {
+      this.eventEmitter.on(event, fn2);
+      return () => this.eventEmitter.off(event, fn2);
+    }
+    async process() {
+      if (this.status === "STOPPED" || this.status === "COMPLETED") {
+        return;
+      }
+      if (this.queue.length === 0) {
+        this.done();
+        return;
+      }
+      const remaining = this.pauseUntil - Date.now();
+      if (remaining > 0) {
+        const waitSecs = Math.ceil(remaining / 1e3);
+        this.progress(this.queue[0].name, "rate_limited", waitSecs);
+        await sleep(remaining);
+        this.pauseUntil = 0;
+      }
+      this.status = "IN_PROGRESS";
+      const requestObject = this.queue.shift();
+      const { name, request } = requestObject;
+      let waitMs = this.backoff;
+      try {
+        this.progress(name, "processing");
+        const result = await request();
+        this.results.push(result);
+        this.completed++;
+        this.progress(name, "processing");
+        this.backoff = this.minBackoff;
+        requestObject.retries = 0;
+      } catch (error2) {
+        if (error2 instanceof RateLimitError) {
+          this.globalPauses++;
+          if (this.globalPauses > MAX_GLOBAL_PAUSES) {
+            console.warn("[Exporter] Queue stopped: API rate limit did not clear after", MAX_GLOBAL_PAUSES, "pauses");
+            this.stop();
+            return;
+          }
+          const pauseMs = Math.max(
+            error2.retryAfterMs,
+            DEFAULT_429_PAUSE_MS * this.globalPauses
+          );
+          this.pauseUntil = Date.now() + pauseMs;
+          this.progress(name, "rate_limited", Math.round(pauseMs / 1e3));
+          console.warn(`[Exporter] Rate limited (429). Pausing queue for ${Math.round(pauseMs / 1e3)}s (pause #${this.globalPauses})`);
+          this.queue.unshift(requestObject);
+          waitMs = 0;
+        } else {
+          console.error(`[Exporter] "${name}" failed:`, error2);
+          requestObject.retries++;
+          if (requestObject.retries > MAX_RETRIES) {
+            console.warn(`[Exporter] "${name}" skipped after ${MAX_RETRIES} retries`);
+            waitMs = 0;
+          } else {
+            this.backoff = Math.min(this.backoff * this.backoffMultiplier, this.maxBackoff);
+            waitMs = this.backoff;
+            this.progress(name, "retrying");
+            this.queue.unshift(requestObject);
+          }
+        }
+      }
+      await sleep(waitMs);
+      this.process();
+    }
+    progress(name, status, rateLimitWaitSecs) {
+      this.eventEmitter.emit("progress", {
+        total: this.total,
+        completed: this.completed,
+        currentName: name,
+        currentStatus: status,
+        rateLimitWaitSecs
+      });
+    }
+    done() {
+      this.status = "COMPLETED";
+      this.eventEmitter.emit("done", this.results);
+    }
+  }
+  function FileCode() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 384 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zM256 0V128H384L256 0zM153 289l-31 31 31 31c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L71 337c-9.4-9.4-9.4-24.6 0-33.9l48-48c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9zM265 255l48 48c9.4 9.4 9.4 24.6 0 33.9l-48 48c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l31-31-31-31c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0z" }) });
+  }
+  function IconCamera() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 384c-53 0-96-43-96-96s43-96 96-96s96 43 96 96s-43 96-96 96z" }) });
+  }
+  function IconMarkdown() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 640 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M593.8 59.1H46.2C20.7 59.1 0 79.8 0 105.2v301.5c0 25.5 20.7 46.2 46.2 46.2h547.7c25.5 0 46.2-20.7 46.1-46.1V105.2c0-25.4-20.7-46.1-46.2-46.1zM338.5 360.6H277v-120l-61.5 76.9-61.5-76.9v120H92.3V151.4h61.5l61.5 76.9 61.5-76.9h61.5v209.2zm135.3 3.1L381.5 256H443V151.4h61.5V256H566z" }) });
+  }
+  function IconCopy() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z" }) });
+  }
+  function IconArrowRightFromBracket() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 576 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M534.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L434.7 224 224 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM192 96c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-53 0-96 43-96 96l0 256c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z" }) });
+  }
+  function IconSetting() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 15 15", className: "w-4 h-4 shrink-0", stroke: "currentColor", "stroke-width": "0.5", children: /* @__PURE__ */ o$8("path", { d: "M7.07095 0.650238C6.67391 0.650238 6.32977 0.925096 6.24198 1.31231L6.0039 2.36247C5.6249 2.47269 5.26335 2.62363 4.92436 2.81013L4.01335 2.23585C3.67748 2.02413 3.23978 2.07312 2.95903 2.35386L2.35294 2.95996C2.0722 3.2407 2.0232 3.6784 2.23493 4.01427L2.80942 4.92561C2.62307 5.2645 2.47227 5.62594 2.36216 6.00481L1.31209 6.24287C0.924883 6.33065 0.650024 6.6748 0.650024 7.07183V7.92897C0.650024 8.32601 0.924883 8.67015 1.31209 8.75794L2.36228 8.99603C2.47246 9.375 2.62335 9.73652 2.80979 10.0755L2.2354 10.9867C2.02367 11.3225 2.07267 11.7602 2.35341 12.041L2.95951 12.6471C3.24025 12.9278 3.67795 12.9768 4.01382 12.7651L4.92506 12.1907C5.26384 12.377 5.62516 12.5278 6.0039 12.6379L6.24198 13.6881C6.32977 14.0753 6.67391 14.3502 7.07095 14.3502H7.92809C8.32512 14.3502 8.66927 14.0753 8.75705 13.6881L8.99505 12.6383C9.37411 12.5282 9.73573 12.3773 10.0748 12.1909L10.986 12.7653C11.3218 12.977 11.7595 12.928 12.0403 12.6473L12.6464 12.0412C12.9271 11.7604 12.9761 11.3227 12.7644 10.9869L12.1902 10.076C12.3768 9.73688 12.5278 9.37515 12.638 8.99596L13.6879 8.75794C14.0751 8.67015 14.35 8.32601 14.35 7.92897V7.07183C14.35 6.6748 14.0751 6.33065 13.6879 6.24287L12.6381 6.00488C12.528 5.62578 12.3771 5.26414 12.1906 4.92507L12.7648 4.01407C12.9766 3.6782 12.9276 3.2405 12.6468 2.95975L12.0407 2.35366C11.76 2.07292 11.3223 2.02392 10.9864 2.23565L10.0755 2.80989C9.73622 2.62328 9.37437 2.47229 8.99505 2.36209L8.75705 1.31231C8.66927 0.925096 8.32512 0.650238 7.92809 0.650238H7.07095ZM4.92053 3.81251C5.44724 3.44339 6.05665 3.18424 6.71543 3.06839L7.07095 1.50024H7.92809L8.28355 3.06816C8.94267 3.18387 9.5524 3.44302 10.0794 3.81224L11.4397 2.9547L12.0458 3.56079L11.1882 4.92117C11.5573 5.44798 11.8164 6.0575 11.9321 6.71638L13.5 7.07183V7.92897L11.932 8.28444C11.8162 8.94342 11.557 9.55301 11.1878 10.0798L12.0453 11.4402L11.4392 12.0462L10.0787 11.1886C9.55192 11.5576 8.94241 11.8166 8.28355 11.9323L7.92809 13.5002H7.07095L6.71543 11.932C6.0569 11.8162 5.44772 11.5572 4.92116 11.1883L3.56055 12.046L2.95445 11.4399L3.81213 10.0794C3.4431 9.55266 3.18403 8.94326 3.06825 8.2845L1.50002 7.92897V7.07183L3.06818 6.71632C3.18388 6.05765 3.44283 5.44833 3.81171 4.92165L2.95398 3.561L3.56008 2.95491L4.92053 3.81251ZM9.02496 7.50008C9.02496 8.34226 8.34223 9.02499 7.50005 9.02499C6.65786 9.02499 5.97513 8.34226 5.97513 7.50008C5.97513 6.65789 6.65786 5.97516 7.50005 5.97516C8.34223 5.97516 9.02496 6.65789 9.02496 7.50008ZM9.92496 7.50008C9.92496 8.83932 8.83929 9.92499 7.50005 9.92499C6.1608 9.92499 5.07513 8.83932 5.07513 7.50008C5.07513 6.16084 6.1608 5.07516 7.50005 5.07516C8.83929 5.07516 9.92496 6.16084 9.92496 7.50008Z", fill: "currentColor", fillRule: "evenodd", clipRule: "evenodd" }) });
+  }
+  function IconCross() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 15 15", width: "15", height: "15", children: /* @__PURE__ */ o$8("path", { d: "M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z", fill: "currentColor", fillRule: "evenodd", clipRule: "evenodd" }) });
+  }
+  function IconJSON() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className: "w-5 h-5", style: { marginInline: "-2px", marginTop: "2px" }, "stroke-width": "2", stroke: "currentColor", fill: "none", strokeLinecap: "round", strokeLinejoin: "round", children: [
+      /* @__PURE__ */ o$8("path", { stroke: "none", d: "M0 0h24v24H0z", fill: "none" }),
+      /* @__PURE__ */ o$8("path", { d: "M20 16v-8l3 8v-8" }),
+      /* @__PURE__ */ o$8("path", { d: "M15 8a2 2 0 0 1 2 2v4a2 2 0 1 1 -4 0v-4a2 2 0 0 1 2 -2z" }),
+      /* @__PURE__ */ o$8("path", { d: "M1 8h3v6.5a1.5 1.5 0 0 1 -3 0v-.5" }),
+      /* @__PURE__ */ o$8("path", { d: "M7 15a1 1 0 0 0 1 1h1a1 1 0 0 0 1 -1v-2a1 1 0 0 0 -1 -1h-1a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1h1a1 1 0 0 1 1 1" })
+    ] });
+  }
+  function IconZip() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className: "w-4 h-4 shrink-0", "stroke-width": "2", stroke: "currentColor", fill: "none", strokeLinecap: "round", strokeLinejoin: "round", children: [
+      /* @__PURE__ */ o$8("path", { stroke: "none", d: "M0 0h24v24H0z", fill: "none" }),
+      /* @__PURE__ */ o$8("path", { d: "M6 20.735a2 2 0 0 1 -1 -1.735v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2h-1" }),
+      /* @__PURE__ */ o$8("path", { d: "M11 17a2 2 0 0 1 2 2v2a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-2a2 2 0 0 1 2 -2z" }),
+      /* @__PURE__ */ o$8("path", { d: "M11 5l-1 0" }),
+      /* @__PURE__ */ o$8("path", { d: "M13 7l-1 0" }),
+      /* @__PURE__ */ o$8("path", { d: "M11 9l-1 0" }),
+      /* @__PURE__ */ o$8("path", { d: "M13 11l-1 0" }),
+      /* @__PURE__ */ o$8("path", { d: "M11 13l-1 0" }),
+      /* @__PURE__ */ o$8("path", { d: "M13 15l-1 0" })
+    ] });
+  }
+  function IconLoading({ className, style }) {
+    return /* @__PURE__ */ o$8("span", { style: { animation: "1.4s linear 0s infinite normal none running rotate" }, children: /* @__PURE__ */ o$8(
+      "svg",
+      {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "22 22 44 44",
+        className,
+        style: { animation: "1.4s ease-in-out 0s infinite normal none running circularDash", ...style },
+        fill: "none",
+        stroke: "currentColor",
+        "stroke-width": "2",
+        children: /* @__PURE__ */ o$8(
+          "circle",
+          {
+            cx: "44",
+            cy: "44",
+            r: "20.2",
+            fill: "none",
+            stroke: "currentColor",
+            "stroke-width": "3.6"
+          }
+        )
+      }
+    ) });
+  }
+  function IconCheckBox() {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", style: { width: "1em", height: "1em", display: "inline-block" }, fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" }) });
+  }
+  function IconCheckBoxChecked({ className }) {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className, style: { width: "1em", height: "1em", display: "inline-block" }, fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" }) });
+  }
+  function IconTrash({ className, style }) {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className, style, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round", children: [
+      /* @__PURE__ */ o$8("path", { stroke: "none", d: "M0 0h24v24H0z", fill: "none" }),
+      /* @__PURE__ */ o$8("path", { d: "M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007h16z", "stroke-width": "0", fill: "currentColor" }),
+      /* @__PURE__ */ o$8("path", { d: "M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005h4z", "stroke-width": "0", fill: "currentColor" })
+    ] });
+  }
+  function IconUpload({ className, style }) {
+    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className, style, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round", children: [
+      /* @__PURE__ */ o$8("path", { stroke: "none", d: "M0 0h24v24H0z", fill: "none" }),
+      /* @__PURE__ */ o$8("path", { stroke: "currentColor", d: "M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" }),
+      /* @__PURE__ */ o$8("path", { stroke: "currentColor", d: "M7 9l5 -5l5 5" }),
+      /* @__PURE__ */ o$8("path", { stroke: "currentColor", d: "M12 4l0 12" })
+    ] });
+  }
+  const CheckBox = ({
+    className,
+    checked = false,
+    disabled,
+    label,
+    onCheckedChange
+  }) => {
+    const [isChecked, setChecked] = h$4(checked);
+    const onChange = (e2) => {
+      const newValue = e2.currentTarget.checked;
+      setChecked(newValue);
+      onCheckedChange == null ? void 0 : onCheckedChange(newValue);
+    };
+    p$6(() => {
+      setChecked(checked);
+    }, [checked]);
+    return /* @__PURE__ */ o$8("label", { className: `CheckBoxLabel ${className ?? ""}`, disabled, children: [
+      /* @__PURE__ */ o$8("span", { className: "IconWrapper", children: [
+        /* @__PURE__ */ o$8(
+          "input",
+          {
+            type: "checkbox",
+            checked: isChecked,
+            onChange,
+            disabled
+          }
+        ),
+        isChecked ? /* @__PURE__ */ o$8(IconCheckBoxChecked, {}) : /* @__PURE__ */ o$8(IconCheckBox, {})
+      ] }),
+      /* @__PURE__ */ o$8("span", { className: "LabelText", children: label })
+    ] });
+  };
+  function conversationTimeToMs(time) {
+    if (time == null) return 0;
+    if (typeof time === "number") {
+      const ms2 = time * 1e3;
+      return Number.isFinite(ms2) ? ms2 : 0;
+    }
+    const ms = new Date(time).getTime();
+    return Number.isNaN(ms) ? 0 : ms;
+  }
+  function localDateBoundary(date, endOfDay) {
+    if (!date) return null;
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+    if (!match) return null;
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const day = Number(match[3]);
+    const boundary = endOfDay ? new Date(year, month, day, 23, 59, 59, 999) : new Date(year, month, day, 0, 0, 0, 0);
+    if (boundary.getFullYear() !== year || boundary.getMonth() !== month || boundary.getDate() !== day) return null;
+    return boundary.getTime();
+  }
+  function conversationMatchesDateRange(conversation, field, fromDate, toDate) {
+    if (!fromDate && !toDate) return true;
+    const fromMs = localDateBoundary(fromDate, false);
+    const toMs2 = localDateBoundary(toDate, true);
+    if (fromDate && fromMs == null || toDate && toMs2 == null) return false;
+    if (fromMs != null && toMs2 != null && fromMs > toMs2) return false;
+    const valueMs = conversationTimeToMs(conversation[field]);
+    if (valueMs <= 0) return false;
+    if (fromMs != null && valueMs < fromMs) return false;
+    if (toMs2 != null && valueMs > toMs2) return false;
+    return true;
+  }
+  function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+  function transformConversationTitle(title2, transform) {
+    let proposedTitle = title2;
+    if (transform.operation === "prefix") {
+      proposedTitle = `${transform.text}${title2}`;
+    } else if (transform.operation === "suffix") {
+      proposedTitle = `${title2}${transform.text}`;
+    } else {
+      if (!transform.text) {
+        return {
+          originalTitle: title2,
+          proposedTitle: title2,
+          changed: false,
+          valid: false,
+          error: "Find text is required."
+        };
+      }
+      const flags = transform.caseSensitive ? "g" : "gi";
+      proposedTitle = title2.replace(
+        new RegExp(escapeRegExp(transform.text), flags),
+        () => transform.replacement
+      );
+    }
+    if (!proposedTitle.trim()) {
+      return {
+        originalTitle: title2,
+        proposedTitle,
+        changed: proposedTitle !== title2,
+        valid: false,
+        error: "Resulting title cannot be empty."
+      };
+    }
+    return {
+      originalTitle: title2,
+      proposedTitle,
+      changed: proposedTitle !== title2,
+      valid: true
+    };
+  }
+  function useGMStorage(key2, initialValue) {
+    const [storedValue, setStoredValue] = h$4(() => ScriptStorage.get(key2) ?? initialValue);
+    const setValue = (value) => {
+      setStoredValue(value);
+      ScriptStorage.set(key2, value);
+    };
+    return [storedValue, setValue];
+  }
+  const defaultFormat = "ChatGPT-{title}";
+  const defaultExportAllLimit = 1e3;
+  const defaultExportMetaList = [
+    { name: "title", value: "{title}" },
+    { name: "source", value: "{source}" }
+  ];
+  const SettingContext = G$1({
+    format: defaultFormat,
+    setFormat: (_24) => {
+    },
+    enableTimestamp: false,
+    setEnableTimestamp: (_24) => {
+    },
+    timeStamp24H: false,
+    setTimeStamp24H: (_24) => {
+    },
+    enableTimestampHTML: false,
+    setEnableTimestampHTML: (_24) => {
+    },
+    enableTimestampMarkdown: false,
+    setEnableTimestampMarkdown: (_24) => {
+    },
+    enableMeta: false,
+    setEnableMeta: (_24) => {
+    },
+    exportMetaList: defaultExportMetaList,
+    setExportMetaList: (_24) => {
+    },
+    enableThinking: false,
+    setEnableThinking: (_24) => {
+    },
+    enableSources: true,
+    setEnableSources: (_24) => {
+    },
+    exportAllLimit: defaultExportAllLimit,
+    setExportAllLimit: (_24) => {
+    },
+    resetDefault: () => {
+    }
+  });
+  const SettingProvider = ({ children }) => {
+    const [format, setFormat] = useGMStorage(KEY_FILENAME_FORMAT, defaultFormat);
+    const [enableTimestamp, setEnableTimestamp] = useGMStorage(KEY_TIMESTAMP_ENABLED, false);
+    const [timeStamp24H, setTimeStamp24H] = useGMStorage(KEY_TIMESTAMP_24H, false);
+    const [enableTimestampHTML, setEnableTimestampHTML] = useGMStorage(KEY_TIMESTAMP_HTML, false);
+    const [enableTimestampMarkdown, setEnableTimestampMarkdown] = useGMStorage(KEY_TIMESTAMP_MARKDOWN, false);
+    const [enableMeta, setEnableMeta] = useGMStorage(KEY_META_ENABLED, false);
+    const [exportMetaList, setExportMetaList] = useGMStorage(KEY_META_LIST, defaultExportMetaList);
+    const [enableThinking, setEnableThinking] = useGMStorage(KEY_THINKING_ENABLED, false);
+    const [enableSources, setEnableSources] = useGMStorage(KEY_SOURCES_ENABLED, true);
+    const [exportAllLimit, setExportAllLimit] = useGMStorage(KEY_EXPORT_ALL_LIMIT, defaultExportAllLimit);
+    const resetDefault = T$4(() => {
+      setFormat(defaultFormat);
+      setEnableTimestamp(false);
+      setEnableMeta(false);
+      setExportMetaList(defaultExportMetaList);
+      setEnableThinking(false);
+      setEnableSources(true);
+      setExportAllLimit(defaultExportAllLimit);
+    }, [
+      setFormat,
+      setEnableTimestamp,
+      setEnableMeta,
+      setExportMetaList,
+      setEnableThinking,
+      setEnableSources,
+      setExportAllLimit
+    ]);
+    return /* @__PURE__ */ o$8(
+      SettingContext.Provider,
+      {
+        value: {
+          format,
+          setFormat,
+          enableTimestamp,
+          setEnableTimestamp,
+          timeStamp24H,
+          setTimeStamp24H,
+          enableTimestampHTML,
+          setEnableTimestampHTML,
+          enableTimestampMarkdown,
+          setEnableTimestampMarkdown,
+          enableMeta,
+          setEnableMeta,
+          exportMetaList,
+          setExportMetaList,
+          enableThinking,
+          setEnableThinking,
+          enableSources,
+          setEnableSources,
+          exportAllLimit,
+          setExportAllLimit,
+          resetDefault
+        },
+        children
+      }
+    );
+  };
+  const useSettingContext = () => q$1(SettingContext);
+  const NOT_IN_PROJECT_ID$2 = "__not_in_project__";
+  function timeToMs(value) {
+    if (value == null) return 0;
+    if (typeof value === "number") return value * 1e3;
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  function formatDate(value) {
+    const ms = timeToMs(value);
+    if (!ms) return "—";
+    return new Date(ms).toLocaleDateString(void 0, {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  }
+  function textSearch$2(value, query2) {
+    const q2 = query2.trim();
+    if (!q2) return true;
+    const lower = q2.toLowerCase();
+    if (!lower.includes("*") && !lower.includes("?")) {
+      return value.toLowerCase().includes(lower);
+    }
+    const regexSource = lower.replace(/[\\\^$.|+()[\]{}]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
+    try {
+      return new RegExp(regexSource).test(value.toLowerCase());
+    } catch {
+      return value.toLowerCase().includes(lower);
+    }
+  }
+  function mergeUnique(existing, incoming) {
+    const byId = new Map(existing.map((item) => [item.id, item]));
+    for (const item of incoming) byId.set(item.id, item);
+    return [...byId.values()];
+  }
+  const BulkRenameDialog = ({ open, onOpenChange, children }) => {
+    const { exportAllLimit } = useSettingContext();
+    const [projects, setProjects] = h$4([]);
+    const [projectsLoaded, setProjectsLoaded] = h$4(false);
+    const [projectsLoading, setProjectsLoading] = h$4(false);
+    const [conversations, setConversations] = h$4([]);
+    const [selected, setSelected] = h$4([]);
+    const [selectedProjectId, setSelectedProjectId] = h$4(null);
+    const [dateField, setDateField] = h$4("update_time");
+    const [fromDate, setFromDate] = h$4("");
+    const [toDate, setToDate] = h$4("");
+    const [query2, setQuery] = h$4("");
+    const [sortField, setSortField] = h$4("update_time");
+    const [sortDir, setSortDir] = h$4("desc");
+    const [loading, setLoading] = h$4(false);
+    const [error2, setError] = h$4("");
+    const [operation, setOperation] = h$4("prefix");
+    const [text2, setText] = h$4("");
+    const [replacement, setReplacement] = h$4("");
+    const [caseSensitive, setCaseSensitive] = h$4(false);
+    const [processing, setProcessing] = h$4(false);
+    const [summary, setSummary] = h$4(null);
+    const [progress, setProgress] = h$4({ total: 0, completed: 0, currentName: "" });
+    const renameQueue = F$1(() => new RequestQueue(200, 1600), []);
+    const pendingPlanRef = _([]);
+    const pendingUnchangedRef = _(0);
+    const pendingInvalidRef = _(0);
+    const projectIds = F$1(() => projects.map((project) => project.id), [projects]);
+    const isNotInProject = selectedProjectId === NOT_IN_PROJECT_ID$2;
+    p$6(() => {
+      if (!open) return;
+      let cancelled = false;
+      setProjectsLoading(true);
+      setProjectsLoaded(false);
+      setError("");
+      setSummary(null);
+      fetchProjects().then((items) => {
+        if (cancelled) return;
+        setProjects(items);
+        setProjectsLoaded(true);
+      }).catch((err) => {
+        if (cancelled) return;
+        console.error("Error fetching projects for bulk rename:", err);
+        setProjects([]);
+        setError(err.message || "Failed to load projects");
+      }).finally(() => {
+        if (!cancelled) setProjectsLoading(false);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [open]);
+    p$6(() => {
+      if (!open || !projectsLoaded) return;
+      let cancelled = false;
+      const alive = () => !cancelled;
+      setConversations([]);
+      setSelected([]);
+      setSummary(null);
+      setError("");
+      setLoading(true);
+      const onBatch = (batch) => {
+        if (!alive()) return;
+        setConversations((previous2) => mergeUnique(previous2, batch));
+      };
+      const load = async () => {
+        if (selectedProjectId === null) {
+          await fetchAllConversationsAll(projects, exportAllLimit, onBatch);
+          return;
+        }
+        if (isNotInProject) {
+          await fetchAllNonProjectConversations(projectIds, exportAllLimit, onBatch);
+          return;
+        }
+        await fetchAllConversations(selectedProjectId, exportAllLimit, onBatch);
+      };
+      load().catch((err) => {
+        if (!alive()) return;
+        console.error("Error fetching conversations for bulk rename:", err);
+        setError(err.message || "Failed to load conversations");
+      }).finally(() => {
+        if (alive()) setLoading(false);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [exportAllLimit, isNotInProject, open, projectIds, projects, projectsLoaded, selectedProjectId]);
+    const filtered = F$1(() => {
+      let result = conversations;
+      if (query2.trim()) {
+        result = result.filter((item) => textSearch$2(item.title ?? "", query2));
+      }
+      if (fromDate || toDate) {
+        result = result.filter((item) => conversationMatchesDateRange(item, dateField, fromDate, toDate));
+      }
+      const direction = sortDir === "asc" ? 1 : -1;
+      return [...result].sort((a2, b2) => {
+        if (sortField === "title") {
+          return direction * (a2.title ?? "").localeCompare(b2.title ?? "");
+        }
+        const aTime = timeToMs(sortField === "update_time" ? a2.update_time : a2.create_time);
+        const bTime = timeToMs(sortField === "update_time" ? b2.update_time : b2.create_time);
+        return direction * (aTime - bTime);
+      });
+    }, [conversations, dateField, fromDate, query2, sortDir, sortField, toDate]);
+    const transform = F$1(() => ({
+      operation,
+      text: text2,
+      replacement,
+      caseSensitive
+    }), [caseSensitive, operation, replacement, text2]);
+    const preview = F$1(() => selected.map((conversation) => ({
+      id: conversation.id,
+      ...transformConversationTitle(conversation.title ?? "", transform)
+    })), [selected, transform]);
+    const previewCounts = F$1(() => preview.reduce((counts, row) => {
+      if (!row.valid) counts.invalid++;
+      else if (row.changed) counts.changed++;
+      else counts.unchanged++;
+      return counts;
+    }, { changed: 0, unchanged: 0, invalid: 0 }), [preview]);
+    const allFilteredSelected = filtered.length > 0 && filtered.every((item) => selected.some((selectedItem) => selectedItem.id === item.id));
+    p$6(() => {
+      const off = renameQueue.on("progress", (event) => {
+        setProgress({
+          total: event.total,
+          completed: event.completed,
+          currentName: event.currentName
+        });
+      });
+      return () => off();
+    }, [renameQueue]);
+    p$6(() => {
+      const off = renameQueue.on("done", (results) => {
+        const plan = pendingPlanRef.current;
+        const successful = new Map(results.map((result) => [result.id, result.title]));
+        const failedIds = new Set(plan.filter((item) => !successful.has(item.id)).map((item) => item.id));
+        if (successful.size > 0) {
+          setConversations((previous2) => previous2.map((conversation) => {
+            const title2 = successful.get(conversation.id);
+            return title2 === void 0 ? conversation : { ...conversation, title: title2 };
+          }));
+        }
+        setSelected((previous2) => previous2.filter((item) => failedIds.has(item.id)));
+        setSummary({
+          renamed: results.length,
+          unchanged: pendingUnchangedRef.current,
+          invalid: pendingInvalidRef.current,
+          failed: Math.max(0, plan.length - results.length)
+        });
+        setProcessing(false);
+        pendingPlanRef.current = [];
+      });
+      return () => off();
+    }, [renameQueue]);
+    p$6(() => () => renameQueue.clear(), [renameQueue]);
+    const applyRename = T$4(() => {
+      if (processing || previewCounts.invalid > 0 || previewCounts.changed === 0) return;
+      const plan = preview.filter((row) => row.valid && row.changed);
+      const approved = confirm(
+        `Rename ${plan.length} selected conversation${plan.length === 1 ? "" : "s"} using the previewed titles?`
+      );
+      if (!approved) return;
+      pendingPlanRef.current = plan;
+      pendingUnchangedRef.current = previewCounts.unchanged;
+      pendingInvalidRef.current = previewCounts.invalid;
+      setSummary(null);
+      setProcessing(true);
+      setProgress({ total: plan.length, completed: 0, currentName: "" });
+      renameQueue.clear();
+      for (const item of plan) {
+        renameQueue.add({
+          name: item.originalTitle,
+          request: () => renameConversation(item.id, item.proposedTitle)
+        });
+      }
+      renameQueue.start();
+    }, [preview, previewCounts, processing, renameQueue]);
+    const setDateAndClearSelection = T$4((setter, value) => {
+      setSelected([]);
+      setter(value);
+    }, []);
+    const closeGuarded = T$4((value) => {
+      if (!processing) onOpenChange(value);
+    }, [onOpenChange, processing]);
+    const busy = projectsLoading || loading || processing;
+    const statusText = error2 ? `Error: ${error2}` : processing ? `Renaming ${progress.completed} / ${progress.total}` : projectsLoading ? "Loading projects..." : loading ? "Loading conversations..." : summary ? `Renamed ${summary.renamed}; unchanged ${summary.unchanged}; invalid ${summary.invalid}; failed ${summary.failed}` : `${selected.length} selected / ${filtered.length} visible`;
+    const statusDetail = processing ? progress.currentName : !error2 && !busy ? `${conversations.length} conversations loaded · source scan limit ${exportAllLimit}` : "";
+    return /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$be92b6f5f03c0fe9, { open, onOpenChange: closeGuarded, children: [
+      /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$41fb9f06171c75f4, { asChild: true, children }),
+      /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$602eac185826482c, { children: [
+        /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$c6fdb837b070b4ff, { className: "DialogOverlay" }),
+        /* @__PURE__ */ o$8(
+          $5d3850c4d0b4e6c7$export$7c6e2c02157bb7d2,
+          {
+            className: "DialogContent _export",
+            onEscapeKeyDown: (event) => {
+              if (processing) event.preventDefault();
+            },
+            onPointerDownOutside: (event) => {
+              if (processing) event.preventDefault();
+            },
+            children: [
+              /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$f99233281efd08a0, { className: "DialogTitle", children: "Bulk Rename Conversations" }),
+              /* @__PURE__ */ o$8("div", { className: "ExportStatusBox", role: "status", "aria-live": "polite", children: [
+                busy && /* @__PURE__ */ o$8(IconLoading, { className: "w-4 h-4 shrink-0" }),
+                /* @__PURE__ */ o$8("span", { className: "ExportStatusText", children: statusText }),
+                statusDetail && /* @__PURE__ */ o$8("span", { className: "ExportStatusDetail", children: statusDetail })
+              ] }),
+              /* @__PURE__ */ o$8("section", { className: "ExportFilters", "aria-label": "Conversation rename filters", children: [
+                /* @__PURE__ */ o$8("div", { className: "ExportFiltersTitle", children: "Filters" }),
+                /* @__PURE__ */ o$8("div", { className: "ExportFilterRow", children: [
+                  /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Project" }),
+                  /* @__PURE__ */ o$8(
+                    "select",
+                    {
+                      className: "Select",
+                      value: selectedProjectId ?? "",
+                      disabled: busy,
+                      onChange: (event) => {
+                        const value = event.currentTarget.value;
+                        setSelectedProjectId(value || null);
+                      },
+                      children: [
+                        /* @__PURE__ */ o$8("option", { value: "", children: "All conversations" }),
+                        /* @__PURE__ */ o$8("option", { value: NOT_IN_PROJECT_ID$2, children: "Not in a project" }),
+                        projects.map((project) => {
+                          var _a;
+                          return /* @__PURE__ */ o$8("option", { value: project.id, children: ((_a = project.display) == null ? void 0 : _a.name) ?? project.id }, project.id);
+                        })
+                      ]
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportDateRow", children: [
+                  /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Date" }),
+                  /* @__PURE__ */ o$8(
+                    "select",
+                    {
+                      className: "Select",
+                      value: dateField,
+                      disabled: busy,
+                      onChange: (event) => {
+                        setSelected([]);
+                        setDateField(event.currentTarget.value);
+                      },
+                      children: [
+                        /* @__PURE__ */ o$8("option", { value: "update_time", children: "Last updated" }),
+                        /* @__PURE__ */ o$8("option", { value: "create_time", children: "Created" })
+                      ]
+                    }
+                  ),
+                  /* @__PURE__ */ o$8("label", { htmlFor: "rename-date-from", children: "From" }),
+                  /* @__PURE__ */ o$8(
+                    "input",
+                    {
+                      id: "rename-date-from",
+                      type: "date",
+                      value: fromDate,
+                      disabled: busy,
+                      onChange: (event) => setDateAndClearSelection(setFromDate, event.currentTarget.value)
+                    }
+                  ),
+                  /* @__PURE__ */ o$8("label", { htmlFor: "rename-date-to", children: "To" }),
+                  /* @__PURE__ */ o$8(
+                    "input",
+                    {
+                      id: "rename-date-to",
+                      type: "date",
+                      value: toDate,
+                      disabled: busy,
+                      onChange: (event) => setDateAndClearSelection(setToDate, event.currentTarget.value)
+                    }
+                  ),
+                  /* @__PURE__ */ o$8(
+                    "button",
+                    {
+                      className: "Button neutral",
+                      disabled: processing || !fromDate && !toDate,
+                      onClick: () => {
+                        setSelected([]);
+                        setFromDate("");
+                        setToDate("");
+                      },
+                      children: "Clear dates"
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSearchRow", children: [
+                  /* @__PURE__ */ o$8("label", { className: "ExportFilterLabel", htmlFor: "rename-search", children: "Search" }),
+                  /* @__PURE__ */ o$8(
+                    "input",
+                    {
+                      id: "rename-search",
+                      type: "search",
+                      className: "SelectSearch",
+                      placeholder: "Search conversations...",
+                      value: query2,
+                      disabled: busy,
+                      onInput: (event) => setQuery(event.currentTarget.value)
+                    }
+                  )
+                ] })
+              ] }),
+              /* @__PURE__ */ o$8("div", { className: "SelectToolbar", children: [
+                /* @__PURE__ */ o$8(
+                  CheckBox,
+                  {
+                    label: "Select all visible",
+                    disabled: busy || filtered.length === 0,
+                    checked: allFilteredSelected,
+                    onCheckedChange: (checked) => setSelected(checked ? filtered : [])
+                  }
+                ),
+                /* @__PURE__ */ o$8("div", { className: "flex flex-grow" }),
+                /* @__PURE__ */ o$8(
+                  "select",
+                  {
+                    className: "Select",
+                    value: sortField,
+                    disabled: processing,
+                    onChange: (event) => setSortField(event.currentTarget.value),
+                    children: [
+                      /* @__PURE__ */ o$8("option", { value: "title", children: "Sort: title" }),
+                      /* @__PURE__ */ o$8("option", { value: "create_time", children: "Sort: created" }),
+                      /* @__PURE__ */ o$8("option", { value: "update_time", children: "Sort: updated" })
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ o$8(
+                  "button",
+                  {
+                    className: "Button neutral",
+                    disabled: processing,
+                    onClick: () => setSortDir((direction) => direction === "asc" ? "desc" : "asc"),
+                    children: sortDir === "asc" ? "Ascending" : "Descending"
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ o$8("ul", { className: "SelectList", style: { maxHeight: "13rem" }, children: [
+                filtered.map((conversation) => /* @__PURE__ */ o$8("li", { className: "SelectItem", children: [
+                  /* @__PURE__ */ o$8(
+                    CheckBox,
+                    {
+                      label: conversation.title || "(untitled)",
+                      disabled: processing,
+                      checked: selected.some((item) => item.id === conversation.id),
+                      onCheckedChange: (checked) => {
+                        setSelected((previous2) => checked ? [...previous2.filter((item) => item.id !== conversation.id), conversation] : previous2.filter((item) => item.id !== conversation.id));
+                      }
+                    }
+                  ),
+                  /* @__PURE__ */ o$8("span", { className: "SelectItemMeta", title: `Created: ${conversation.create_time ?? "—"}`, children: formatDate(conversation.create_time) }),
+                  /* @__PURE__ */ o$8("span", { className: "SelectItemMeta", title: `Updated: ${conversation.update_time ?? "—"}`, children: formatDate(conversation.update_time) })
+                ] }, conversation.id)),
+                !loading && !error2 && filtered.length === 0 && /* @__PURE__ */ o$8("li", { className: "SelectItem text-gray-400 dark:text-gray-500", children: "No conversations to display." })
+              ] }),
+              /* @__PURE__ */ o$8("section", { className: "ExportFilters", "aria-label": "Rename transformation", style: { marginTop: "0.75rem" }, children: [
+                /* @__PURE__ */ o$8("div", { className: "ExportFiltersTitle", children: "Rename transformation" }),
+                /* @__PURE__ */ o$8("div", { className: "ExportFilterRow", children: [
+                  /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Operation" }),
+                  /* @__PURE__ */ o$8(
+                    "select",
+                    {
+                      className: "Select",
+                      value: operation,
+                      disabled: processing,
+                      onChange: (event) => setOperation(event.currentTarget.value),
+                      children: [
+                        /* @__PURE__ */ o$8("option", { value: "prefix", children: "Prefix" }),
+                        /* @__PURE__ */ o$8("option", { value: "suffix", children: "Suffix" }),
+                        /* @__PURE__ */ o$8("option", { value: "replace", children: "Find / Replace" })
+                      ]
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSearchRow", children: [
+                  /* @__PURE__ */ o$8("label", { className: "ExportFilterLabel", htmlFor: "rename-text", children: operation === "replace" ? "Find text" : operation === "prefix" ? "Prefix" : "Suffix" }),
+                  /* @__PURE__ */ o$8(
+                    "input",
+                    {
+                      id: "rename-text",
+                      type: "text",
+                      className: "SelectSearch",
+                      value: text2,
+                      disabled: processing,
+                      placeholder: operation === "replace" ? "Text to find..." : "Text to add...",
+                      onInput: (event) => setText(event.currentTarget.value)
+                    }
+                  )
+                ] }),
+                operation === "replace" && /* @__PURE__ */ o$8(k$3, { children: [
+                  /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSearchRow", children: [
+                    /* @__PURE__ */ o$8("label", { className: "ExportFilterLabel", htmlFor: "rename-replacement", children: "Replace with" }),
+                    /* @__PURE__ */ o$8(
+                      "input",
+                      {
+                        id: "rename-replacement",
+                        type: "text",
+                        className: "SelectSearch",
+                        value: replacement,
+                        disabled: processing,
+                        placeholder: "Leave blank to remove matches",
+                        onInput: (event) => setReplacement(event.currentTarget.value)
+                      }
+                    )
+                  ] }),
+                  /* @__PURE__ */ o$8("div", { className: "ExportFilterRow", children: [
+                    /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Matching" }),
+                    /* @__PURE__ */ o$8(
+                      CheckBox,
+                      {
+                        label: "Case sensitive",
+                        disabled: processing,
+                        checked: caseSensitive,
+                        onCheckedChange: setCaseSensitive
+                      }
+                    )
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ o$8("div", { style: { marginTop: "0.75rem", fontSize: "0.78rem" }, children: [
+                /* @__PURE__ */ o$8("strong", { children: "Preview" }),
+                /* @__PURE__ */ o$8("span", { style: { marginLeft: "0.5rem", opacity: 0.75 }, children: [
+                  previewCounts.changed,
+                  " change · ",
+                  previewCounts.unchanged,
+                  " unchanged · ",
+                  previewCounts.invalid,
+                  " invalid"
+                ] })
+              ] }),
+              /* @__PURE__ */ o$8(
+                "div",
+                {
+                  style: {
+                    border: "1px solid var(--ce-border-light)",
+                    borderRadius: "4px",
+                    marginTop: "0.35rem",
+                    maxHeight: "13rem",
+                    overflow: "auto"
+                  },
+                  children: [
+                    /* @__PURE__ */ o$8(
+                      "div",
+                      {
+                        style: {
+                          display: "grid",
+                          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) 5.5rem",
+                          gap: "0.5rem",
+                          padding: "0.4rem 0.55rem",
+                          fontSize: "0.72rem",
+                          fontWeight: 600,
+                          borderBottom: "1px solid var(--ce-border-light)"
+                        },
+                        children: [
+                          /* @__PURE__ */ o$8("span", { children: "Current title" }),
+                          /* @__PURE__ */ o$8("span", { children: "Proposed title" }),
+                          /* @__PURE__ */ o$8("span", { children: "Status" })
+                        ]
+                      }
+                    ),
+                    preview.map((row) => /* @__PURE__ */ o$8(
+                      "div",
+                      {
+                        style: {
+                          display: "grid",
+                          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) 5.5rem",
+                          gap: "0.5rem",
+                          padding: "0.4rem 0.55rem",
+                          fontSize: "0.72rem",
+                          borderBottom: "1px solid var(--ce-border-light)"
+                        },
+                        children: [
+                          /* @__PURE__ */ o$8("span", { title: row.originalTitle, style: { overflowWrap: "anywhere" }, children: row.originalTitle || "(untitled)" }),
+                          /* @__PURE__ */ o$8("span", { title: row.proposedTitle, style: { overflowWrap: "anywhere" }, children: row.proposedTitle || "(empty)" }),
+                          /* @__PURE__ */ o$8("span", { title: row.error, children: !row.valid ? "Invalid" : row.changed ? "Change" : "Unchanged" })
+                        ]
+                      },
+                      row.id
+                    )),
+                    preview.length === 0 && /* @__PURE__ */ o$8("div", { style: { padding: "0.65rem", fontSize: "0.75rem", opacity: 0.7 }, children: "Select one or more conversations to preview title changes." })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ o$8("div", { className: "ActionBar flex flex-wrap mt-3 items-center gap-2", children: [
+                /* @__PURE__ */ o$8("span", { style: { fontSize: "0.75rem", opacity: 0.75 }, children: "Unchanged conversations are skipped. Invalid results block the batch." }),
+                /* @__PURE__ */ o$8("div", { className: "flex flex-grow" }),
+                /* @__PURE__ */ o$8(
+                  "button",
+                  {
+                    className: "Button green",
+                    disabled: busy || !!error2 || previewCounts.changed === 0 || previewCounts.invalid > 0,
+                    onClick: applyRename,
+                    children: [
+                      "Apply ",
+                      previewCounts.changed > 0 ? `to ${previewCounts.changed}` : ""
+                    ]
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$f39c2d165cd861fe, { asChild: true, children: /* @__PURE__ */ o$8("button", { className: "IconButton CloseButton", "aria-label": "Close", disabled: processing, children: /* @__PURE__ */ o$8(IconCross, {}) }) })
+            ]
+          }
+        )
+      ] })
+    ] });
+  };
   const Divider = () => /* @__PURE__ */ o$8("div", { className: "h-px bg-token-border-light" });
   function classifyFileReference(reference) {
     const rawText = [
@@ -22979,409 +24003,6 @@ ${content2}`;
   async function exportAllToFileDiscovery(fileNameFormat, apiConversations, _metaList, _projectName, _partIndex, _totalParts) {
     return exportAllFileDiscovery(fileNameFormat, apiConversations);
   }
-  function EventEmitter(n2) {
-    return { all: n2 = n2 || /* @__PURE__ */ new Map(), on: function(t2, e2) {
-      var i2 = n2.get(t2);
-      i2 ? i2.push(e2) : n2.set(t2, [e2]);
-    }, off: function(t2, e2) {
-      var i2 = n2.get(t2);
-      i2 && (e2 ? i2.splice(i2.indexOf(e2) >>> 0, 1) : n2.set(t2, []));
-    }, emit: function(t2, e2) {
-      var i2 = n2.get(t2);
-      i2 && i2.slice().map(function(n3) {
-        n3(e2);
-      }), (i2 = n2.get("*")) && i2.slice().map(function(n3) {
-        n3(t2, e2);
-      });
-    } };
-  }
-  const MAX_RETRIES = 5;
-  const MAX_GLOBAL_PAUSES = 5;
-  const DEFAULT_429_PAUSE_MS = 6e4;
-  class RequestQueue {
-    constructor(minBackoff, maxBackoff) {
-      __publicField(this, "eventEmitter", EventEmitter());
-      __publicField(this, "queue", []);
-      __publicField(this, "results", []);
-      __publicField(this, "status", "IDLE");
-      __publicField(this, "backoffMultiplier", 2);
-      __publicField(this, "backoff");
-      __publicField(this, "total", 0);
-      __publicField(this, "completed", 0);
-      /**
-       * Timestamp (ms since epoch) until which the whole queue is frozen after
-       * receiving a 429. While Date.now() < pauseUntil every process() iteration
-       * waits out the remainder before making the next request.
-       */
-      __publicField(this, "pauseUntil", 0);
-      /** How many global rate-limit pauses have been applied so far */
-      __publicField(this, "globalPauses", 0);
-      this.minBackoff = minBackoff;
-      this.maxBackoff = maxBackoff;
-      this.backoff = minBackoff;
-    }
-    add(requestObject) {
-      this.queue.push({ ...requestObject, retries: 0, rateRetries: 0 });
-    }
-    start() {
-      if (this.status === "IDLE") {
-        this.total = this.queue.length;
-        this.process();
-      }
-    }
-    stop() {
-      this.status = "STOPPED";
-      this.eventEmitter.emit("done", this.results);
-    }
-    clear() {
-      this.queue = [];
-      this.results = [];
-      this.status = "IDLE";
-      this.backoff = this.minBackoff;
-      this.pauseUntil = 0;
-      this.globalPauses = 0;
-      this.total = 0;
-      this.completed = 0;
-    }
-    on(event, fn2) {
-      this.eventEmitter.on(event, fn2);
-      return () => this.eventEmitter.off(event, fn2);
-    }
-    async process() {
-      if (this.status === "STOPPED" || this.status === "COMPLETED") {
-        return;
-      }
-      if (this.queue.length === 0) {
-        this.done();
-        return;
-      }
-      const remaining = this.pauseUntil - Date.now();
-      if (remaining > 0) {
-        const waitSecs = Math.ceil(remaining / 1e3);
-        this.progress(this.queue[0].name, "rate_limited", waitSecs);
-        await sleep(remaining);
-        this.pauseUntil = 0;
-      }
-      this.status = "IN_PROGRESS";
-      const requestObject = this.queue.shift();
-      const { name, request } = requestObject;
-      let waitMs = this.backoff;
-      try {
-        this.progress(name, "processing");
-        const result = await request();
-        this.results.push(result);
-        this.completed++;
-        this.progress(name, "processing");
-        this.backoff = this.minBackoff;
-        requestObject.retries = 0;
-      } catch (error2) {
-        if (error2 instanceof RateLimitError) {
-          this.globalPauses++;
-          if (this.globalPauses > MAX_GLOBAL_PAUSES) {
-            console.warn("[Exporter] Queue stopped: API rate limit did not clear after", MAX_GLOBAL_PAUSES, "pauses");
-            this.stop();
-            return;
-          }
-          const pauseMs = Math.max(
-            error2.retryAfterMs,
-            DEFAULT_429_PAUSE_MS * this.globalPauses
-          );
-          this.pauseUntil = Date.now() + pauseMs;
-          this.progress(name, "rate_limited", Math.round(pauseMs / 1e3));
-          console.warn(`[Exporter] Rate limited (429). Pausing queue for ${Math.round(pauseMs / 1e3)}s (pause #${this.globalPauses})`);
-          this.queue.unshift(requestObject);
-          waitMs = 0;
-        } else {
-          console.error(`[Exporter] "${name}" failed:`, error2);
-          requestObject.retries++;
-          if (requestObject.retries > MAX_RETRIES) {
-            console.warn(`[Exporter] "${name}" skipped after ${MAX_RETRIES} retries`);
-            waitMs = 0;
-          } else {
-            this.backoff = Math.min(this.backoff * this.backoffMultiplier, this.maxBackoff);
-            waitMs = this.backoff;
-            this.progress(name, "retrying");
-            this.queue.unshift(requestObject);
-          }
-        }
-      }
-      await sleep(waitMs);
-      this.process();
-    }
-    progress(name, status, rateLimitWaitSecs) {
-      this.eventEmitter.emit("progress", {
-        total: this.total,
-        completed: this.completed,
-        currentName: name,
-        currentStatus: status,
-        rateLimitWaitSecs
-      });
-    }
-    done() {
-      this.status = "COMPLETED";
-      this.eventEmitter.emit("done", this.results);
-    }
-  }
-  function FileCode() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 384 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zM256 0V128H384L256 0zM153 289l-31 31 31 31c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L71 337c-9.4-9.4-9.4-24.6 0-33.9l48-48c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9zM265 255l48 48c9.4 9.4 9.4 24.6 0 33.9l-48 48c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l31-31-31-31c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0z" }) });
-  }
-  function IconCamera() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 384c-53 0-96-43-96-96s43-96 96-96s96 43 96 96s-43 96-96 96z" }) });
-  }
-  function IconMarkdown() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 640 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M593.8 59.1H46.2C20.7 59.1 0 79.8 0 105.2v301.5c0 25.5 20.7 46.2 46.2 46.2h547.7c25.5 0 46.2-20.7 46.1-46.1V105.2c0-25.4-20.7-46.1-46.2-46.1zM338.5 360.6H277v-120l-61.5 76.9-61.5-76.9v120H92.3V151.4h61.5l61.5 76.9 61.5-76.9h61.5v209.2zm135.3 3.1L381.5 256H443V151.4h61.5V256H566z" }) });
-  }
-  function IconCopy() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 512 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z" }) });
-  }
-  function IconArrowRightFromBracket() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 576 512", className: "w-4 h-4 shrink-0", fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M534.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L434.7 224 224 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM192 96c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-53 0-96 43-96 96l0 256c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z" }) });
-  }
-  function IconSetting() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 15 15", className: "w-4 h-4 shrink-0", stroke: "currentColor", "stroke-width": "0.5", children: /* @__PURE__ */ o$8("path", { d: "M7.07095 0.650238C6.67391 0.650238 6.32977 0.925096 6.24198 1.31231L6.0039 2.36247C5.6249 2.47269 5.26335 2.62363 4.92436 2.81013L4.01335 2.23585C3.67748 2.02413 3.23978 2.07312 2.95903 2.35386L2.35294 2.95996C2.0722 3.2407 2.0232 3.6784 2.23493 4.01427L2.80942 4.92561C2.62307 5.2645 2.47227 5.62594 2.36216 6.00481L1.31209 6.24287C0.924883 6.33065 0.650024 6.6748 0.650024 7.07183V7.92897C0.650024 8.32601 0.924883 8.67015 1.31209 8.75794L2.36228 8.99603C2.47246 9.375 2.62335 9.73652 2.80979 10.0755L2.2354 10.9867C2.02367 11.3225 2.07267 11.7602 2.35341 12.041L2.95951 12.6471C3.24025 12.9278 3.67795 12.9768 4.01382 12.7651L4.92506 12.1907C5.26384 12.377 5.62516 12.5278 6.0039 12.6379L6.24198 13.6881C6.32977 14.0753 6.67391 14.3502 7.07095 14.3502H7.92809C8.32512 14.3502 8.66927 14.0753 8.75705 13.6881L8.99505 12.6383C9.37411 12.5282 9.73573 12.3773 10.0748 12.1909L10.986 12.7653C11.3218 12.977 11.7595 12.928 12.0403 12.6473L12.6464 12.0412C12.9271 11.7604 12.9761 11.3227 12.7644 10.9869L12.1902 10.076C12.3768 9.73688 12.5278 9.37515 12.638 8.99596L13.6879 8.75794C14.0751 8.67015 14.35 8.32601 14.35 7.92897V7.07183C14.35 6.6748 14.0751 6.33065 13.6879 6.24287L12.6381 6.00488C12.528 5.62578 12.3771 5.26414 12.1906 4.92507L12.7648 4.01407C12.9766 3.6782 12.9276 3.2405 12.6468 2.95975L12.0407 2.35366C11.76 2.07292 11.3223 2.02392 10.9864 2.23565L10.0755 2.80989C9.73622 2.62328 9.37437 2.47229 8.99505 2.36209L8.75705 1.31231C8.66927 0.925096 8.32512 0.650238 7.92809 0.650238H7.07095ZM4.92053 3.81251C5.44724 3.44339 6.05665 3.18424 6.71543 3.06839L7.07095 1.50024H7.92809L8.28355 3.06816C8.94267 3.18387 9.5524 3.44302 10.0794 3.81224L11.4397 2.9547L12.0458 3.56079L11.1882 4.92117C11.5573 5.44798 11.8164 6.0575 11.9321 6.71638L13.5 7.07183V7.92897L11.932 8.28444C11.8162 8.94342 11.557 9.55301 11.1878 10.0798L12.0453 11.4402L11.4392 12.0462L10.0787 11.1886C9.55192 11.5576 8.94241 11.8166 8.28355 11.9323L7.92809 13.5002H7.07095L6.71543 11.932C6.0569 11.8162 5.44772 11.5572 4.92116 11.1883L3.56055 12.046L2.95445 11.4399L3.81213 10.0794C3.4431 9.55266 3.18403 8.94326 3.06825 8.2845L1.50002 7.92897V7.07183L3.06818 6.71632C3.18388 6.05765 3.44283 5.44833 3.81171 4.92165L2.95398 3.561L3.56008 2.95491L4.92053 3.81251ZM9.02496 7.50008C9.02496 8.34226 8.34223 9.02499 7.50005 9.02499C6.65786 9.02499 5.97513 8.34226 5.97513 7.50008C5.97513 6.65789 6.65786 5.97516 7.50005 5.97516C8.34223 5.97516 9.02496 6.65789 9.02496 7.50008ZM9.92496 7.50008C9.92496 8.83932 8.83929 9.92499 7.50005 9.92499C6.1608 9.92499 5.07513 8.83932 5.07513 7.50008C5.07513 6.16084 6.1608 5.07516 7.50005 5.07516C8.83929 5.07516 9.92496 6.16084 9.92496 7.50008Z", fill: "currentColor", fillRule: "evenodd", clipRule: "evenodd" }) });
-  }
-  function IconCross() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 15 15", width: "15", height: "15", children: /* @__PURE__ */ o$8("path", { d: "M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z", fill: "currentColor", fillRule: "evenodd", clipRule: "evenodd" }) });
-  }
-  function IconJSON() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className: "w-5 h-5", style: { marginInline: "-2px", marginTop: "2px" }, "stroke-width": "2", stroke: "currentColor", fill: "none", strokeLinecap: "round", strokeLinejoin: "round", children: [
-      /* @__PURE__ */ o$8("path", { stroke: "none", d: "M0 0h24v24H0z", fill: "none" }),
-      /* @__PURE__ */ o$8("path", { d: "M20 16v-8l3 8v-8" }),
-      /* @__PURE__ */ o$8("path", { d: "M15 8a2 2 0 0 1 2 2v4a2 2 0 1 1 -4 0v-4a2 2 0 0 1 2 -2z" }),
-      /* @__PURE__ */ o$8("path", { d: "M1 8h3v6.5a1.5 1.5 0 0 1 -3 0v-.5" }),
-      /* @__PURE__ */ o$8("path", { d: "M7 15a1 1 0 0 0 1 1h1a1 1 0 0 0 1 -1v-2a1 1 0 0 0 -1 -1h-1a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1h1a1 1 0 0 1 1 1" })
-    ] });
-  }
-  function IconZip() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className: "w-4 h-4 shrink-0", "stroke-width": "2", stroke: "currentColor", fill: "none", strokeLinecap: "round", strokeLinejoin: "round", children: [
-      /* @__PURE__ */ o$8("path", { stroke: "none", d: "M0 0h24v24H0z", fill: "none" }),
-      /* @__PURE__ */ o$8("path", { d: "M6 20.735a2 2 0 0 1 -1 -1.735v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2h-1" }),
-      /* @__PURE__ */ o$8("path", { d: "M11 17a2 2 0 0 1 2 2v2a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-2a2 2 0 0 1 2 -2z" }),
-      /* @__PURE__ */ o$8("path", { d: "M11 5l-1 0" }),
-      /* @__PURE__ */ o$8("path", { d: "M13 7l-1 0" }),
-      /* @__PURE__ */ o$8("path", { d: "M11 9l-1 0" }),
-      /* @__PURE__ */ o$8("path", { d: "M13 11l-1 0" }),
-      /* @__PURE__ */ o$8("path", { d: "M11 13l-1 0" }),
-      /* @__PURE__ */ o$8("path", { d: "M13 15l-1 0" })
-    ] });
-  }
-  function IconLoading({ className, style }) {
-    return /* @__PURE__ */ o$8("span", { style: { animation: "1.4s linear 0s infinite normal none running rotate" }, children: /* @__PURE__ */ o$8(
-      "svg",
-      {
-        xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "22 22 44 44",
-        className,
-        style: { animation: "1.4s ease-in-out 0s infinite normal none running circularDash", ...style },
-        fill: "none",
-        stroke: "currentColor",
-        "stroke-width": "2",
-        children: /* @__PURE__ */ o$8(
-          "circle",
-          {
-            cx: "44",
-            cy: "44",
-            r: "20.2",
-            fill: "none",
-            stroke: "currentColor",
-            "stroke-width": "3.6"
-          }
-        )
-      }
-    ) });
-  }
-  function IconCheckBox() {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", style: { width: "1em", height: "1em", display: "inline-block" }, fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" }) });
-  }
-  function IconCheckBoxChecked({ className }) {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className, style: { width: "1em", height: "1em", display: "inline-block" }, fill: "currentColor", children: /* @__PURE__ */ o$8("path", { d: "M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" }) });
-  }
-  function IconTrash({ className, style }) {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className, style, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round", children: [
-      /* @__PURE__ */ o$8("path", { stroke: "none", d: "M0 0h24v24H0z", fill: "none" }),
-      /* @__PURE__ */ o$8("path", { d: "M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007h16z", "stroke-width": "0", fill: "currentColor" }),
-      /* @__PURE__ */ o$8("path", { d: "M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005h4z", "stroke-width": "0", fill: "currentColor" })
-    ] });
-  }
-  function IconUpload({ className, style }) {
-    return /* @__PURE__ */ o$8("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", className, style, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round", children: [
-      /* @__PURE__ */ o$8("path", { stroke: "none", d: "M0 0h24v24H0z", fill: "none" }),
-      /* @__PURE__ */ o$8("path", { stroke: "currentColor", d: "M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" }),
-      /* @__PURE__ */ o$8("path", { stroke: "currentColor", d: "M7 9l5 -5l5 5" }),
-      /* @__PURE__ */ o$8("path", { stroke: "currentColor", d: "M12 4l0 12" })
-    ] });
-  }
-  const CheckBox = ({
-    className,
-    checked = false,
-    disabled,
-    label,
-    onCheckedChange
-  }) => {
-    const [isChecked, setChecked] = h$4(checked);
-    const onChange = (e2) => {
-      const newValue = e2.currentTarget.checked;
-      setChecked(newValue);
-      onCheckedChange == null ? void 0 : onCheckedChange(newValue);
-    };
-    p$6(() => {
-      setChecked(checked);
-    }, [checked]);
-    return /* @__PURE__ */ o$8("label", { className: `CheckBoxLabel ${className ?? ""}`, disabled, children: [
-      /* @__PURE__ */ o$8("span", { className: "IconWrapper", children: [
-        /* @__PURE__ */ o$8(
-          "input",
-          {
-            type: "checkbox",
-            checked: isChecked,
-            onChange,
-            disabled
-          }
-        ),
-        isChecked ? /* @__PURE__ */ o$8(IconCheckBoxChecked, {}) : /* @__PURE__ */ o$8(IconCheckBox, {})
-      ] }),
-      /* @__PURE__ */ o$8("span", { className: "LabelText", children: label })
-    ] });
-  };
-  function conversationTimeToMs(time) {
-    if (time == null) return 0;
-    if (typeof time === "number") {
-      const ms2 = time * 1e3;
-      return Number.isFinite(ms2) ? ms2 : 0;
-    }
-    const ms = new Date(time).getTime();
-    return Number.isNaN(ms) ? 0 : ms;
-  }
-  function localDateBoundary(date, endOfDay) {
-    if (!date) return null;
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
-    if (!match) return null;
-    const year = Number(match[1]);
-    const month = Number(match[2]) - 1;
-    const day = Number(match[3]);
-    const boundary = endOfDay ? new Date(year, month, day, 23, 59, 59, 999) : new Date(year, month, day, 0, 0, 0, 0);
-    if (boundary.getFullYear() !== year || boundary.getMonth() !== month || boundary.getDate() !== day) return null;
-    return boundary.getTime();
-  }
-  function conversationMatchesDateRange(conversation, field, fromDate, toDate) {
-    if (!fromDate && !toDate) return true;
-    const fromMs = localDateBoundary(fromDate, false);
-    const toMs2 = localDateBoundary(toDate, true);
-    if (fromDate && fromMs == null || toDate && toMs2 == null) return false;
-    if (fromMs != null && toMs2 != null && fromMs > toMs2) return false;
-    const valueMs = conversationTimeToMs(conversation[field]);
-    if (valueMs <= 0) return false;
-    if (fromMs != null && valueMs < fromMs) return false;
-    if (toMs2 != null && valueMs > toMs2) return false;
-    return true;
-  }
-  function useGMStorage(key2, initialValue) {
-    const [storedValue, setStoredValue] = h$4(() => ScriptStorage.get(key2) ?? initialValue);
-    const setValue = (value) => {
-      setStoredValue(value);
-      ScriptStorage.set(key2, value);
-    };
-    return [storedValue, setValue];
-  }
-  const defaultFormat = "ChatGPT-{title}";
-  const defaultExportAllLimit = 1e3;
-  const defaultExportMetaList = [
-    { name: "title", value: "{title}" },
-    { name: "source", value: "{source}" }
-  ];
-  const SettingContext = G$1({
-    format: defaultFormat,
-    setFormat: (_24) => {
-    },
-    enableTimestamp: false,
-    setEnableTimestamp: (_24) => {
-    },
-    timeStamp24H: false,
-    setTimeStamp24H: (_24) => {
-    },
-    enableTimestampHTML: false,
-    setEnableTimestampHTML: (_24) => {
-    },
-    enableTimestampMarkdown: false,
-    setEnableTimestampMarkdown: (_24) => {
-    },
-    enableMeta: false,
-    setEnableMeta: (_24) => {
-    },
-    exportMetaList: defaultExportMetaList,
-    setExportMetaList: (_24) => {
-    },
-    enableThinking: false,
-    setEnableThinking: (_24) => {
-    },
-    enableSources: true,
-    setEnableSources: (_24) => {
-    },
-    exportAllLimit: defaultExportAllLimit,
-    setExportAllLimit: (_24) => {
-    },
-    resetDefault: () => {
-    }
-  });
-  const SettingProvider = ({ children }) => {
-    const [format, setFormat] = useGMStorage(KEY_FILENAME_FORMAT, defaultFormat);
-    const [enableTimestamp, setEnableTimestamp] = useGMStorage(KEY_TIMESTAMP_ENABLED, false);
-    const [timeStamp24H, setTimeStamp24H] = useGMStorage(KEY_TIMESTAMP_24H, false);
-    const [enableTimestampHTML, setEnableTimestampHTML] = useGMStorage(KEY_TIMESTAMP_HTML, false);
-    const [enableTimestampMarkdown, setEnableTimestampMarkdown] = useGMStorage(KEY_TIMESTAMP_MARKDOWN, false);
-    const [enableMeta, setEnableMeta] = useGMStorage(KEY_META_ENABLED, false);
-    const [exportMetaList, setExportMetaList] = useGMStorage(KEY_META_LIST, defaultExportMetaList);
-    const [enableThinking, setEnableThinking] = useGMStorage(KEY_THINKING_ENABLED, false);
-    const [enableSources, setEnableSources] = useGMStorage(KEY_SOURCES_ENABLED, true);
-    const [exportAllLimit, setExportAllLimit] = useGMStorage(KEY_EXPORT_ALL_LIMIT, defaultExportAllLimit);
-    const resetDefault = T$4(() => {
-      setFormat(defaultFormat);
-      setEnableTimestamp(false);
-      setEnableMeta(false);
-      setExportMetaList(defaultExportMetaList);
-      setEnableThinking(false);
-      setEnableSources(true);
-      setExportAllLimit(defaultExportAllLimit);
-    }, [
-      setFormat,
-      setEnableTimestamp,
-      setEnableMeta,
-      setExportMetaList,
-      setEnableThinking,
-      setEnableSources,
-      setExportAllLimit
-    ]);
-    return /* @__PURE__ */ o$8(
-      SettingContext.Provider,
-      {
-        value: {
-          format,
-          setFormat,
-          enableTimestamp,
-          setEnableTimestamp,
-          timeStamp24H,
-          setTimeStamp24H,
-          enableTimestampHTML,
-          setEnableTimestampHTML,
-          enableTimestampMarkdown,
-          setEnableTimestampMarkdown,
-          enableMeta,
-          setEnableMeta,
-          exportMetaList,
-          setExportMetaList,
-          enableThinking,
-          setEnableThinking,
-          enableSources,
-          setEnableSources,
-          exportAllLimit,
-          setExportAllLimit,
-          resetDefault
-        },
-        children
-      }
-    );
-  };
-  const useSettingContext = () => q$1(SettingContext);
   const exportingRef = { current: false };
   const NOT_IN_PROJECT_ID$1 = "__not_in_project__";
   function toMs(time) {
@@ -25655,6 +26276,7 @@ ${body2}
     const [jsonOpen, setJsonOpen] = h$4(false);
     const [exportOpen, setExportOpen] = h$4(false);
     const [inventoryOpen, setInventoryOpen] = h$4(false);
+    const [renameOpen, setRenameOpen] = h$4(false);
     const [settingOpen, setSettingOpen] = h$4(false);
     const {
       format,
@@ -25719,7 +26341,7 @@ ${body2}
               Portal,
               {
                 container: isMobile ? container : document.body,
-                forceMount: open || jsonOpen || settingOpen || exportOpen || inventoryOpen,
+                forceMount: open || jsonOpen || settingOpen || exportOpen || inventoryOpen || renameOpen,
                 children: /* @__PURE__ */ o$8(
                   $cef8881cdc69808e$export$7c6e2c02157bb7d2,
                   {
@@ -25862,6 +26484,20 @@ ${body2}
                             {
                               text: "Export Project / Chat Lists",
                               icon: IconZip
+                            }
+                          ) })
+                        }
+                      ),
+                      /* @__PURE__ */ o$8(
+                        BulkRenameDialog,
+                        {
+                          open: renameOpen,
+                          onOpenChange: setRenameOpen,
+                          children: /* @__PURE__ */ o$8("div", { className: "row-full", children: /* @__PURE__ */ o$8(
+                            MenuItem,
+                            {
+                              text: "Bulk Rename Conversations",
+                              icon: IconCopy
                             }
                           ) })
                         }
