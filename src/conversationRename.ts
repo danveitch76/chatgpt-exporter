@@ -1,5 +1,5 @@
 import urlcat from 'urlcat'
-import { getTeamAccountId, RateLimitError } from './api'
+import { RateLimitError, getTeamAccountId } from './api'
 import { apiUrl, baseUrl } from './constants'
 import { memorize } from './utils/memorize'
 
