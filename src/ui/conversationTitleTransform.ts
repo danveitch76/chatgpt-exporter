@@ -1,4 +1,11 @@
-export type RenameOperation = 'prefix' | 'suffix' | 'replace'
+export type RenameOperation =
+    | 'prefix'
+    | 'suffix'
+    | 'replace'
+    | 'lowercase'
+    | 'uppercase'
+    | 'propercase'
+    | 'status'
 
 export interface ConversationTitleTransform {
     operation: RenameOperation
@@ -15,8 +22,43 @@ export interface ConversationTitleTransformResult {
     error?: string
 }
 
+const canonicalStatuses = new Map<string, string>([
+    ['ACTIVE', 'ACTIVE'],
+    ['TO DO', 'TO DO'],
+    ['TODO', 'TO DO'],
+    ['WAITING', 'WAITING'],
+    ['ON HOLD', 'ON HOLD'],
+    ['COMPLETE', 'COMPLETE'],
+    ['RETIRED', 'RETIRED'],
+    ['NO', 'NO'],
+    ['REJECTED', 'REJECTED'],
+])
+
 function escapeRegExp(value: string): string {
-    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return value.replace(/[.*+?^$(){}|[\]\\]/g, '\\$&')
+}
+
+function toProperCase(value: string): string {
+    return value
+        .toLocaleLowerCase()
+        .replace(
+            /(^|[\s\-–—/([{])([a-z])/g,
+            (_match, prefix: string, letter: string) => prefix + letter.toLocaleUpperCase(),
+        )
+}
+
+function normaliseStatusCapitalisation(value: string): string {
+    const branchPrefix = value.startsWith('Branch · ') ? 'Branch · ' : ''
+    const remainder = value.slice(branchPrefix.length)
+    const match = remainder.match(/^(.+?)(\s*-\s*)/)
+
+    if (!match) return value
+
+    const statusCandidate = match[1].trim().replace(/\s+/g, ' ').toLocaleUpperCase()
+    const canonicalStatus = canonicalStatuses.get(statusCandidate)
+    if (!canonicalStatus) return value
+
+    return branchPrefix + canonicalStatus + match[2] + remainder.slice(match[0].length)
 }
 
 export function transformConversationTitle(
@@ -26,10 +68,22 @@ export function transformConversationTitle(
     let proposedTitle = title
 
     if (transform.operation === 'prefix') {
-        proposedTitle = `${transform.text}${title}`
+        proposedTitle = transform.text + title
     }
     else if (transform.operation === 'suffix') {
-        proposedTitle = `${title}${transform.text}`
+        proposedTitle = title + transform.text
+    }
+    else if (transform.operation === 'lowercase') {
+        proposedTitle = title.toLocaleLowerCase()
+    }
+    else if (transform.operation === 'uppercase') {
+        proposedTitle = title.toLocaleUpperCase()
+    }
+    else if (transform.operation === 'propercase') {
+        proposedTitle = toProperCase(title)
+    }
+    else if (transform.operation === 'status') {
+        proposedTitle = normaliseStatusCapitalisation(title)
     }
     else {
         if (!transform.text) {
