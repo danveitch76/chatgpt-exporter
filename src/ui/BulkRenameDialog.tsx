@@ -10,6 +10,7 @@ import { renameConversation } from '../conversationRename'
 import { RequestQueue } from '../utils/queue'
 import { CheckBox } from './CheckBox'
 import { conversationMatchesDateRange } from './conversationDateFilter'
+import { buildRenameManifestPreview } from './conversationRenameManifest'
 import { transformConversationTitle } from './conversationTitleTransform'
 import { IconCross, IconLoading } from './Icons'
 import { useSettingContext } from './SettingContext'
@@ -19,6 +20,8 @@ import type { RenameConversationResult } from '../conversationRename'
 import type { FC } from '../type'
 
 const NOT_IN_PROJECT_ID = '__not_in_project__'
+
+type BulkRenameOperation = RenameOperation | 'manifest'
 
 interface BulkRenameDialogProps {
     open: boolean
@@ -106,10 +109,11 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
 
-    const [operation, setOperation] = useState<RenameOperation>('prefix')
+    const [operation, setOperation] = useState<BulkRenameOperation>('prefix')
     const [text, setText] = useState('')
     const [replacement, setReplacement] = useState('')
     const [caseSensitive, setCaseSensitive] = useState(false)
+    const [manifestText, setManifestText] = useState('')
     const [processing, setProcessing] = useState(false)
     const [summary, setSummary] = useState<RenameSummary | null>(null)
     const [progress, setProgress] = useState({ total: 0, completed: 0, currentName: '' })
@@ -215,26 +219,41 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
         })
     }, [conversations, dateField, fromDate, query, sortDir, sortField, toDate])
 
+    const transformOperation: RenameOperation = operation === 'manifest' ? 'prefix' : operation
     const transform = useMemo(() => ({
-        operation,
+        operation: transformOperation,
         text,
         replacement,
         caseSensitive,
-    }), [caseSensitive, operation, replacement, text])
+    }), [caseSensitive, replacement, text, transformOperation])
 
-    const preview = useMemo<RenamePreviewRow[]>(() => selected.map(conversation => ({
-        id: conversation.id,
-        ...transformConversationTitle(conversation.title ?? '', transform),
-    })), [selected, transform])
+    const manifestPreview = useMemo(
+        () => buildRenameManifestPreview(manifestText, conversations),
+        [conversations, manifestText],
+    )
+    const manifestError = operation === 'manifest' ? manifestPreview.error : undefined
+
+    const preview = useMemo<RenamePreviewRow[]>(() => {
+        if (operation === 'manifest') return manifestPreview.rows
+        return selected.map(conversation => ({
+            id: conversation.id,
+            ...transformConversationTitle(conversation.title ?? '', transform),
+        }))
+    }, [manifestPreview.rows, operation, selected, transform])
 
     const previewCounts = useMemo(() => preview.reduce((counts, row) => {
         if (!row.valid) counts.invalid++
         else if (row.changed) counts.changed++
         else counts.unchanged++
         return counts
-    }, { changed: 0, unchanged: 0, invalid: 0 }), [preview])
+    }, {
+        changed: 0,
+        unchanged: 0,
+        invalid: manifestError ? 1 : 0,
+    }), [manifestError, preview])
 
-    const allFilteredSelected = filtered.length > 0
+    const allFilteredSelected = operation !== 'manifest'
+        && filtered.length > 0
         && filtered.every(item => selected.some(selectedItem => selectedItem.id === item.id))
 
     useEffect(() => {
@@ -280,8 +299,9 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
         if (processing || previewCounts.invalid > 0 || previewCounts.changed === 0) return
 
         const plan = preview.filter(row => row.valid && row.changed)
+        const sourceLabel = operation === 'manifest' ? 'manifest conversation' : 'selected conversation'
         const approved = confirm(
-            `Rename ${plan.length} selected conversation${plan.length === 1 ? '' : 's'} using the previewed titles?`,
+            `Rename ${plan.length} ${sourceLabel}${plan.length === 1 ? '' : 's'} using the previewed titles?`,
         )
         if (!approved) return
 
@@ -300,7 +320,7 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
             })
         }
         renameQueue.start()
-    }, [preview, previewCounts, processing, renameQueue])
+    }, [operation, preview, previewCounts, processing, renameQueue])
 
     const setDateAndClearSelection = useCallback((setter: (value: string) => void, value: string) => {
         setSelected([])
@@ -322,7 +342,9 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                     ? 'Loading conversations...'
                     : summary
                         ? `Renamed ${summary.renamed}; unchanged ${summary.unchanged}; invalid ${summary.invalid}; failed ${summary.failed}`
-                        : `${selected.length} selected / ${filtered.length} visible`
+                        : operation === 'manifest'
+                            ? `${preview.length} manifest entries / ${conversations.length} loaded`
+                            : `${selected.length} selected / ${filtered.length} visible`
     const statusDetail = processing
         ? progress.currentName
         : !error && !busy
@@ -433,7 +455,7 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                     <div className="SelectToolbar">
                         <CheckBox
                             label="Select all visible"
-                            disabled={busy || filtered.length === 0}
+                            disabled={busy || operation === 'manifest' || filtered.length === 0}
                             checked={allFilteredSelected}
                             onCheckedChange={checked => setSelected(checked ? filtered : [])}
                         />
@@ -462,7 +484,7 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                             <li className="SelectItem" key={conversation.id}>
                                 <CheckBox
                                     label={conversation.title || '(untitled)'}
-                                    disabled={processing}
+                                    disabled={processing || operation === 'manifest'}
                                     checked={selected.some(item => item.id === conversation.id)}
                                     onCheckedChange={(checked) => {
                                         setSelected(previous => checked
@@ -491,28 +513,35 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                                 className="Select"
                                 value={operation}
                                 disabled={processing}
-                                onChange={event => setOperation(event.currentTarget.value as RenameOperation)}
+                                onChange={event => setOperation(event.currentTarget.value as BulkRenameOperation)}
                             >
                                 <option value="prefix">Prefix</option>
                                 <option value="suffix">Suffix</option>
                                 <option value="replace">Find / Replace</option>
+                                <option value="lowercase">lowercase</option>
+                                <option value="uppercase">UPPERCASE</option>
+                                <option value="propercase">Proper Case</option>
+                                <option value="status">Status capitalisation</option>
+                                <option value="manifest">Exact mapping manifest</option>
                             </select>
                         </div>
 
-                        <div className="ExportFilterRow ExportSearchRow">
-                            <label className="ExportFilterLabel" htmlFor="rename-text">
-                                {operation === 'replace' ? 'Find text' : operation === 'prefix' ? 'Prefix' : 'Suffix'}
-                            </label>
-                            <input
-                                id="rename-text"
-                                type="text"
-                                className="SelectSearch"
-                                value={text}
-                                disabled={processing}
-                                placeholder={operation === 'replace' ? 'Text to find...' : 'Text to add...'}
-                                onInput={event => setText((event.currentTarget as HTMLInputElement).value)}
-                            />
-                        </div>
+                        {(operation === 'prefix' || operation === 'suffix' || operation === 'replace') && (
+                            <div className="ExportFilterRow ExportSearchRow">
+                                <label className="ExportFilterLabel" htmlFor="rename-text">
+                                    {operation === 'replace' ? 'Find text' : operation === 'prefix' ? 'Prefix' : 'Suffix'}
+                                </label>
+                                <input
+                                    id="rename-text"
+                                    type="text"
+                                    className="SelectSearch"
+                                    value={text}
+                                    disabled={processing}
+                                    placeholder={operation === 'replace' ? 'Text to find...' : 'Text to add...'}
+                                    onInput={event => setText((event.currentTarget as HTMLInputElement).value)}
+                                />
+                            </div>
+                        )}
 
                         {operation === 'replace' && (
                             <>
@@ -537,6 +566,32 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                                         onCheckedChange={setCaseSensitive}
                                     />
                                 </div>
+                            </>
+                        )}
+
+                        {operation === 'manifest' && (
+                            <>
+                                <div className="ExportFilterRow ExportSearchRow">
+                                    <label className="ExportFilterLabel" htmlFor="rename-manifest">Manifest JSON</label>
+                                    <textarea
+                                        id="rename-manifest"
+                                        className="SelectSearch"
+                                        value={manifestText}
+                                        disabled={processing}
+                                        rows={4}
+                                        placeholder='[{"id":"...","expectedTitle":"...","newTitle":"..."}]'
+                                        onInput={event => setManifestText((event.currentTarget as HTMLTextAreaElement).value)}
+                                        style={{ resize: 'vertical' }}
+                                    />
+                                </div>
+                                <div style={{ fontSize: '0.72rem', opacity: 0.8 }}>
+                                    Manifest mode resolves conversations by identifier. Project controls the loaded scope; Date and Search only filter the displayed list. Manual selection is ignored.
+                                </div>
+                                {manifestError && (
+                                    <div style={{ fontSize: '0.72rem' }} role="alert">
+                                        {manifestError}
+                                    </div>
+                                )}
                             </>
                         )}
                     </section>
@@ -588,7 +643,9 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                         ))}
                         {preview.length === 0 && (
                             <div style={{ padding: '0.65rem', fontSize: '0.75rem', opacity: 0.7 }}>
-                                Select one or more conversations to preview title changes.
+                                {operation === 'manifest'
+                                    ? 'Paste a valid manifest to preview exact title mappings.'
+                                    : 'Select one or more conversations to preview title changes.'}
                             </div>
                         )}
                     </div>
@@ -603,6 +660,7 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                             disabled={
                                 busy
                                 || !!error
+                                || !!manifestError
                                 || previewCounts.changed === 0
                                 || previewCounts.invalid > 0
                             }
