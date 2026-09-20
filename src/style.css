@@ -233,7 +233,120 @@ body[data-time-format="24"] span[data-time-format="24"] {
     color: #9ca3af;
 }
 
+/* Bulk rename dialog ------------------------------------------------------ */
+.BulkRenameDialog {
+    width: min(94vw, 76rem);
+    max-width: 76rem;
+    height: min(90vh, 62rem);
+    max-height: 90vh;
+    display: grid;
+    grid-template-rows:
+        auto
+        auto
+        auto
+        auto
+        minmax(7rem, 1.15fr)
+        auto
+        auto
+        minmax(6rem, 0.85fr)
+        auto;
+    overflow: hidden;
+}
+
+.BulkRenameDialog > .DialogTitle {
+    margin-bottom: 0.4rem;
+}
+
+.BulkRenameDialog > .ExportStatusBox {
+    margin: 0 0 0.55rem;
+}
+
+.BulkRenameDialog > .ExportFilters {
+    margin-bottom: 0.55rem;
+}
+
+.BulkRenameDialog > .SelectToolbar {
+    margin: 0;
+    border-radius: 5px 5px 0 0;
+}
+
+.BulkRenameConversationList {
+    min-height: 0;
+    max-height: none !important;
+    margin: 0 0 0.55rem;
+    border-top: 0;
+    border-radius: 0 0 5px 5px;
+}
+
+.BulkRenameTransform {
+    margin: 0 0 0.45rem !important;
+}
+
+.BulkRenamePreviewSummary {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-height: 1.35rem;
+    margin: 0;
+    font-size: 0.78rem;
+}
+
+.BulkRenamePreviewSummary > span {
+    margin-left: 0 !important;
+}
+
+.BulkRenamePreviewTable {
+    min-height: 0;
+    margin-top: 0.3rem;
+    overflow: auto;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 4px;
+}
+
+.BulkRenamePreviewTable > div:first-child {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--ce-menu-primary);
+}
+
+.BulkRenameFooter {
+    min-height: 3rem;
+    margin-top: 0.55rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--ce-border-light);
+    background: var(--ce-menu-primary);
+}
+
+.BulkRenameFooter .Button.green {
+    min-width: 7rem;
+}
+
 @media (max-width: 820px) {
+    .BulkRenameDialog {
+        width: min(96vw, 48rem);
+        height: 94vh;
+        max-height: 94vh;
+        grid-template-rows:
+            auto
+            auto
+            auto
+            auto
+            minmax(6rem, 1fr)
+            auto
+            auto
+            minmax(5rem, 0.8fr)
+            auto;
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+
+    .BulkRenameFooter {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+    }
+
     .DialogContent._export {
         width: min(96vw, 48rem);
         height: 92vh;
