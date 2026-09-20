@@ -234,7 +234,7 @@ body[data-time-format="24"] span[data-time-format="24"] {
 }
 
 /* Bulk rename dialog ------------------------------------------------------ */
-.BulkRenameDialog {
+.DialogContent._export.BulkRenameDialog {
     width: min(94vw, 76rem);
     max-width: 76rem;
     height: min(90vh, 62rem);
@@ -323,7 +323,7 @@ body[data-time-format="24"] span[data-time-format="24"] {
 }
 
 @media (max-width: 820px) {
-    .BulkRenameDialog {
+    .DialogContent._export.BulkRenameDialog {
         width: min(96vw, 48rem);
         height: 94vh;
         max-height: 94vh;
