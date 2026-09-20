@@ -148,7 +148,6 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
 
     const preview = useMemo<ManagementPreviewRow[]>(() => {
         if (mode === 'conversation-project') {
-
             return rawConversationPreview.rows.map(row => ({
                 id: row.id,
                 label: row.title || row.id,
@@ -185,7 +184,7 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
     }), [manifestError, preview])
 
     useEffect(() => {
-        const off = queue.on('progress', (event) => setProgress({
+        const off = queue.on('progress', event => setProgress({
             total: event.total,
             completed: event.completed,
             currentName: event.currentName,
@@ -251,17 +250,24 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
 
         queue.clear()
         for (const row of plan) {
-            queue.add({
-                name: row.label,
-                request: mode === 'conversation-project'
-                    ? () => moveConversationToProject(
+            if (mode === 'conversation-project') {
+                const targetProjectId = rawConversationPreview.rows.find(item => item.id === row.id)!.proposedProjectId
+                queue.add({
+                    name: row.label,
+                    request: () => moveConversationToProject(
                         row.id,
                         row.originalProjectId ?? null,
-                        rawConversationPreview.rows.find(item => item.id === row.id)!.proposedProjectId,
+                        targetProjectId,
                         projectIds,
-                    )
-                    : () => renameProject(row.id, row.originalValue, row.proposedValue),
-            })
+                    ),
+                })
+            }
+            else {
+                queue.add({
+                    name: row.label,
+                    request: () => renameProject(row.id, row.originalValue, row.proposedValue),
+                })
+            }
         }
         queue.start()
     }, [mode, preview, previewCounts, processing, projectIds, queue, rawConversationPreview.rows])
@@ -282,13 +288,16 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
                     : summary
                         ? `Changed ${summary.changed}; unchanged ${summary.unchanged}; invalid ${summary.invalid}; failed ${summary.failed}`
                         : `${preview.length} manifest entries`
-    const statusDetail = processing
-        ? progress.currentName
-        : !error && !busy && mode === 'conversation-project'
-            ? `${conversations.length} conversations loaded · source scan limit ${exportAllLimit}`
-            : !error && !busy
-                ? `${projects.length} Projects loaded`
-                : ''
+    let statusDetail = ''
+    if (processing) {
+        statusDetail = progress.currentName
+    }
+    else if (!error && !busy && mode === 'conversation-project') {
+        statusDetail = `${conversations.length} conversations loaded · source scan limit ${exportAllLimit}`
+    }
+    else if (!error && !busy) {
+        statusDetail = `${projects.length} Projects loaded`
+    }
 
     return (
         <Dialog.Root open={open} onOpenChange={closeGuarded}>
@@ -299,7 +308,6 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
                     className="DialogContent _export BulkRenameDialog"
                     onEscapeKeyDown={(event: Event) => {
                         if (processing) event.preventDefault()
-
                     }}
                     onPointerDownOutside={(event: Event) => {
                         if (processing) event.preventDefault()
