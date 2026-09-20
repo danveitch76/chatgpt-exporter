@@ -19,7 +19,9 @@
 
 
 > [!NOTE]
-> Bu depo, `pionxzh/chatgpt-exporter` projesinin bakımı yapılan bir çatallamasıdır. File Discovery ve bakım aracı dâhil çatala özgü özellikler [İngilizce README](./README.md) içinde belgelenmiştir.
+> Bu depo, `pionxzh/chatgpt-exporter` projesinin bakımı yapılan bir çatallamasıdır. File Discovery, Export Project / Chat Lists, Bulk Rename Conversations ve bakım aracı dâhil çatala özgü özellikler [İngilizce README](./README.md) içinde belgelenmiştir.
+
+**Geçerli downstream sürümü:** `2.34.0`
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/2c5554d6-6afc-46b5-aa52-d78bd5ee433c)
 
@@ -247,7 +249,7 @@ Sol alt köşedeki açılır menüden dışa aktarma formatınızı seçin. Aşa
 
 İstediğiniz işlemi gerçekleştirmek için düğmeye tıklayın.
 
-- **Arşivle** - Arşivlenen sohbet oturumları kenar çubuğundan kaybolur ve ChatGPT ayarlarında yönetilebilir. Daha fazla bilgi için [#199](https://github.com/danveitch76/chatgpt-exporter/issues/199) sayfasına bakın.
+- **Arşivle** - Arşivlenen sohbet oturumları kenar çubuğundan kaybolur ve ChatGPT ayarlarında yönetilebilir.
 - **Sil** - Seçilen sohbetleri siler.
 - **Dışa Aktar** - Seçilen sohbetleri, format seçicisinden seçilen formatta dışa aktarır.
 
