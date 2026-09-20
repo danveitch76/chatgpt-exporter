@@ -19,7 +19,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp
 
 
 > [!NOTE]
-> This repository is a maintained downstream fork of [`pionxzh/chatgpt-exporter`](https://github.com/pionxzh/chatgpt-exporter). It preserves upstream attribution while adding File Discovery, asset classification, validation tooling and governed upstream-maintenance automation.
+> This repository is a maintained downstream fork of [`pionxzh/chatgpt-exporter`](https://github.com/pionxzh/chatgpt-exporter). It preserves upstream attribution while adding File Discovery and asset classification, filtered Project/Chat inventory exports, Bulk Rename Conversations, validation tooling and governed upstream-maintenance automation.
 
 **Current downstream version:** `2.34.0`
 
@@ -253,9 +253,21 @@ Select your export format from the dropdown on the bottom left. **JSON (ZIP)** i
 
 Click the button to perform the action you want.
 
-- **Archive** -  Archived chat sessions will disappear from the sidebar and can be managed in ChatGPT settings. See [#199](https://github.com/danveitch76/chatgpt-exporter/issues/199) for more details.
+- **Archive** - Archived chat sessions will disappear from the sidebar and can be managed in ChatGPT settings.
 - **Delete** - Deletes the selected conversations.
 - **Export** - Exports the selected conversations in the format chosen using the format selector.
+
+## Project and Chat Inventory Exports
+
+Choose **Export Project / Chat Lists** to export lightweight metadata inventories without exporting full conversation content. Project and Chat lists support the existing source, Project, date and wildcard-search filters and can be saved as JSON, TXT, HTML or Markdown.
+
+See [Project and Chat Inventory Exports](./docs/inventory-exports.md) for field definitions, filtering behaviour and limitations.
+
+## Bulk Rename Conversations
+
+Choose **Bulk Rename Conversations** to apply controlled Prefix, Suffix or literal Find / Replace title transformations to selected live ChatGPT conversations. Every batch requires a preview and confirmation; invalid empty titles are blocked and failed conversations remain selected for review or retry.
+
+See [Bulk Rename Conversations](./docs/bulk-rename-conversations.md) for usage, safety controls and limitations.
 
 ## File Discovery
 
@@ -309,10 +321,12 @@ See the [maintainer documentation](./scripts/maintainer/README.md).
 ## Development
 
 ```powershell
-corepack pnpm install --frozen-lockfile
-corepack pnpm run lint
-corepack pnpm run test
-corepack pnpm run build
+corepack prepare pnpm@8.14.1 --activate
+pnpm --version
+pnpm install --frozen-lockfile
+pnpm run lint
+pnpm run test
+pnpm run build
 ```
 
 Further guidance:

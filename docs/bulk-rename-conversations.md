@@ -66,8 +66,10 @@ The repository includes deterministic fixture coverage for Prefix, Suffix and Fi
 Repository-level validation remains the standard development sequence:
 
 ```powershell
-corepack pnpm install --frozen-lockfile
-corepack pnpm run lint
-corepack pnpm run test
-corepack pnpm run build
+corepack prepare pnpm@8.14.1 --activate
+pnpm --version
+pnpm install --frozen-lockfile
+pnpm run lint
+pnpm run test
+pnpm run build
 ```

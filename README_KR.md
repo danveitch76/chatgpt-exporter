@@ -19,7 +19,9 @@
 
 
 > [!NOTE]
-> 이 저장소는 `pionxzh/chatgpt-exporter`의 유지 관리되는 포크입니다. File Discovery와 유지 관리 도구를 포함한 포크 전용 기능은 [영문 README](./README.md)에 문서화되어 있습니다.
+> 이 저장소는 `pionxzh/chatgpt-exporter`의 유지 관리되는 포크입니다. File Discovery, Export Project / Chat Lists, Bulk Rename Conversations 및 유지 관리 도구를 포함한 포크 전용 기능은 [영문 README](./README.md)에 문서화되어 있습니다.
+
+**현재 downstream 버전:** `2.34.0`
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
@@ -249,7 +251,7 @@ API `https://chat.openai.com/backend-api/conversation/[id]` 에서 얻은 원시
 
 원하는 작업을 수행하려면 버튼을 클릭하세요.
 
-- **보관** - 보관된 채팅 세션은 사이드바에서 사라지며 ChatGPT 설정에서 관리할 수 있습니다. 자세한 내용은 [#199](https://github.com/danveitch76/chatgpt-exporter/issues/199)을 참조하세요.
+- **보관** - 보관된 채팅 세션은 사이드바에서 사라지며 ChatGPT 설정에서 관리할 수 있습니다.
 - **삭제** - 선택한 대화를 삭제합니다.
 - **내보내기** - 선택한 대화를 선택한 형식으로 내보냅니다.
 

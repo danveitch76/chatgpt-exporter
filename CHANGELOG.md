@@ -26,13 +26,15 @@
 * Project/Chat inventory export passed TypeScript compilation, full regression tests, production build and browser smoke testing before merge
 * file-reference discovery hardening passed lint, full regression tests, production build and real-account File Discovery validation before merge
 * Bulk Rename passed lint, full regression tests, production build and deterministic generated-userscript checks before merge
-* final 2.34.0 release reproducibility and post-release smoke testing remain required before tagging
+* final 2.34.0 deterministic build validation passed on the exact release tree; live userscript smoke testing remains required before tagging
+* release-state audit confirmed package metadata, release manifest, userscript metadata, README and changelog are aligned at 2.34.0
 
 ### References
 
 * Issues #86, #63, #89 and #91
 * Pull requests #87, #88, #90 and #92
 * Release tracking issue #93
+* Documentation alignment issue #95
 
 ## [2.33.8](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.7...userscript-v2.33.8) (2026-09-14)
 

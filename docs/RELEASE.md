@@ -25,7 +25,7 @@ Use downstream tags in downstream changelog comparison links.
 ## Release sequence
 
 1. Complete implementation and regression tests.
-2. Allow Release Please to prepare the version and changelog metadata on `master`.
+2. Allow Release Please to prepare the version and changelog metadata on `master`. If no Release Please workflow run is created, prepare the same metadata in a controlled release pull request and record the automation limitation; do not invent CI evidence.
 3. Update `README.md` to the target downstream version and review the generated changelog entry.
 4. Run the production build and include `dist/chatgpt.user.js` in the final release commit.
 5. Keep release packaging/documentation together in a final commit using the convention:
@@ -34,22 +34,26 @@ Use downstream tags in downstream changelog comparison links.
    release: userscript X.Y.Z
    ```
 
-6. Run all quality gates and confirm the build does not leave an uncommitted generated-userscript diff.
-7. Create the annotated `userscript-vX.Y.Z` tag on that exact final release commit.
-8. Push the tag only after the commit is present on `master`.
-9. The tag workflow re-runs the release validation and, only if every check succeeds, creates the GitHub Release object for that tag.
-10. Complete the live userscript smoke tests.
+6. Run all quality gates and confirm the generated userscript is byte-for-byte reproducible.
+7. Install the userscript from that exact final release tree and complete the live smoke tests before publication.
+8. Create the annotated `userscript-vX.Y.Z` tag on that exact final release commit.
+9. Push the tag only after the commit is present on `master`.
+10. The tag workflow re-runs the release validation and, only if every check succeeds, creates the GitHub Release object for that tag.
+11. Complete the post-release publication checks.
 
 If release packaging is accidentally split across adjacent build/documentation commits before publication, squash them before tagging rather than accepting a split release boundary.
 
 ## Quality gates
 
 ```powershell
-corepack pnpm install --frozen-lockfile
-corepack pnpm run lint
-corepack pnpm run test
-corepack pnpm run build
+corepack prepare pnpm@8.14.1 --activate
+pnpm --version
+pnpm install --frozen-lockfile
+pnpm run lint
+pnpm run test
+pnpm run build
 git diff --exit-code -- dist/chatgpt.user.js
+git status --short
 ```
 
 Verify metadata:
@@ -60,7 +64,7 @@ Select-String -Path .\dist\chatgpt.user.js -Pattern '@namespace|@version'
 
 Expected namespace: `danveitch76`.
 
-Before tagging, also confirm the target version is identical in:
+Before tagging, confirm the working tree is clean and the target version is identical in:
 
 - `package.json`;
 - `.release-please-manifest.json`;
@@ -85,14 +89,27 @@ The normal `Check` workflow runs lint, tests and a production build, then fails 
 
 The `Release Validation` workflow runs only for `userscript-v*` tag pushes. It never commits or pushes repository content. It verifies lint, tests, build reproducibility, tag/package/manifest/userscript version equality, namespace, README version and changelog presence. Only after all of those checks pass does it create the GitHub Release object for the existing validated tag. The release step is idempotent and does nothing if the GitHub Release already exists.
 
+## Live smoke-test gate
+
+Before tagging, install the userscript from the exact final release tree and smoke-test the capabilities affected by the release plus the core regression paths. For userscript 2.34.0 this includes:
+
+- single-conversation export;
+- Export All with **JSON (ZIP)**;
+- Project and Chat inventory exports;
+- File Discovery;
+- Bulk Rename against a disposable/test conversation, including preview and confirmed rename;
+- source selection/filtering;
+- collapsed-sidebar behaviour.
+
+For changes to multi-conversation selection, also verify the default selection size and at least one non-default value plus resume selection behaviour.
+
 ## Post-release checks
 
-1. Confirm the tag resolves to the intended final release commit.
+1. Confirm the annotated tag resolves to the intended final release commit.
 2. Confirm the GitHub Release exists for that exact tag and the release badge resolves correctly.
-3. Inspect raw userscript metadata.
-4. Install or update in Tampermonkey.
-5. Smoke-test single export, Export All with **JSON (ZIP)**, File Discovery, source export and collapsed-sidebar behaviour.
-6. For changes to multi-conversation selection, verify the default selection size and at least one non-default value plus resume selection behaviour.
+3. Inspect raw userscript metadata and confirm the published version/namespace.
+4. Install or update from the published userscript and perform a minimal launch/export sanity check.
+5. Record any missing workflow/CI execution explicitly rather than treating absence of a status as success.
 
 ## Recovery rule
 

@@ -19,7 +19,9 @@
 
 
 > [!NOTE]
-> Ce dépôt est un fork maintenu de `pionxzh/chatgpt-exporter`. Les fonctions propres au fork, notamment File Discovery et l’outil de maintenance, sont documentées dans le [README anglais](./README.md).
+> Ce dépôt est un fork maintenu de `pionxzh/chatgpt-exporter`. Les fonctions propres au fork, notamment File Discovery, Export Project / Chat Lists, Bulk Rename Conversations et l’outil de maintenance, sont documentées dans le [README anglais](./README.md).
+
+**Version downstream actuelle :** `2.34.0`
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
@@ -246,7 +248,7 @@ Sélectionnez votre format d'exportation dans le menu déroulant en bas à gauch
 
 Cliquez sur le bouton pour effectuer l'action souhaitée.
 
-- **Archiver** - Les sessions de chat archivées disparaîtront de la barre latérale et pourront être gérées dans les paramètres de ChatGPT. Voir [#199](https://github.com/danveitch76/chatgpt-exporter/issues/199) pour plus de détails.
+- **Archiver** - Les sessions de chat archivées disparaîtront de la barre latérale et pourront être gérées dans les paramètres de ChatGPT.
 - **Supprimer** - Supprime les conversations sélectionnées.
 - **Exporter** - Exporte les conversations sélectionnées dans le format choisi à l'aide du sélecteur de format.
 
