@@ -18,7 +18,7 @@ It prepares and validates maintenance changes and can open a pull request. It do
 
 ## Purpose
 
-The downstream repository has materially diverged from upstream. It contains Dan-specific functionality, including File Discovery, asset classification, validation evidence and file-resolution work. A blind fork synchronisation or full upstream merge would therefore be unsafe.
+The downstream repository has materially diverged from upstream. It contains Dan-specific functionality, including File Discovery, asset classification, Project/Chat inventory exports, Bulk Rename Conversations, validation evidence and file-resolution work. A blind fork synchronisation or full upstream merge would therefore be unsafe.
 
 This tool provides a controlled workflow:
 
@@ -748,12 +748,17 @@ git -C C:\GitHub\chatgpt-exporter stash push --include-untracked
 
 ### Corepack or pnpm is unavailable
 
-Check:
+Check and explicitly activate the repository-required pnpm version:
 
 ```powershell
 corepack --version
-corepack pnpm --version
+corepack prepare pnpm@8.14.1 --activate
+pnpm --version
 ```
+
+Expected pnpm version: `8.14.1`.
+
+The current maintainer script still invokes `corepack pnpm` internally. On some Corepack installations this can resolve a different global pnpm version and cause nested repository scripts to fail with `ERR_PNPM_BAD_PM_VERSION`. Until [issue #96](https://github.com/danveitch76/chatgpt-exporter/issues/96) is fixed, explicitly activate pnpm 8.14.1 before running the maintainer.
 
 Do not assume `corepack enable` is required. On Windows, enabling global shims can require administrator rights.
 
