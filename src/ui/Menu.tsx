@@ -8,6 +8,7 @@ import { exportToJson, exportToOoba, exportToTavern } from '../exporter/json'
 import { exportToMarkdown } from '../exporter/markdown'
 import { exportToText } from '../exporter/text'
 import { useWindowResize } from '../hooks/useWindowResize'
+import { BulkProjectManagementDialog } from './BulkProjectManagementDialog'
 import { BulkRenameDialog } from './BulkRenameDialog'
 import { Divider } from './Divider'
 import { ExportDialog } from './ExportDialog'
@@ -83,6 +84,7 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
     const [exportOpen, setExportOpen] = useState(false)
     const [inventoryOpen, setInventoryOpen] = useState(false)
     const [renameOpen, setRenameOpen] = useState(false)
+    const [projectManagementOpen, setProjectManagementOpen] = useState(false)
     const [settingOpen, setSettingOpen] = useState(false)
 
     const {
@@ -152,7 +154,7 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
                 </HoverCard.Trigger>
                 <Portal
                     container={isMobile ? container : document.body}
-                    forceMount={open || jsonOpen || settingOpen || exportOpen || inventoryOpen || renameOpen}
+                    forceMount={open || jsonOpen || settingOpen || exportOpen || inventoryOpen || renameOpen || projectManagementOpen}
                 >
                     <HoverCard.Content
                         className={`
@@ -280,6 +282,17 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
                                 />
                             </div>
                         </BulkRenameDialog>
+                        <BulkProjectManagementDialog
+                            open={projectManagementOpen}
+                            onOpenChange={setProjectManagementOpen}
+                        >
+                            <div className="row-full">
+                                <MenuItem
+                                    text="Bulk Project Management"
+                                    icon={IconCopy}
+                                />
+                            </div>
+                        </BulkProjectManagementDialog>
 
                         {!isMobile && (
                             <HoverCard.Arrow
