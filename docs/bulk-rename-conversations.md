@@ -53,7 +53,7 @@ Proper Case is intentionally literal. It can change product names and acronyms, 
 
 ## Exact mapping manifest
 
-Exact mapping mode accepts a JSON array:
+Exact mapping mode accepts a JSON array. Project selection controls which conversations are loaded for resolution; Date and Search filters only change the displayed list:
 
 ```json
 [
@@ -79,7 +79,7 @@ A manifest is blocked if it contains invalid JSON, duplicate identifiers, blank 
 - A batch containing an invalid result is blocked.
 - Rename requests use the existing rate-limit-aware request queue.
 - Successful responses update the in-memory conversation list immediately.
-- One failed request does not abort unrelated rename requests.
+- One failed request does not abort unrelated rename requests.\n- In normal transformation modes, failed conversations remain selected for review or retry.
 - The completion summary reports renamed, unchanged, invalid and failed counts.
 - The dialog cannot be closed while a rename batch is in progress.
 
