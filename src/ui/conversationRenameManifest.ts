@@ -39,13 +39,13 @@ export function parseRenameManifest(value: string): RenameManifestEntry[] {
     }
 
     if (!Array.isArray(parsed)) {
-        throw new Error('Manifest root must be a JSON array.')
+        throw new TypeError('Manifest root must be a JSON array.')
     }
 
     const seen = new Set<string>()
     return parsed.map((item, index) => {
         if (!isRecord(item)) {
-            throw new Error('Manifest entry ' + (index + 1) + ' must be an object.')
+            throw new TypeError(`Manifest entry ${index + 1} must be an object.`)
         }
 
         const id = typeof item.id === 'string' ? item.id.trim() : ''
@@ -53,16 +53,16 @@ export function parseRenameManifest(value: string): RenameManifestEntry[] {
         const newTitle = typeof item.newTitle === 'string' ? item.newTitle : null
 
         if (!id) {
-            throw new Error('Manifest entry ' + (index + 1) + ' requires a conversation id.')
+            throw new Error(`Manifest entry ${index + 1} requires a conversation id.`)
         }
         if (seen.has(id)) {
-            throw new Error('Manifest contains duplicate conversation id: ' + id)
+            throw new Error(`Manifest contains duplicate conversation id: ${id}`)
         }
         if (expectedTitle === null) {
-            throw new Error('Manifest entry ' + (index + 1) + ' requires expectedTitle.')
+            throw new Error(`Manifest entry ${index + 1} requires expectedTitle.`)
         }
         if (newTitle === null || !newTitle.trim()) {
-            throw new Error('Manifest entry ' + (index + 1) + ' requires a non-empty newTitle.')
+            throw new Error(`Manifest entry ${index + 1} requires a non-empty newTitle.`)
         }
 
         seen.add(id)
