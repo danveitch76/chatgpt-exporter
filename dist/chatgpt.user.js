@@ -321,7 +321,120 @@ body[data-time-format="24"] span[data-time-format="24"] {\r
     color: #9ca3af;\r
 }\r
 \r
+/* Bulk rename dialog ------------------------------------------------------ */\r
+.DialogContent._export.BulkRenameDialog {\r
+    width: min(94vw, 76rem);\r
+    max-width: 76rem;\r
+    height: min(90vh, 62rem);\r
+    max-height: 90vh;\r
+    display: grid;\r
+    grid-template-rows:\r
+        auto\r
+        auto\r
+        auto\r
+        auto\r
+        minmax(7rem, 1.15fr)\r
+        auto\r
+        auto\r
+        minmax(6rem, 0.85fr)\r
+        auto;\r
+    overflow: hidden;\r
+}\r
+\r
+.BulkRenameDialog > .DialogTitle {\r
+    margin-bottom: 0.4rem;\r
+}\r
+\r
+.BulkRenameDialog > .ExportStatusBox {\r
+    margin: 0 0 0.55rem;\r
+}\r
+\r
+.BulkRenameDialog > .ExportFilters {\r
+    margin-bottom: 0.55rem;\r
+}\r
+\r
+.BulkRenameDialog > .SelectToolbar {\r
+    margin: 0;\r
+    border-radius: 5px 5px 0 0;\r
+}\r
+\r
+.BulkRenameConversationList {\r
+    min-height: 0;\r
+    max-height: none !important;\r
+    margin: 0 0 0.55rem;\r
+    border-top: 0;\r
+    border-radius: 0 0 5px 5px;\r
+}\r
+\r
+.BulkRenameTransform {\r
+    margin: 0 0 0.45rem !important;\r
+}\r
+\r
+.BulkRenamePreviewSummary {\r
+    display: flex;\r
+    align-items: baseline;\r
+    gap: 0.5rem;\r
+    min-height: 1.35rem;\r
+    margin: 0;\r
+    font-size: 0.78rem;\r
+}\r
+\r
+.BulkRenamePreviewSummary > span {\r
+    margin-left: 0 !important;\r
+}\r
+\r
+.BulkRenamePreviewTable {\r
+    min-height: 0;\r
+    margin-top: 0.3rem;\r
+    overflow: auto;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 4px;\r
+}\r
+\r
+.BulkRenamePreviewTable > div:first-child {\r
+    position: sticky;\r
+    top: 0;\r
+    z-index: 1;\r
+    background: var(--ce-menu-primary);\r
+}\r
+\r
+.BulkRenameFooter {\r
+    min-height: 3rem;\r
+    margin-top: 0.55rem;\r
+    padding-top: 0.55rem;\r
+    border-top: 1px solid var(--ce-border-light);\r
+    background: var(--ce-menu-primary);\r
+}\r
+\r
+.BulkRenameFooter .Button.green {\r
+    min-width: 7rem;\r
+}\r
+\r
 @media (max-width: 820px) {\r
+    .DialogContent._export.BulkRenameDialog {\r
+        width: min(96vw, 48rem);\r
+        height: 94vh;\r
+        max-height: 94vh;\r
+        grid-template-rows:\r
+            auto\r
+            auto\r
+            auto\r
+            auto\r
+            minmax(6rem, 1fr)\r
+            auto\r
+            auto\r
+            minmax(5rem, 0.8fr)\r
+            auto;\r
+        padding-right: 1rem;\r
+        padding-left: 1rem;\r
+    }\r
+\r
+    .BulkRenameFooter {\r
+        position: sticky;\r
+        bottom: 0;\r
+        z-index: 2;\r
+    }\r
+\r
     .DialogContent._export {\r
         width: min(96vw, 48rem);\r
         height: 92vh;\r
@@ -23270,7 +23383,7 @@ ${content2}`;
         /* @__PURE__ */ o$8(
           $5d3850c4d0b4e6c7$export$7c6e2c02157bb7d2,
           {
-            className: "DialogContent _export",
+            className: "DialogContent _export BulkRenameDialog",
             onEscapeKeyDown: (event) => {
               if (processing) event.preventDefault();
             },
@@ -23414,7 +23527,7 @@ ${content2}`;
                   }
                 )
               ] }),
-              /* @__PURE__ */ o$8("ul", { className: "SelectList", style: { maxHeight: "13rem" }, children: [
+              /* @__PURE__ */ o$8("ul", { className: "SelectList BulkRenameConversationList", children: [
                 filtered.map((conversation) => /* @__PURE__ */ o$8("li", { className: "SelectItem", children: [
                   /* @__PURE__ */ o$8(
                     CheckBox,
@@ -23432,7 +23545,7 @@ ${content2}`;
                 ] }, conversation.id)),
                 !loading && !error2 && filtered.length === 0 && /* @__PURE__ */ o$8("li", { className: "SelectItem text-gray-400 dark:text-gray-500", children: "No conversations to display." })
               ] }),
-              /* @__PURE__ */ o$8("section", { className: "ExportFilters", "aria-label": "Rename transformation", style: { marginTop: "0.75rem" }, children: [
+              /* @__PURE__ */ o$8("section", { className: "ExportFilters BulkRenameTransform", "aria-label": "Rename transformation", children: [
                 /* @__PURE__ */ o$8("div", { className: "ExportFiltersTitle", children: "Rename transformation" }),
                 /* @__PURE__ */ o$8("div", { className: "ExportFilterRow", children: [
                   /* @__PURE__ */ o$8("span", { className: "ExportFilterLabel", children: "Operation" }),
@@ -23496,7 +23609,7 @@ ${content2}`;
                   ] })
                 ] })
               ] }),
-              /* @__PURE__ */ o$8("div", { style: { marginTop: "0.75rem", fontSize: "0.78rem" }, children: [
+              /* @__PURE__ */ o$8("div", { className: "BulkRenamePreviewSummary", children: [
                 /* @__PURE__ */ o$8("strong", { children: "Preview" }),
                 /* @__PURE__ */ o$8("span", { style: { marginLeft: "0.5rem", opacity: 0.75 }, children: [
                   previewCounts.changed,
@@ -23507,60 +23620,48 @@ ${content2}`;
                   " invalid"
                 ] })
               ] }),
-              /* @__PURE__ */ o$8(
-                "div",
-                {
-                  style: {
-                    border: "1px solid var(--ce-border-light)",
-                    borderRadius: "4px",
-                    marginTop: "0.35rem",
-                    maxHeight: "13rem",
-                    overflow: "auto"
+              /* @__PURE__ */ o$8("div", { className: "BulkRenamePreviewTable", children: [
+                /* @__PURE__ */ o$8(
+                  "div",
+                  {
+                    style: {
+                      display: "grid",
+                      gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) 5.5rem",
+                      gap: "0.5rem",
+                      padding: "0.4rem 0.55rem",
+                      fontSize: "0.72rem",
+                      fontWeight: 600,
+                      borderBottom: "1px solid var(--ce-border-light)"
+                    },
+                    children: [
+                      /* @__PURE__ */ o$8("span", { children: "Current title" }),
+                      /* @__PURE__ */ o$8("span", { children: "Proposed title" }),
+                      /* @__PURE__ */ o$8("span", { children: "Status" })
+                    ]
+                  }
+                ),
+                preview.map((row) => /* @__PURE__ */ o$8(
+                  "div",
+                  {
+                    style: {
+                      display: "grid",
+                      gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) 5.5rem",
+                      gap: "0.5rem",
+                      padding: "0.4rem 0.55rem",
+                      fontSize: "0.72rem",
+                      borderBottom: "1px solid var(--ce-border-light)"
+                    },
+                    children: [
+                      /* @__PURE__ */ o$8("span", { title: row.originalTitle, style: { overflowWrap: "anywhere" }, children: row.originalTitle || "(untitled)" }),
+                      /* @__PURE__ */ o$8("span", { title: row.proposedTitle, style: { overflowWrap: "anywhere" }, children: row.proposedTitle || "(empty)" }),
+                      /* @__PURE__ */ o$8("span", { title: row.error, children: !row.valid ? "Invalid" : row.changed ? "Change" : "Unchanged" })
+                    ]
                   },
-                  children: [
-                    /* @__PURE__ */ o$8(
-                      "div",
-                      {
-                        style: {
-                          display: "grid",
-                          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) 5.5rem",
-                          gap: "0.5rem",
-                          padding: "0.4rem 0.55rem",
-                          fontSize: "0.72rem",
-                          fontWeight: 600,
-                          borderBottom: "1px solid var(--ce-border-light)"
-                        },
-                        children: [
-                          /* @__PURE__ */ o$8("span", { children: "Current title" }),
-                          /* @__PURE__ */ o$8("span", { children: "Proposed title" }),
-                          /* @__PURE__ */ o$8("span", { children: "Status" })
-                        ]
-                      }
-                    ),
-                    preview.map((row) => /* @__PURE__ */ o$8(
-                      "div",
-                      {
-                        style: {
-                          display: "grid",
-                          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) 5.5rem",
-                          gap: "0.5rem",
-                          padding: "0.4rem 0.55rem",
-                          fontSize: "0.72rem",
-                          borderBottom: "1px solid var(--ce-border-light)"
-                        },
-                        children: [
-                          /* @__PURE__ */ o$8("span", { title: row.originalTitle, style: { overflowWrap: "anywhere" }, children: row.originalTitle || "(untitled)" }),
-                          /* @__PURE__ */ o$8("span", { title: row.proposedTitle, style: { overflowWrap: "anywhere" }, children: row.proposedTitle || "(empty)" }),
-                          /* @__PURE__ */ o$8("span", { title: row.error, children: !row.valid ? "Invalid" : row.changed ? "Change" : "Unchanged" })
-                        ]
-                      },
-                      row.id
-                    )),
-                    preview.length === 0 && /* @__PURE__ */ o$8("div", { style: { padding: "0.65rem", fontSize: "0.75rem", opacity: 0.7 }, children: "Select one or more conversations to preview title changes." })
-                  ]
-                }
-              ),
-              /* @__PURE__ */ o$8("div", { className: "ActionBar flex flex-wrap mt-3 items-center gap-2", children: [
+                  row.id
+                )),
+                preview.length === 0 && /* @__PURE__ */ o$8("div", { style: { padding: "0.65rem", fontSize: "0.75rem", opacity: 0.7 }, children: "Select one or more conversations to preview title changes." })
+              ] }),
+              /* @__PURE__ */ o$8("div", { className: "ActionBar BulkRenameFooter flex flex-wrap items-center gap-2", children: [
                 /* @__PURE__ */ o$8("span", { style: { fontSize: "0.75rem", opacity: 0.75 }, children: "Unchanged conversations are skipped. Invalid results block the batch." }),
                 /* @__PURE__ */ o$8("div", { className: "flex flex-grow" }),
                 /* @__PURE__ */ o$8(
