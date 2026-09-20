@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are welcome. This repository is a maintained downstream fork, so changes must preserve both upstream exporter behaviour and downstream File Discovery capabilities.
+Contributions are welcome. This repository is a maintained downstream fork, so changes must preserve upstream exporter behaviour and downstream capabilities including File Discovery, Project/Chat inventory exports and Bulk Rename Conversations.
 
 ## Prerequisites
 
@@ -14,7 +14,8 @@ Contributions are welcome. This repository is a maintained downstream fork, so c
 git --version
 node --version
 corepack --version
-corepack pnpm --version
+corepack prepare pnpm@8.14.1 --activate
+pnpm --version
 ```
 
 ## Local setup
@@ -23,8 +24,8 @@ corepack pnpm --version
 git checkout master
 git pull --ff-only
 git checkout -b <type>/<short-description>
-corepack pnpm install --frozen-lockfile
-corepack pnpm dev
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
 Use the browser popup to install the development userscript.
@@ -32,12 +33,12 @@ Use the browser popup to install the development userscript.
 ## Required validation
 
 ```powershell
-corepack pnpm run lint
-corepack pnpm run test
-corepack pnpm run build
+pnpm run lint
+pnpm run test
+pnpm run build
 ```
 
-The test command covers TypeScript compilation, extraction fixtures, archive-limit planning, generated and uploaded asset classification, failure recovery, file resolution and file-reference classification.
+The test command covers TypeScript compilation, conversation discovery and date filtering, title transformations, Project/Chat inventory export, extraction fixtures, archive-limit planning, generated and uploaded asset classification, failure recovery, file resolution and file-reference classification.
 
 The build must produce `dist/chatgpt.user.js`. Its version must match `package.json`, and its namespace must remain `danveitch76`.
 
@@ -66,7 +67,7 @@ A pull request should:
 - identify downstream and upstream impact;
 - list material assumptions;
 - include validation evidence;
-- preserve File Discovery and resolver behaviour unless explicitly changed;
+- preserve established downstream behaviour, including File Discovery, inventory exports, Bulk Rename and resolver behaviour, unless explicitly changed;
 - include rebuilt distribution output when source changes affect it;
 - update the changelog and relevant documentation.
 
@@ -85,6 +86,6 @@ Review the assessment before applying changes. See [the maintainer guide](./scri
 
 ## Releases
 
-For a release, update `package.json`, `.release-please-manifest.json`, `CHANGELOG.md` and `dist/chatgpt.user.js`; run all quality gates; and use the `userscript-vX.Y.Z` tag convention.
+For a release, align `package.json`, `.release-please-manifest.json`, `README.md`, `CHANGELOG.md` and `dist/chatgpt.user.js`; run all quality gates and live smoke tests on the exact final release tree; and use the `userscript-vX.Y.Z` tag convention.
 
 See [docs/RELEASE.md](./docs/RELEASE.md).
