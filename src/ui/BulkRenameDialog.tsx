@@ -335,7 +335,7 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
             <Dialog.Portal>
                 <Dialog.Overlay className="DialogOverlay" />
                 <Dialog.Content
-                    className="DialogContent _export"
+                    className="DialogContent _export BulkRenameDialog"
                     onEscapeKeyDown={(event: Event) => {
                         if (processing) event.preventDefault()
                     }}
@@ -457,7 +457,7 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                         </button>
                     </div>
 
-                    <ul className="SelectList" style={{ maxHeight: '13rem' }}>
+                    <ul className="SelectList BulkRenameConversationList">
                         {filtered.map(conversation => (
                             <li className="SelectItem" key={conversation.id}>
                                 <CheckBox
@@ -483,7 +483,7 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                         )}
                     </ul>
 
-                    <section className="ExportFilters" aria-label="Rename transformation" style={{ marginTop: '0.75rem' }}>
+                    <section className="ExportFilters BulkRenameTransform" aria-label="Rename transformation">
                         <div className="ExportFiltersTitle">Rename transformation</div>
                         <div className="ExportFilterRow">
                             <span className="ExportFilterLabel">Operation</span>
@@ -541,21 +541,13 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                         )}
                     </section>
 
-                    <div style={{ marginTop: '0.75rem', fontSize: '0.78rem' }}>
+                    <div className="BulkRenamePreviewSummary">
                         <strong>Preview</strong>
                         <span style={{ marginLeft: '0.5rem', opacity: 0.75 }}>
                             {previewCounts.changed} change · {previewCounts.unchanged} unchanged · {previewCounts.invalid} invalid
                         </span>
                     </div>
-                    <div
-                        style={{
-                            border: '1px solid var(--ce-border-light)',
-                            borderRadius: '4px',
-                            marginTop: '0.35rem',
-                            maxHeight: '13rem',
-                            overflow: 'auto',
-                        }}
-                    >
+                    <div className="BulkRenamePreviewTable">
                         <div
                             style={{
                                 display: 'grid',
@@ -601,7 +593,7 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                         )}
                     </div>
 
-                    <div className="ActionBar flex flex-wrap mt-3 items-center gap-2">
+                    <div className="ActionBar BulkRenameFooter flex flex-wrap items-center gap-2">
                         <span style={{ fontSize: '0.75rem', opacity: 0.75 }}>
                             Unchanged conversations are skipped. Invalid results block the batch.
                         </span>
