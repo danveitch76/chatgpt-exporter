@@ -578,14 +578,14 @@ export const BulkRenameDialog: FC<BulkRenameDialogProps> = ({ open, onOpenChange
                                         className="SelectSearch"
                                         value={manifestText}
                                         disabled={processing}
-                                        rows={6}
+                                        rows={4}
                                         placeholder='[{"id":"...","expectedTitle":"...","newTitle":"..."}]'
                                         onInput={event => setManifestText((event.currentTarget as HTMLTextAreaElement).value)}
                                         style={{ resize: 'vertical' }}
                                     />
                                 </div>
                                 <div style={{ fontSize: '0.72rem', opacity: 0.8 }}>
-                                    Manifest mode resolves conversations by identifier. Manual selection is ignored.
+                                    Manifest mode resolves conversations by identifier. Project controls the loaded scope; Date and Search only filter the displayed list. Manual selection is ignored.
                                 </div>
                                 {manifestError && (
                                     <div style={{ fontSize: '0.72rem' }} role="alert">
