@@ -35,15 +35,15 @@ const canonicalStatuses = new Map<string, string>([
 ])
 
 function escapeRegExp(value: string): string {
-    return value.replace(/[.*+?^$(){}|[\]\\]/g, '\\$&')
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function toProperCase(value: string): string {
     return value
-        .toLocaleLowerCase()
+        .toLowerCase()
         .replace(
             /(^|[\s\-–—/([{])([a-z])/g,
-            (_match, prefix: string, letter: string) => prefix + letter.toLocaleUpperCase(),
+            (_match, prefix: string, letter: string) => prefix + letter.toUpperCase(),
         )
 }
 
@@ -54,7 +54,7 @@ function normaliseStatusCapitalisation(value: string): string {
 
     if (!match) return value
 
-    const statusCandidate = match[1].trim().replace(/\s+/g, ' ').toLocaleUpperCase()
+    const statusCandidate = match[1].trim().replace(/\s+/g, ' ').toUpperCase()
     const canonicalStatus = canonicalStatuses.get(statusCandidate)
     if (!canonicalStatus) return value
 
@@ -74,10 +74,10 @@ export function transformConversationTitle(
         proposedTitle = title + transform.text
     }
     else if (transform.operation === 'lowercase') {
-        proposedTitle = title.toLocaleLowerCase()
+        proposedTitle = title.toLowerCase()
     }
     else if (transform.operation === 'uppercase') {
-        proposedTitle = title.toLocaleUpperCase()
+        proposedTitle = title.toUpperCase()
     }
     else if (transform.operation === 'propercase') {
         proposedTitle = toProperCase(title)
