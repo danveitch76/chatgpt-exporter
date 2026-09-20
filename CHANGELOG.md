@@ -1,5 +1,39 @@
 # Changelog
 
+## [2.34.0](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.8...userscript-v2.34.0) (2026-09-20)
+
+### Features
+
+* add filtered **Project list** and **Chat list** exports in JSON, TXT, HTML and Markdown, with Project-name resolution, preview tables and existing source/Project/date/search filters
+* add **Bulk Rename Conversations** with Prefix, Suffix and literal Find / Replace transformations, preview/confirmation, validation and rate-limit-aware title updates
+
+### Fixes
+
+* recognise current ChatGPT `file_...` uploaded-file identifiers alongside `file-...` backend identifiers
+* derive file identifiers from direct `sediment://` asset pointers and valid `{{file:...}}` placeholders
+* classify current underscore-style identifiers as recoverable backend assets while keeping citation/search references non-recoverable
+* capture current attachment `size` metadata
+* stabilise the Bulk Rename modal so conversation and preview panes scroll independently while the Apply/footer controls remain usable
+
+### Compatibility
+
+* preserve existing conversation export formats, Project/date/search filtering, Archive/Delete actions, batching and rate-limit handling
+* preserve File Discovery's inventory-only boundary; live authenticated bulk asset download remains tracked separately
+* add no new runtime dependency or external service
+
+### Validation
+
+* Project/Chat inventory export passed TypeScript compilation, full regression tests, production build and browser smoke testing before merge
+* file-reference discovery hardening passed lint, full regression tests, production build and real-account File Discovery validation before merge
+* Bulk Rename passed lint, full regression tests, production build and deterministic generated-userscript checks before merge
+* final 2.34.0 release reproducibility and post-release smoke testing remain required before tagging
+
+### References
+
+* Issues #86, #63, #89 and #91
+* Pull requests #87, #88, #90 and #92
+* Release tracking issue #93
+
 ## [2.33.8](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.7...userscript-v2.33.8) (2026-09-14)
 
 ### Fixes

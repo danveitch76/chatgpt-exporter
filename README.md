@@ -21,7 +21,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp
 > [!NOTE]
 > This repository is a maintained downstream fork of [`pionxzh/chatgpt-exporter`](https://github.com/pionxzh/chatgpt-exporter). It preserves upstream attribution while adding File Discovery, asset classification, validation tooling and governed upstream-maintenance automation.
 
-**Current downstream version:** `2.33.8`
+**Current downstream version:** `2.34.0`
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
@@ -284,7 +284,7 @@ The inventory includes:
 
 ### Current capability boundary
 
-Version 2.33.5 includes discovery, classification, resolver proof, backend-path mapping, archive-limit planning and validation fixtures, plus corrected All-conversations discovery across normal and Project feeds.
+Version 2.34.0 includes discovery and asset classification, current `file-...` / `file_...` reference recognition, resolver proof and backend-path mapping, filtered Project/Chat inventory exports, corrected All-conversations discovery, and bulk conversation title transformations.
 
 The **File Discovery** user-interface option remains inventory-only. It does not yet perform complete live bulk download and ZIP packaging of all discovered assets. Backend file routes have been identified, but live authenticated download remains subject to further Phase 1 validation.
 
