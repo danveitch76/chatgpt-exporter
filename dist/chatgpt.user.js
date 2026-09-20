@@ -23005,15 +23005,141 @@ ${content2}`;
     if (toMs2 != null && valueMs > toMs2) return false;
     return true;
   }
+  function isRecord(value) {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+  function parseRenameManifest(value) {
+    if (!value.trim()) return [];
+    let parsed;
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      throw new Error("Manifest must be valid JSON.");
+    }
+    if (!Array.isArray(parsed)) {
+      throw new TypeError("Manifest root must be a JSON array.");
+    }
+    const seen = /* @__PURE__ */ new Set();
+    return parsed.map((item, index2) => {
+      if (!isRecord(item)) {
+        throw new TypeError(`Manifest entry ${index2 + 1} must be an object.`);
+      }
+      const id = typeof item.id === "string" ? item.id.trim() : "";
+      const expectedTitle = typeof item.expectedTitle === "string" ? item.expectedTitle : null;
+      const newTitle = typeof item.newTitle === "string" ? item.newTitle : null;
+      if (!id) {
+        throw new Error(`Manifest entry ${index2 + 1} requires a conversation id.`);
+      }
+      if (seen.has(id)) {
+        throw new Error(`Manifest contains duplicate conversation id: ${id}`);
+      }
+      if (expectedTitle === null) {
+        throw new Error(`Manifest entry ${index2 + 1} requires expectedTitle.`);
+      }
+      if (newTitle === null || !newTitle.trim()) {
+        throw new Error(`Manifest entry ${index2 + 1} requires a non-empty newTitle.`);
+      }
+      seen.add(id);
+      return { id, expectedTitle, newTitle };
+    });
+  }
+  function buildRenameManifestPreview(value, conversations) {
+    let entries;
+    try {
+      entries = parseRenameManifest(value);
+    } catch (error2) {
+      return {
+        rows: [],
+        error: error2 instanceof Error ? error2.message : "Manifest is invalid."
+      };
+    }
+    const byId = new Map(conversations.map((conversation) => [conversation.id, conversation]));
+    const rows = entries.map((entry) => {
+      const conversation = byId.get(entry.id);
+      if (!conversation) {
+        return {
+          id: entry.id,
+          originalTitle: entry.expectedTitle,
+          proposedTitle: entry.newTitle,
+          changed: true,
+          valid: false,
+          error: "Conversation is not loaded in the current scope."
+        };
+      }
+      const currentTitle = conversation.title ?? "";
+      if (currentTitle === entry.newTitle) {
+        return {
+          id: entry.id,
+          originalTitle: currentTitle,
+          proposedTitle: entry.newTitle,
+          changed: false,
+          valid: true
+        };
+      }
+      if (currentTitle !== entry.expectedTitle) {
+        return {
+          id: entry.id,
+          originalTitle: currentTitle,
+          proposedTitle: entry.newTitle,
+          changed: true,
+          valid: false,
+          error: "Current title does not match expectedTitle."
+        };
+      }
+      return {
+        id: entry.id,
+        originalTitle: currentTitle,
+        proposedTitle: entry.newTitle,
+        changed: currentTitle !== entry.newTitle,
+        valid: true
+      };
+    });
+    return { rows };
+  }
+  const canonicalStatuses = /* @__PURE__ */ new Map([
+    ["ACTIVE", "ACTIVE"],
+    ["TO DO", "TO DO"],
+    ["TODO", "TO DO"],
+    ["WAITING", "WAITING"],
+    ["ON HOLD", "ON HOLD"],
+    ["COMPLETE", "COMPLETE"],
+    ["RETIRED", "RETIRED"],
+    ["NO", "NO"],
+    ["REJECTED", "REJECTED"]
+  ]);
   function escapeRegExp(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+  function toProperCase(value) {
+    return value.toLowerCase().replace(
+      /(^|[\s\-–—/([{])([a-z])/g,
+      (_match, prefix, letter) => prefix + letter.toUpperCase()
+    );
+  }
+  function normaliseStatusCapitalisation(value) {
+    const branchPrefix = value.startsWith("Branch · ") ? "Branch · " : "";
+    const remainder = value.slice(branchPrefix.length);
+    const match = remainder.match(/^(.+?)(\s*-\s*)/);
+    if (!match) return value;
+    const statusCandidate = match[1].trim().replace(/\s+/g, " ").toUpperCase();
+    const canonicalStatus = canonicalStatuses.get(statusCandidate);
+    if (!canonicalStatus) return value;
+    return branchPrefix + canonicalStatus + match[2] + remainder.slice(match[0].length);
   }
   function transformConversationTitle(title2, transform) {
     let proposedTitle = title2;
     if (transform.operation === "prefix") {
-      proposedTitle = `${transform.text}${title2}`;
+      proposedTitle = transform.text + title2;
     } else if (transform.operation === "suffix") {
-      proposedTitle = `${title2}${transform.text}`;
+      proposedTitle = title2 + transform.text;
+    } else if (transform.operation === "lowercase") {
+      proposedTitle = title2.toLowerCase();
+    } else if (transform.operation === "uppercase") {
+      proposedTitle = title2.toUpperCase();
+    } else if (transform.operation === "propercase") {
+      proposedTitle = toProperCase(title2);
+    } else if (transform.operation === "status") {
+      proposedTitle = normaliseStatusCapitalisation(title2);
     } else {
       if (!transform.text) {
         return {
@@ -23208,6 +23334,7 @@ ${content2}`;
     const [text2, setText] = h$4("");
     const [replacement, setReplacement] = h$4("");
     const [caseSensitive, setCaseSensitive] = h$4(false);
+    const [manifestText, setManifestText] = h$4("");
     const [processing, setProcessing] = h$4(false);
     const [summary, setSummary] = h$4(null);
     const [progress, setProgress] = h$4({ total: 0, completed: 0, currentName: "" });
@@ -23293,23 +23420,36 @@ ${content2}`;
         return direction * (aTime - bTime);
       });
     }, [conversations, dateField, fromDate, query2, sortDir, sortField, toDate]);
+    const transformOperation = operation === "manifest" ? "prefix" : operation;
     const transform = F$1(() => ({
-      operation,
+      operation: transformOperation,
       text: text2,
       replacement,
       caseSensitive
-    }), [caseSensitive, operation, replacement, text2]);
-    const preview = F$1(() => selected.map((conversation) => ({
-      id: conversation.id,
-      ...transformConversationTitle(conversation.title ?? "", transform)
-    })), [selected, transform]);
+    }), [caseSensitive, replacement, text2, transformOperation]);
+    const manifestPreview = F$1(
+      () => buildRenameManifestPreview(manifestText, conversations),
+      [conversations, manifestText]
+    );
+    const manifestError = operation === "manifest" ? manifestPreview.error : void 0;
+    const preview = F$1(() => {
+      if (operation === "manifest") return manifestPreview.rows;
+      return selected.map((conversation) => ({
+        id: conversation.id,
+        ...transformConversationTitle(conversation.title ?? "", transform)
+      }));
+    }, [manifestPreview.rows, operation, selected, transform]);
     const previewCounts = F$1(() => preview.reduce((counts, row) => {
       if (!row.valid) counts.invalid++;
       else if (row.changed) counts.changed++;
       else counts.unchanged++;
       return counts;
-    }, { changed: 0, unchanged: 0, invalid: 0 }), [preview]);
-    const allFilteredSelected = filtered.length > 0 && filtered.every((item) => selected.some((selectedItem) => selectedItem.id === item.id));
+    }, {
+      changed: 0,
+      unchanged: 0,
+      invalid: manifestError ? 1 : 0
+    }), [manifestError, preview]);
+    const allFilteredSelected = operation !== "manifest" && filtered.length > 0 && filtered.every((item) => selected.some((selectedItem) => selectedItem.id === item.id));
     p$6(() => {
       const off = renameQueue.on("progress", (event) => {
         setProgress({
@@ -23347,8 +23487,9 @@ ${content2}`;
     const applyRename = T$4(() => {
       if (processing || previewCounts.invalid > 0 || previewCounts.changed === 0) return;
       const plan = preview.filter((row) => row.valid && row.changed);
+      const sourceLabel = operation === "manifest" ? "manifest conversation" : "selected conversation";
       const approved = confirm(
-        `Rename ${plan.length} selected conversation${plan.length === 1 ? "" : "s"} using the previewed titles?`
+        `Rename ${plan.length} ${sourceLabel}${plan.length === 1 ? "" : "s"} using the previewed titles?`
       );
       if (!approved) return;
       pendingPlanRef.current = plan;
@@ -23365,7 +23506,7 @@ ${content2}`;
         });
       }
       renameQueue.start();
-    }, [preview, previewCounts, processing, renameQueue]);
+    }, [operation, preview, previewCounts, processing, renameQueue]);
     const setDateAndClearSelection = T$4((setter, value) => {
       setSelected([]);
       setter(value);
@@ -23374,7 +23515,7 @@ ${content2}`;
       if (!processing) onOpenChange(value);
     }, [onOpenChange, processing]);
     const busy = projectsLoading || loading || processing;
-    const statusText = error2 ? `Error: ${error2}` : processing ? `Renaming ${progress.completed} / ${progress.total}` : projectsLoading ? "Loading projects..." : loading ? "Loading conversations..." : summary ? `Renamed ${summary.renamed}; unchanged ${summary.unchanged}; invalid ${summary.invalid}; failed ${summary.failed}` : `${selected.length} selected / ${filtered.length} visible`;
+    const statusText = error2 ? `Error: ${error2}` : processing ? `Renaming ${progress.completed} / ${progress.total}` : projectsLoading ? "Loading projects..." : loading ? "Loading conversations..." : summary ? `Renamed ${summary.renamed}; unchanged ${summary.unchanged}; invalid ${summary.invalid}; failed ${summary.failed}` : operation === "manifest" ? `${preview.length} manifest entries / ${conversations.length} loaded` : `${selected.length} selected / ${filtered.length} visible`;
     const statusDetail = processing ? progress.currentName : !error2 && !busy ? `${conversations.length} conversations loaded · source scan limit ${exportAllLimit}` : "";
     return /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$be92b6f5f03c0fe9, { open, onOpenChange: closeGuarded, children: [
       /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$41fb9f06171c75f4, { asChild: true, children }),
@@ -23497,7 +23638,7 @@ ${content2}`;
                   CheckBox,
                   {
                     label: "Select all visible",
-                    disabled: busy || filtered.length === 0,
+                    disabled: busy || operation === "manifest" || filtered.length === 0,
                     checked: allFilteredSelected,
                     onCheckedChange: (checked) => setSelected(checked ? filtered : [])
                   }
@@ -23533,7 +23674,7 @@ ${content2}`;
                     CheckBox,
                     {
                       label: conversation.title || "(untitled)",
-                      disabled: processing,
+                      disabled: processing || operation === "manifest",
                       checked: selected.some((item) => item.id === conversation.id),
                       onCheckedChange: (checked) => {
                         setSelected((previous2) => checked ? [...previous2.filter((item) => item.id !== conversation.id), conversation] : previous2.filter((item) => item.id !== conversation.id));
@@ -23559,12 +23700,17 @@ ${content2}`;
                       children: [
                         /* @__PURE__ */ o$8("option", { value: "prefix", children: "Prefix" }),
                         /* @__PURE__ */ o$8("option", { value: "suffix", children: "Suffix" }),
-                        /* @__PURE__ */ o$8("option", { value: "replace", children: "Find / Replace" })
+                        /* @__PURE__ */ o$8("option", { value: "replace", children: "Find / Replace" }),
+                        /* @__PURE__ */ o$8("option", { value: "lowercase", children: "lowercase" }),
+                        /* @__PURE__ */ o$8("option", { value: "uppercase", children: "UPPERCASE" }),
+                        /* @__PURE__ */ o$8("option", { value: "propercase", children: "Proper Case" }),
+                        /* @__PURE__ */ o$8("option", { value: "status", children: "Status capitalisation" }),
+                        /* @__PURE__ */ o$8("option", { value: "manifest", children: "Exact mapping manifest" })
                       ]
                     }
                   )
                 ] }),
-                /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSearchRow", children: [
+                (operation === "prefix" || operation === "suffix" || operation === "replace") && /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSearchRow", children: [
                   /* @__PURE__ */ o$8("label", { className: "ExportFilterLabel", htmlFor: "rename-text", children: operation === "replace" ? "Find text" : operation === "prefix" ? "Prefix" : "Suffix" }),
                   /* @__PURE__ */ o$8(
                     "input",
@@ -23607,6 +23753,26 @@ ${content2}`;
                       }
                     )
                   ] })
+                ] }),
+                operation === "manifest" && /* @__PURE__ */ o$8(k$3, { children: [
+                  /* @__PURE__ */ o$8("div", { className: "ExportFilterRow ExportSearchRow", children: [
+                    /* @__PURE__ */ o$8("label", { className: "ExportFilterLabel", htmlFor: "rename-manifest", children: "Manifest JSON" }),
+                    /* @__PURE__ */ o$8(
+                      "textarea",
+                      {
+                        id: "rename-manifest",
+                        className: "SelectSearch",
+                        value: manifestText,
+                        disabled: processing,
+                        rows: 4,
+                        placeholder: '[{"id":"...","expectedTitle":"...","newTitle":"..."}]',
+                        onInput: (event) => setManifestText(event.currentTarget.value),
+                        style: { resize: "vertical" }
+                      }
+                    )
+                  ] }),
+                  /* @__PURE__ */ o$8("div", { style: { fontSize: "0.72rem", opacity: 0.8 }, children: "Manifest mode resolves conversations by identifier. Project controls the loaded scope; Date and Search only filter the displayed list. Manual selection is ignored." }),
+                  manifestError && /* @__PURE__ */ o$8("div", { style: { fontSize: "0.72rem" }, role: "alert", children: manifestError })
                 ] })
               ] }),
               /* @__PURE__ */ o$8("div", { className: "BulkRenamePreviewSummary", children: [
@@ -23659,7 +23825,7 @@ ${content2}`;
                   },
                   row.id
                 )),
-                preview.length === 0 && /* @__PURE__ */ o$8("div", { style: { padding: "0.65rem", fontSize: "0.75rem", opacity: 0.7 }, children: "Select one or more conversations to preview title changes." })
+                preview.length === 0 && /* @__PURE__ */ o$8("div", { style: { padding: "0.65rem", fontSize: "0.75rem", opacity: 0.7 }, children: operation === "manifest" ? "Paste a valid manifest to preview exact title mappings." : "Select one or more conversations to preview title changes." })
               ] }),
               /* @__PURE__ */ o$8("div", { className: "ActionBar BulkRenameFooter flex flex-wrap items-center gap-2", children: [
                 /* @__PURE__ */ o$8("span", { style: { fontSize: "0.75rem", opacity: 0.75 }, children: "Unchanged conversations are skipped. Invalid results block the batch." }),
@@ -23668,7 +23834,7 @@ ${content2}`;
                   "button",
                   {
                     className: "Button green",
-                    disabled: busy || !!error2 || previewCounts.changed === 0 || previewCounts.invalid > 0,
+                    disabled: busy || !!error2 || !!manifestError || previewCounts.changed === 0 || previewCounts.invalid > 0,
                     onClick: applyRename,
                     children: [
                       "Apply ",
