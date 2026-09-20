@@ -19,7 +19,9 @@
 
 
 > [!NOTE]
-> Repositori ini adalah fork terpelihara dari `pionxzh/chatgpt-exporter`. Fitur khusus fork, termasuk File Discovery dan alat pemeliharaan, didokumentasikan dalam [README bahasa Inggris](./README.md).
+> Repositori ini adalah fork terpelihara dari `pionxzh/chatgpt-exporter`. Fitur khusus fork, termasuk File Discovery, Export Project / Chat Lists, Bulk Rename Conversations, dan alat pemeliharaan, didokumentasikan dalam [README bahasa Inggris](./README.md).
+
+**Versi downstream saat ini:** `2.34.0`
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/0697599c-2432-4eae-bc6a-ea4b6ecf89aa)
 
@@ -255,7 +257,7 @@ Pilih format ekspor Anda dari menu dropdown di kiri bawah. Anda dapat memilih da
 
 Klik tombol untuk melakukan tindakan yang diinginkan.
 
-- **Arsipkan** - Sesi obrolan yang diarsipkan akan menghilang dari bilah sisi dan dapat dikelola di pengaturan ChatGPT. Lihat [#199](https://github.com/danveitch76/chatgpt-exporter/issues/199) untuk detail lebih lanjut.
+- **Arsipkan** - Sesi obrolan yang diarsipkan akan menghilang dari bilah sisi dan dapat dikelola di pengaturan ChatGPT.
 - **Hapus** - Menghapus percakapan yang dipilih.
 - **Ekspor** - Mengekspor percakapan yang dipilih dalam format yang dipilih menggunakan pemilih format.
 
