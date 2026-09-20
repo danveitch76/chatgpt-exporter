@@ -57,7 +57,7 @@ References:
 | `{{file:...}}` inline placeholder detection | **INTEGRATE** | Current generic scalar scanner did not recognise an identifier embedded inside text. |
 | Voice-audio pointer discovery | **REFERENCE** | Current scanner already sees audio asset-pointer fields, but its source taxonomy does not yet distinguish audio from images. Address through existing discovery-hardening work rather than importing the external model. |
 | Sandbox interpreter download route | **REFERENCE** | Potentially useful for live recovery, but it is an undocumented authenticated route and needs real-account validation under the existing resolver issue before integration. |
-| Backend file download handling | **REFERENCE** | Confirms the route family already mapped by this repository and highlights different handling for `file-` and `file_`; live validation remains required. |
+| Backend file download handling | **REFERENCE** | Confirms the route family already mapped by this repository and highlights different handling for `file-` and `file_`; live authenticated download validation remains tracked under issue #5. |
 | Batch attachment ZIP model | **REFERENCE** | Useful implementation evidence, but this repository already has its own batching, memory-protection and resolver roadmap. |
 | Auto-save through the File System Access API | **REJECT** | Separate product behaviour with additional state and browser-permission complexity; not required to close the verified discovery gap. |
 | Credential interception by wrapping `fetch`/XMLHttpRequest and inspecting page state | **REJECT** | Expands security and maintenance risk and is unnecessary for the bounded discovery change. |
@@ -88,11 +88,16 @@ The integrated change is local parsing only. It does not:
 
 The external live-download and credential-interception techniques remain reference material only until separately justified and validated.
 
-## Remaining work
+## Follow-up status
 
-Existing GitHub issues remain the correct traceability points:
+Real-account File Discovery validation completed after the bounded integration and confirmed the discovery gap was closed:
 
-- issue #63 — refine discovery to identify recoverable file assets;
-- issue #5 — add and validate the file download resolver.
+- 11 inventory rows were produced;
+- one genuine underscore-style `file_...` identifier was discovered;
+- that identifier was classified as `recoverable_backend_asset`;
+- attachment filename, MIME type and size metadata were populated;
+- citation/search rows were not misclassified as recoverable assets.
 
-The next real-account validation should confirm that current conversations now produce `fileId` rows from `file_` attachments and sediment-backed file identifiers before issue #5 is extended to live downloads.
+Issue #63 was closed as completed on 20 September 2026 after that validation. Issue #5 remains open for live authenticated download/resolver work.
+
+Voice-audio taxonomy remains a possible separate hardening item because the scanner can observe audio asset pointers while the current source taxonomy does not yet distinguish them from images.
