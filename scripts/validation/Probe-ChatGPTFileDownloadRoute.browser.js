@@ -44,6 +44,14 @@
             : null
     )
 
+    const redactText = (value) => {
+        if (typeof value !== 'string') return value
+
+        return value
+            .replaceAll(INPUT.fileId, '<file-id>')
+            .replace(/https?:\/\/\S+/gi, '<url>')
+    }
+
     const toHex = bytes => Array.from(bytes)
         .map(value => value.toString(16).padStart(2, '0'))
         .join('')
@@ -117,7 +125,9 @@
 
         result.backendStatus = typeof responseJson?.status === 'string' ? responseJson.status : null
         result.backendErrorCode = typeof responseJson?.error_code === 'string' ? responseJson.error_code : null
-        result.backendErrorMessage = typeof responseJson?.error_message === 'string' ? responseJson.error_message : null
+        result.backendErrorMessage = typeof responseJson?.error_message === 'string'
+            ? redactText(responseJson.error_message)
+            : null
         result.backendFilenamePresent = typeof responseJson?.file_name === 'string' && responseJson.file_name.length > 0
         result.backendMimeType = normaliseMimeType(responseJson?.mime_type ?? responseJson?.mimedata)
         result.backendSizeBytes = Number.isFinite(responseJson?.file_size_bytes)
@@ -215,8 +225,8 @@
     }
     catch (error) {
         result.error = error instanceof Error
-            ? { name: error.name, message: error.message }
-            : { message: String(error) }
+            ? { name: error.name, message: redactText(error.message) }
+            : { message: redactText(String(error)) }
     }
 
     console.log(JSON.stringify(result, null, 2))
