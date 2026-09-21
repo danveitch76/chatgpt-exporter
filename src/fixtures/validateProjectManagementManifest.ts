@@ -1,9 +1,7 @@
 import { strict as assert } from 'node:assert'
 import {
-    buildConversationProjectPreview,
-    buildProjectRenamePreview,
-    parseConversationProjectManifest,
-    parseProjectRenameManifest,
+    buildProjectManagementPreview,
+    parseProjectManagementManifest,
 } from '../ui/projectManagementManifest'
 
 const projects = [
@@ -16,133 +14,191 @@ const conversations = [
     { id: 'chat-custom-gpt', title: 'Custom GPT', gizmo_id: 'g-custom' },
 ]
 
-const assign = JSON.stringify([
-    { id: 'chat-unassigned', expectedProjectId: null, newProjectId: 'g-p-one' },
+const mixed = JSON.stringify([
+    {
+        action: 'moveConversation',
+        id: 'chat-unassigned',
+        expectedProjectId: null,
+        newProjectId: 'g-p-one',
+    },
+    {
+        action: 'moveConversation',
+        id: 'chat-one',
+        expectedProjectId: 'g-p-one',
+        newProjectId: 'g-p-two',
+    },
+    {
+        action: 'renameProject',
+        id: 'g-p-two',
+        expectedName: 'Two',
+        newName: 'Two Renamed',
+    },
 ])
-let preview = buildConversationProjectPreview(assign, conversations, projects)
+let preview = buildProjectManagementPreview(mixed, conversations, projects)
 assert.equal(preview.error, undefined)
+assert.equal(preview.rows.length, 3)
 assert.deepEqual(preview.rows[0], {
+    action: 'moveConversation',
     id: 'chat-unassigned',
-    title: 'Unassigned',
+    label: 'Unassigned',
+    originalValue: 'Not in a Project',
+    proposedValue: 'One',
+    changed: true,
+    valid: true,
     originalProjectId: null,
     proposedProjectId: 'g-p-one',
+})
+assert.equal(preview.rows[1].action, 'moveConversation')
+assert.equal(preview.rows[1].valid, true)
+assert.equal(preview.rows[1].changed, true)
+assert.deepEqual(preview.rows[2], {
+    action: 'renameProject',
+    id: 'g-p-two',
+    label: 'Two',
+    originalValue: 'Two',
+    proposedValue: 'Two Renamed',
     changed: true,
     valid: true,
 })
 
-const move = JSON.stringify([
-    { id: 'chat-one', expectedProjectId: 'g-p-one', newProjectId: 'g-p-two' },
-])
-preview = buildConversationProjectPreview(move, conversations, projects)
-assert.equal(preview.rows[0].valid, true)
-assert.equal(preview.rows[0].changed, true)
-
 const alreadyMoved = JSON.stringify([
-    { id: 'chat-one', expectedProjectId: null, newProjectId: 'g-p-one' },
+    {
+        action: 'moveConversation',
+        id: 'chat-one',
+        expectedProjectId: null,
+        newProjectId: 'g-p-one',
+    },
 ])
-preview = buildConversationProjectPreview(alreadyMoved, conversations, projects)
+preview = buildProjectManagementPreview(alreadyMoved, conversations, projects)
 assert.equal(preview.rows[0].valid, true)
 assert.equal(preview.rows[0].changed, false)
 
 const stale = JSON.stringify([
-    { id: 'chat-one', expectedProjectId: null, newProjectId: 'g-p-two' },
+    {
+        action: 'moveConversation',
+        id: 'chat-one',
+        expectedProjectId: null,
+        newProjectId: 'g-p-two',
+    },
 ])
-preview = buildConversationProjectPreview(stale, conversations, projects)
+preview = buildProjectManagementPreview(stale, conversations, projects)
 assert.equal(preview.rows[0].valid, false)
 assert.equal(preview.rows[0].error, 'Current Project membership does not match expectedProjectId.')
 
 const unknownProject = JSON.stringify([
-    { id: 'chat-one', expectedProjectId: 'g-p-one', newProjectId: 'g-p-missing' },
+    {
+        action: 'moveConversation',
+        id: 'chat-one',
+        expectedProjectId: 'g-p-one',
+        newProjectId: 'g-p-missing',
+    },
 ])
-preview = buildConversationProjectPreview(unknownProject, conversations, projects)
+preview = buildProjectManagementPreview(unknownProject, conversations, projects)
 assert.equal(preview.rows[0].valid, false)
 assert.equal(preview.rows[0].error, 'Destination Project is not loaded.')
 
-const customGptAsNoProject = JSON.stringify([
-    { id: 'chat-custom-gpt', expectedProjectId: null, newProjectId: 'g-p-one' },
+const customGpt = JSON.stringify([
+    {
+        action: 'moveConversation',
+        id: 'chat-custom-gpt',
+        expectedProjectId: null,
+        newProjectId: 'g-p-one',
+    },
 ])
-preview = buildConversationProjectPreview(customGptAsNoProject, conversations, projects)
+preview = buildProjectManagementPreview(customGpt, conversations, projects)
 assert.equal(preview.rows[0].valid, false)
 assert.equal(preview.rows[0].error, 'Conversation belongs to a non-Project gizmo and cannot be moved safely.')
 
+const renameAlready = JSON.stringify([
+    {
+        action: 'renameProject',
+        id: 'g-p-one',
+        expectedName: 'Old One',
+        newName: 'One',
+    },
+])
+preview = buildProjectManagementPreview(renameAlready, conversations, projects)
+assert.equal(preview.rows[0].valid, true)
+assert.equal(preview.rows[0].changed, false)
+
+const renameStale = JSON.stringify([
+    {
+        action: 'renameProject',
+        id: 'g-p-one',
+        expectedName: 'Wrong',
+        newName: 'One Renamed',
+    },
+])
+preview = buildProjectManagementPreview(renameStale, conversations, projects)
+assert.equal(preview.rows[0].valid, false)
+assert.equal(preview.rows[0].error, 'Current Project name does not match expectedName.')
+
+const renameMissing = JSON.stringify([
+    {
+        action: 'renameProject',
+        id: 'g-p-missing',
+        expectedName: 'Missing',
+        newName: 'Still Missing',
+    },
+])
+preview = buildProjectManagementPreview(renameMissing, conversations, projects)
+assert.equal(preview.rows[0].valid, false)
+assert.equal(preview.rows[0].error, 'Project is not loaded.')
+
 assert.throws(
-    () => parseConversationProjectManifest(JSON.stringify([
-        { id: 'chat-one', expectedProjectId: 'g-p-one', newProjectId: 'g-p-two' },
-        { id: 'chat-one', expectedProjectId: 'g-p-two', newProjectId: 'g-p-one' },
+    () => parseProjectManagementManifest(JSON.stringify([
+        {
+            action: 'moveConversation',
+            id: 'chat-one',
+            expectedProjectId: 'g-p-one',
+            newProjectId: 'g-p-two',
+        },
+        {
+            action: 'moveConversation',
+            id: 'chat-one',
+            expectedProjectId: 'g-p-two',
+            newProjectId: 'g-p-one',
+        },
     ])),
-    /duplicate conversation id/,
+    /duplicate id/,
 )
 assert.throws(
-    () => parseConversationProjectManifest(JSON.stringify([
-        { id: '', expectedProjectId: null, newProjectId: 'g-p-one' },
+    () => parseProjectManagementManifest(JSON.stringify([
+        { action: 'unknown', id: 'chat-one' },
     ])),
-    /requires a conversation id/,
+    /requires action/,
 )
 assert.throws(
-    () => parseConversationProjectManifest(JSON.stringify([
-        { id: 'chat-one', newProjectId: 'g-p-two' },
+    () => parseProjectManagementManifest(JSON.stringify([
+        { action: 'moveConversation', id: '', expectedProjectId: null, newProjectId: 'g-p-one' },
+    ])),
+    /requires an id/,
+)
+assert.throws(
+    () => parseProjectManagementManifest(JSON.stringify([
+        { action: 'moveConversation', id: 'chat-one', newProjectId: 'g-p-two' },
     ])),
     /requires expectedProjectId/,
 )
 assert.throws(
-    () => parseConversationProjectManifest(JSON.stringify([
-        { id: 'chat-one', expectedProjectId: 'g-p-one', newProjectId: '' },
+    () => parseProjectManagementManifest(JSON.stringify([
+        { action: 'moveConversation', id: 'chat-one', expectedProjectId: 'g-p-one', newProjectId: '' },
     ])),
     /requires a destination newProjectId/,
 )
-assert.equal(buildConversationProjectPreview('{bad', conversations, projects).error, 'Manifest must be valid JSON.')
-
-const rename = JSON.stringify([
-    { id: 'g-p-one', expectedName: 'One', newName: 'One Renamed' },
-])
-let renamePreview = buildProjectRenamePreview(rename, projects)
-assert.equal(renamePreview.error, undefined)
-assert.deepEqual(renamePreview.rows[0], {
-    id: 'g-p-one',
-    originalName: 'One',
-    proposedName: 'One Renamed',
-    changed: true,
-    valid: true,
-})
-
-const renameAlready = JSON.stringify([
-    { id: 'g-p-one', expectedName: 'Old One', newName: 'One' },
-])
-renamePreview = buildProjectRenamePreview(renameAlready, projects)
-assert.equal(renamePreview.rows[0].valid, true)
-assert.equal(renamePreview.rows[0].changed, false)
-
-const renameStale = JSON.stringify([
-    { id: 'g-p-one', expectedName: 'Wrong', newName: 'One Renamed' },
-])
-renamePreview = buildProjectRenamePreview(renameStale, projects)
-assert.equal(renamePreview.rows[0].valid, false)
-assert.equal(renamePreview.rows[0].error, 'Current Project name does not match expectedName.')
-
-const renameMissing = JSON.stringify([
-    { id: 'g-p-missing', expectedName: 'Missing', newName: 'Still Missing' },
-])
-renamePreview = buildProjectRenamePreview(renameMissing, projects)
-assert.equal(renamePreview.rows[0].valid, false)
-assert.equal(renamePreview.rows[0].error, 'Project is not loaded.')
-
 assert.throws(
-    () => parseProjectRenameManifest(JSON.stringify([
-        { id: 'g-p-one', expectedName: 'One', newName: 'One A' },
-        { id: 'g-p-one', expectedName: 'One A', newName: 'One B' },
-    ])),
-    /duplicate Project id/,
-)
-assert.throws(
-    () => parseProjectRenameManifest(JSON.stringify([
-        { id: '', expectedName: 'One', newName: 'One A' },
-    ])),
-    /requires a Project id/,
-)
-assert.throws(
-    () => parseProjectRenameManifest(JSON.stringify([
-        { id: 'g-p-one', expectedName: 'One', newName: '   ' },
+    () => parseProjectManagementManifest(JSON.stringify([
+        { action: 'renameProject', id: 'g-p-one', expectedName: 'One', newName: '   ' },
     ])),
     /requires a non-empty newName/,
 )
-assert.equal(buildProjectRenamePreview('{bad', projects).error, 'Manifest must be valid JSON.')
+assert.throws(
+    () => parseProjectManagementManifest(JSON.stringify([
+        { action: 'renameProject', id: 'g-p-one', newName: 'One Renamed' },
+    ])),
+    /requires expectedName/,
+)
+assert.equal(
+    buildProjectManagementPreview('{bad', conversations, projects).error,
+    'Manifest must be valid JSON.',
+)
