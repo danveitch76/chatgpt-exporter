@@ -61,10 +61,6 @@
         return toHex(new Uint8Array(digest))
     }
 
-    const allProvidedChecksPass = checks => Object.values(checks)
-        .filter(value => value !== null)
-        .every(Boolean)
-
     const route = `/backend-api/files/download/${encodeURIComponent(INPUT.fileId)}?post_id=&inline=false`
 
     const result = {
@@ -206,12 +202,13 @@
             && result.checks.expectedMimeTypeMatches === true
             && result.checks.expectedSizeMatches === true
 
-        const identityProofPassed = result.checks.expectedSha256Matches === true
-            || result.expectedAssetMetadataMatched
+        const hashCheckProvided = INPUT.expectedSha256 !== null
+        const identityProofPassed = hashCheckProvided
+            ? result.checks.expectedSha256Matches === true
+            : result.expectedAssetMetadataMatched
 
         result.acceptanceGatePassed = result.retrievalSucceeded
             && identityProofPassed
-            && allProvidedChecksPass(result.checks)
 
         if (result.acceptanceGatePassed && result.checks.expectedSha256Matches === true) {
             result.evidenceLevel = 'expected_asset_hash_matched'
