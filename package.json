@@ -1,7 +1,7 @@
 {
   "name": "@danveitch76/chatgpt-exporter",
   "type": "module",
-  "version": "2.34.0",
+  "version": "2.35.0",
   "private": true,
   "packageManager": "pnpm@8.14.1",
   "title": "ChatGPT Exporter",
@@ -23,7 +23,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "tsc --noEmit && pnpm run test:conversation-discovery && pnpm run test:conversation-date-range && pnpm run test:conversation-title-transform && pnpm run test:inventory-export && pnpm run test:file-extractor && pnpm run test:file-extractor-limits && pnpm run test:generated-asset-classification && pnpm run test:failure-recovery-classification && pnpm run test:uploaded-asset-classification && pnpm run test:file-resolver && pnpm run test:file-reference-classification",
+    "test": "tsc --noEmit && pnpm run test:conversation-discovery && pnpm run test:conversation-date-range && pnpm run test:conversation-title-transform && pnpm run test:project-management-manifest && pnpm run test:inventory-export && pnpm run test:file-extractor && pnpm run test:file-extractor-limits && pnpm run test:generated-asset-classification && pnpm run test:failure-recovery-classification && pnpm run test:uploaded-asset-classification && pnpm run test:file-resolver && pnpm run test:file-reference-classification",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky",
@@ -37,7 +37,8 @@
     "test:failure-recovery-classification": "tsx ./src/file-extractor/fixtures/validateFailureRecoveryClassification.ts",
     "test:uploaded-asset-classification": "tsx ./src/file-extractor/fixtures/validateUploadedAssetClassification.ts",
     "test:file-resolver": "tsx ./src/file-extractor/fixtures/validateFileResolver.ts",
-    "test:file-reference-classification": "tsx ./src/file-extractor/fixtures/validateFileReferenceClassification.ts"
+    "test:file-reference-classification": "tsx ./src/file-extractor/fixtures/validateFileReferenceClassification.ts",
+    "test:project-management-manifest": "tsx ./src/fixtures/validateProjectManagementManifest.ts"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.14",

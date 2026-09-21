@@ -3,7 +3,7 @@
 // @name:zh-CN         ChatGPT Exporter
 // @name:zh-TW         ChatGPT Exporter
 // @namespace          danveitch76
-// @version            2.34.0
+// @version            2.35.0
 // @author             danveitch76
 // @description        Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.
 // @description:zh-CN  一键导出 ChatGPT 对话，轻松备份与分享
@@ -615,6 +615,168 @@ html {\r
     100% {\r
         stroke-dasharray: 100px, 200px;\r
         stroke-dashoffset: -125px;\r
+    }\r
+}\r
+\r
+\r
+/* Bulk Project management dialog ----------------------------------------- */\r
+.DialogContent._export.BulkProjectManagementDialog {\r
+    width: min(96vw, 82rem);\r
+    max-width: 82rem;\r
+    height: min(92vh, 64rem);\r
+    max-height: 92vh;\r
+    display: grid;\r
+    grid-template-rows: auto auto minmax(13rem, 0.9fr) minmax(12rem, 1.1fr) auto;\r
+    gap: 0.65rem;\r
+    overflow: hidden;\r
+}\r
+\r
+.BulkProjectManagementDialog > .DialogTitle,\r
+.BulkProjectManagementDialog > .ExportStatusBox {\r
+    margin: 0;\r
+}\r
+\r
+.ProjectManagementManifest,\r
+.ProjectManagementPreview {\r
+    min-width: 0;\r
+    min-height: 0;\r
+    display: flex;\r
+    flex-direction: column;\r
+}\r
+\r
+.ProjectManagementSectionTitle,\r
+.ProjectManagementPreviewHeader {\r
+    display: flex;\r
+    align-items: baseline;\r
+    justify-content: space-between;\r
+    gap: 1rem;\r
+    margin-bottom: 0.4rem;\r
+    color: var(--ce-text-primary);\r
+    font-size: 0.875rem;\r
+    font-weight: 600;\r
+}\r
+\r
+.ProjectManagementManifestInput {\r
+    width: 100%;\r
+    min-width: 0;\r
+    min-height: 10rem;\r
+    flex: 1 1 auto;\r
+    box-sizing: border-box;\r
+    padding: 0.75rem;\r
+    resize: vertical;\r
+    overflow: auto;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 5px;\r
+    background: var(--ce-menu-primary);\r
+    color: var(--ce-text-primary);\r
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;\r
+    font-size: 0.8125rem;\r
+    line-height: 1.45;\r
+    white-space: pre;\r
+}\r
+\r
+.ProjectManagementManifest .RenameHelpText {\r
+    margin-top: 0.4rem;\r
+}\r
+\r
+.ProjectManagementPreviewHeader > span:last-child {\r
+    font-weight: 400;\r
+    color: #9ca3af;\r
+}\r
+\r
+.ProjectManagementPreviewTableWrap {\r
+    min-height: 0;\r
+    flex: 1 1 auto;\r
+    overflow: auto;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 5px;\r
+}\r
+\r
+.ProjectManagementPreviewTable {\r
+    width: 100%;\r
+    min-width: 68rem;\r
+    border-collapse: collapse;\r
+    table-layout: fixed;\r
+    color: var(--ce-text-primary);\r
+    font-size: 0.8125rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable th,\r
+.ProjectManagementPreviewTable td {\r
+    padding: 0.55rem 0.65rem;\r
+    border-bottom: 1px solid var(--ce-border-light);\r
+    text-align: left;\r
+    vertical-align: top;\r
+    overflow-wrap: anywhere;\r
+}\r
+\r
+.ProjectManagementPreviewTable th {\r
+    position: sticky;\r
+    top: 0;\r
+    z-index: 1;\r
+    background: var(--ce-menu-secondary);\r
+    font-size: 0.75rem;\r
+    font-weight: 600;\r
+}\r
+\r
+.ProjectManagementPreviewTable th:nth-child(1) {\r
+    width: 9rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable th:nth-child(2) {\r
+    width: 18rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable th:nth-child(3),\r
+.ProjectManagementPreviewTable th:nth-child(4) {\r
+    width: 13rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable th:nth-child(5) {\r
+    width: 18rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable tbody tr:last-child td {\r
+    border-bottom: 0;\r
+}\r
+\r
+.ProjectManagementInvalid {\r
+    font-weight: 500;\r
+}\r
+\r
+.ProjectManagementActions {\r
+    margin: 0;\r
+    padding-top: 0.65rem;\r
+    border-top: 1px solid var(--ce-border-light);\r
+    display: flex;\r
+    align-items: center;\r
+    justify-content: flex-end;\r
+    gap: 0.5rem;\r
+}\r
+\r
+.ProjectManagementActions .Button {\r
+    flex: 0 0 auto;\r
+    width: auto;\r
+    min-width: 0;\r
+}\r
+\r
+@media (max-width: 820px) {\r
+    .DialogContent._export.BulkProjectManagementDialog {\r
+        width: 96vw;\r
+        height: 94vh;\r
+        max-height: 94vh;\r
+        grid-template-rows: auto auto minmax(11rem, 0.9fr) minmax(10rem, 1.1fr) auto;\r
+        padding-right: 1rem;\r
+        padding-left: 1rem;\r
+    }\r
+\r
+    .BulkProjectManagementDialog .ExportStatusBox {\r
+        align-items: flex-start;\r
+        flex-direction: column;\r
+    }\r
+\r
+    .BulkProjectManagementDialog .ExportStatusDetail {\r
+        white-space: normal;\r
     }\r
 }\r
 .DialogOverlay {\r
@@ -1675,8 +1837,8 @@ html {\r
     };
     return memorized;
   }
-  const sessionApi$1 = _default(baseUrl, "/api/auth/session");
-  const conversationApi$1 = (id) => _default(apiUrl, "/conversation/:id", { id });
+  const sessionApi$2 = _default(baseUrl, "/api/auth/session");
+  const conversationApi$2 = (id) => _default(apiUrl, "/conversation/:id", { id });
   const conversationsApi = (offset, limit) => _default(apiUrl, "/conversations", { offset, limit });
   const fileDownloadApi = (id) => _default(apiUrl, "/files/download/:id", { id, post_id: "", inline: false });
   const projectsApi = (cursor) => _default(apiUrl, "/gizmos/snorlax/sidebar", { conversations_per_gizmo: 0, cursor });
@@ -1751,7 +1913,7 @@ html {\r
         ...shareConversation
       };
     }
-    const url = conversationApi$1(chatId);
+    const url = conversationApi$2(chatId);
     const conversation = await fetchApi(url);
     if (shouldReplaceAssets) {
       await replaceImageAssets(conversation);
@@ -1876,7 +2038,7 @@ html {\r
     }
   }
   async function archiveConversation(chatId) {
-    const url = conversationApi$1(chatId);
+    const url = conversationApi$2(chatId);
     const { success } = await fetchApi(url, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -1885,7 +2047,7 @@ html {\r
     return success;
   }
   async function deleteConversation(chatId) {
-    const url = conversationApi$1(chatId);
+    const url = conversationApi$2(chatId);
     const { success } = await fetchApi(url, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -1970,15 +2132,15 @@ html {\r
     return { ok: true, rateLimitHeaders };
   }
   async function _fetchSession() {
-    const response = await fetch(sessionApi$1);
+    const response = await fetch(sessionApi$2);
     if (!response.ok) {
       throw new Error(response.statusText);
     }
     return response.json();
   }
-  const fetchSession$1 = memorize(_fetchSession);
+  const fetchSession$2 = memorize(_fetchSession);
   async function getAccessToken() {
-    const session = await fetchSession$1();
+    const session = await fetchSession$2();
     return session.accessToken;
   }
   async function _fetchAccountsCheck() {
@@ -22672,42 +22834,140 @@ ${content2}`;
     window.addEventListener("resize", callback);
     return () => window.removeEventListener("resize", callback);
   }
-  const sessionApi = _default(baseUrl, "/api/auth/session");
-  const conversationApi = (id) => _default(apiUrl, "/conversation/:id", { id });
-  async function fetchSession() {
-    const response = await fetch(sessionApi);
+  const sessionApi$1 = _default(baseUrl, "/api/auth/session");
+  const conversationApi$1 = (id) => _default(apiUrl, "/conversation/:id", { id });
+  const projectApi = (id) => _default(apiUrl, "/gizmos/:id", { id });
+  const projectUpdateApi = (id) => _default(apiUrl, "/projects/:id", { id });
+  async function fetchSession$1() {
+    const response = await fetch(sessionApi$1);
     if (!response.ok) {
       throw new Error(response.statusText || "Failed to load ChatGPT session");
     }
     return response.json();
   }
-  const getSession = memorize(fetchSession);
-  async function renameConversation(chatId, title2) {
-    if (!chatId.trim()) throw new Error("Conversation id is required");
-    if (!title2.trim()) throw new Error("Conversation title cannot be empty");
-    const session = await getSession();
+  const getSession$1 = memorize(fetchSession$1);
+  async function authenticatedFetch(url, options) {
+    const session = await getSession$1();
     const accountId = await getTeamAccountId();
-    const response = await fetch(conversationApi(chatId), {
-      method: "PATCH",
+    const response = await fetch(url, {
+      ...options,
       headers: {
         "Authorization": `Bearer ${session.accessToken}`,
         "X-Authorization": `Bearer ${session.accessToken}`,
-        "Content-Type": "application/json",
-        ...accountId ? { "Chatgpt-Account-Id": accountId } : {}
-      },
-      body: JSON.stringify({ title: title2 })
+        ...accountId ? { "Chatgpt-Account-Id": accountId } : {},
+        ...options == null ? void 0 : options.headers
+      }
     });
     if (!response.ok) {
       if (response.status === 429) {
         throw new RateLimitError(response.headers.get("Retry-After"));
       }
-      throw new Error(response.statusText || `Rename failed (${response.status})`);
+      throw new Error(response.statusText || `ChatGPT request failed (${response.status})`);
     }
-    const payload = await response.json();
-    if (payload.success !== true) {
-      throw new Error("ChatGPT did not confirm the rename");
+    return response;
+  }
+  async function readConversationProjectState(chatId) {
+    const response = await authenticatedFetch(conversationApi$1(chatId));
+    return response.json();
+  }
+  function unwrapProjectPayload(value) {
+    var _a;
+    let current = value;
+    for (let depth = 0; depth < 3; depth++) {
+      if (!current || typeof current !== "object" || Array.isArray(current)) break;
+      const record = current;
+      if (!record.gizmo) break;
+      current = record.gizmo;
     }
-    return { id: chatId, title: title2 };
+    if (!current || typeof current !== "object" || Array.isArray(current)) {
+      throw new Error("ChatGPT returned an invalid Project payload");
+    }
+    const project = current;
+    if (!project.id || !((_a = project.display) == null ? void 0 : _a.name)) {
+      throw new Error("ChatGPT returned incomplete Project metadata");
+    }
+    return project;
+  }
+  async function readProjectState(projectId) {
+    const response = await authenticatedFetch(projectApi(projectId));
+    return unwrapProjectPayload(await response.json());
+  }
+  async function moveConversationToProject(chatId, expectedProjectId, newProjectId, knownProjectIds) {
+    var _a, _b;
+    if (!chatId.trim()) throw new Error("Conversation id is required");
+    if (!newProjectId.trim()) throw new Error("Destination Project id is required");
+    const knownProjects = new Set(knownProjectIds);
+    if (!knownProjects.has(newProjectId)) {
+      throw new Error(`Destination Project is not loaded: ${newProjectId}`);
+    }
+    const before = await readConversationProjectState(chatId);
+    const rawGizmoId = ((_a = before.gizmo_id) == null ? void 0 : _a.trim()) || null;
+    if (rawGizmoId && !knownProjects.has(rawGizmoId)) {
+      throw new Error("Conversation belongs to a non-Project gizmo and cannot be moved safely");
+    }
+    const currentProjectId = rawGizmoId;
+    if (currentProjectId === newProjectId) {
+      return {
+        id: chatId,
+        kind: "conversation-project",
+        changed: false,
+        projectId: newProjectId
+      };
+    }
+    if (currentProjectId !== expectedProjectId) {
+      throw new Error("Current Project membership does not match expectedProjectId");
+    }
+    await authenticatedFetch(conversationApi$1(chatId), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gizmo_id: newProjectId })
+    });
+    const after = await readConversationProjectState(chatId);
+    if ((((_b = after.gizmo_id) == null ? void 0 : _b.trim()) || null) !== newProjectId) {
+      throw new Error("ChatGPT did not confirm the conversation Project move");
+    }
+    return {
+      id: chatId,
+      kind: "conversation-project",
+      changed: true,
+      projectId: newProjectId
+    };
+  }
+  async function renameProject(projectId, expectedName, newName) {
+    if (!projectId.trim()) throw new Error("Project id is required");
+    if (!newName.trim()) throw new Error("Project name cannot be empty");
+    const before = await readProjectState(projectId);
+    if (before.display.name === newName) {
+      return {
+        id: projectId,
+        kind: "project-rename",
+        changed: false,
+        name: newName
+      };
+    }
+    if (before.display.name !== expectedName) {
+      throw new Error("Current Project name does not match expectedName");
+    }
+    await authenticatedFetch(projectUpdateApi(projectId), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: newName,
+        emoji: before.display.emoji ?? null,
+        theme: before.display.theme ?? null,
+        instructions: before.instructions ?? ""
+      })
+    });
+    const after = await readProjectState(projectId);
+    if (after.display.name !== newName) {
+      throw new Error("ChatGPT did not confirm the Project rename");
+    }
+    return {
+      id: projectId,
+      kind: "project-rename",
+      changed: true,
+      name: newName
+    };
   }
   function EventEmitter(n2) {
     return { all: n2 = n2 || /* @__PURE__ */ new Map(), on: function(t2, e2) {
@@ -22941,6 +23201,632 @@ ${content2}`;
       /* @__PURE__ */ o$8("path", { stroke: "currentColor", d: "M12 4l0 12" })
     ] });
   }
+  function isRecord$1(value) {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+  function optionalString(value) {
+    if (value === null) return null;
+    if (typeof value === "string") return value.trim() || void 0;
+    return void 0;
+  }
+  function parseProjectManagementManifest(value) {
+    if (!value.trim()) return [];
+    let parsed;
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      throw new Error("Manifest must be valid JSON.");
+    }
+    if (!Array.isArray(parsed)) {
+      throw new TypeError("Manifest root must be a JSON array.");
+    }
+    const seen = /* @__PURE__ */ new Set();
+    return parsed.map((item, index2) => {
+      if (!isRecord$1(item)) {
+        throw new TypeError(`Manifest entry ${index2 + 1} must be an object.`);
+      }
+      const action = typeof item.action === "string" ? item.action.trim() : "";
+      const id = typeof item.id === "string" ? item.id.trim() : "";
+      if (action !== "moveConversation" && action !== "renameProject") {
+        throw new Error(`Manifest entry ${index2 + 1} requires action "moveConversation" or "renameProject".`);
+      }
+      if (!id) throw new Error(`Manifest entry ${index2 + 1} requires an id.`);
+      if (seen.has(id)) throw new Error(`Manifest contains duplicate id: ${id}`);
+      seen.add(id);
+      if (action === "moveConversation") {
+        const expectedProjectId = optionalString(item.expectedProjectId);
+        const newProjectId = typeof item.newProjectId === "string" ? item.newProjectId.trim() : "";
+        if (expectedProjectId === void 0) {
+          throw new Error(`Manifest entry ${index2 + 1} requires expectedProjectId as a Project id or null.`);
+        }
+        if (!newProjectId) {
+          throw new Error(`Manifest entry ${index2 + 1} requires a destination newProjectId.`);
+        }
+        return { action, id, expectedProjectId, newProjectId };
+      }
+      const expectedName = typeof item.expectedName === "string" ? item.expectedName : null;
+      const newName = typeof item.newName === "string" ? item.newName : null;
+      if (expectedName === null) throw new Error(`Manifest entry ${index2 + 1} requires expectedName.`);
+      if (newName === null || !newName.trim()) {
+        throw new Error(`Manifest entry ${index2 + 1} requires a non-empty newName.`);
+      }
+      return { action, id, expectedName, newName };
+    });
+  }
+  function buildProjectManagementPreview(value, conversations, projects) {
+    let entries;
+    try {
+      entries = parseProjectManagementManifest(value);
+    } catch (error2) {
+      return { rows: [], error: error2 instanceof Error ? error2.message : "Manifest is invalid." };
+    }
+    const projectIds = new Set(projects.map((project) => project.id));
+    const projectNames = new Map(projects.map((project) => {
+      var _a;
+      return [project.id, ((_a = project.display) == null ? void 0 : _a.name) ?? project.id];
+    }));
+    const projectsById = new Map(projects.map((project) => [project.id, project]));
+    const conversationsById = new Map(conversations.map((conversation) => [conversation.id, conversation]));
+    return {
+      rows: entries.map((entry) => {
+        var _a, _b;
+        if (entry.action === "renameProject") {
+          const project = projectsById.get(entry.id);
+          if (!project) {
+            return {
+              action: entry.action,
+              id: entry.id,
+              label: entry.id,
+              originalValue: entry.expectedName,
+              proposedValue: entry.newName,
+              changed: true,
+              valid: false,
+              error: "Project is not loaded."
+            };
+          }
+          const currentName = ((_a = project.display) == null ? void 0 : _a.name) ?? "";
+          if (currentName === entry.newName) {
+            return {
+              action: entry.action,
+              id: entry.id,
+              label: currentName || entry.id,
+              originalValue: currentName,
+              proposedValue: entry.newName,
+              changed: false,
+              valid: true
+            };
+          }
+          if (currentName !== entry.expectedName) {
+            return {
+              action: entry.action,
+              id: entry.id,
+              label: currentName || entry.id,
+              originalValue: currentName,
+              proposedValue: entry.newName,
+              changed: true,
+              valid: false,
+              error: "Current Project name does not match expectedName."
+            };
+          }
+          return {
+            action: entry.action,
+            id: entry.id,
+            label: currentName || entry.id,
+            originalValue: currentName,
+            proposedValue: entry.newName,
+            changed: true,
+            valid: true
+          };
+        }
+        const conversation = conversationsById.get(entry.id);
+        if (!conversation) {
+          return {
+            action: entry.action,
+            id: entry.id,
+            label: entry.id,
+            originalValue: entry.expectedProjectId === null ? "Not in a Project" : projectNames.get(entry.expectedProjectId) ?? entry.expectedProjectId,
+            proposedValue: projectNames.get(entry.newProjectId) ?? entry.newProjectId,
+            changed: true,
+            valid: false,
+            error: "Conversation is not loaded in the current scope.",
+            originalProjectId: entry.expectedProjectId,
+            proposedProjectId: entry.newProjectId
+          };
+        }
+        if (!projectIds.has(entry.newProjectId)) {
+          const currentProjectId2 = projectIds.has(conversation.gizmo_id ?? "") ? conversation.gizmo_id : null;
+          return {
+            action: entry.action,
+            id: entry.id,
+            label: conversation.title ?? entry.id,
+            originalValue: currentProjectId2 === null ? "Not in a Project" : projectNames.get(currentProjectId2) ?? currentProjectId2,
+            proposedValue: entry.newProjectId,
+            changed: true,
+            valid: false,
+            error: "Destination Project is not loaded.",
+            originalProjectId: currentProjectId2,
+            proposedProjectId: entry.newProjectId
+          };
+        }
+        const rawGizmoId = ((_b = conversation.gizmo_id) == null ? void 0 : _b.trim()) || null;
+        if (rawGizmoId && !projectIds.has(rawGizmoId)) {
+          return {
+            action: entry.action,
+            id: entry.id,
+            label: conversation.title ?? entry.id,
+            originalValue: "Non-Project gizmo",
+            proposedValue: projectNames.get(entry.newProjectId) ?? entry.newProjectId,
+            changed: true,
+            valid: false,
+            error: "Conversation belongs to a non-Project gizmo and cannot be moved safely.",
+            originalProjectId: null,
+            proposedProjectId: entry.newProjectId
+          };
+        }
+        const currentProjectId = rawGizmoId;
+        const originalValue = currentProjectId === null ? "Not in a Project" : projectNames.get(currentProjectId) ?? currentProjectId;
+        const proposedValue = projectNames.get(entry.newProjectId) ?? entry.newProjectId;
+        if (currentProjectId === entry.newProjectId) {
+          return {
+            action: entry.action,
+            id: entry.id,
+            label: conversation.title ?? entry.id,
+            originalValue,
+            proposedValue,
+            changed: false,
+            valid: true,
+            originalProjectId: currentProjectId,
+            proposedProjectId: entry.newProjectId
+          };
+        }
+        if (currentProjectId !== entry.expectedProjectId) {
+          return {
+            action: entry.action,
+            id: entry.id,
+            label: conversation.title ?? entry.id,
+            originalValue,
+            proposedValue,
+            changed: true,
+            valid: false,
+            error: "Current Project membership does not match expectedProjectId.",
+            originalProjectId: currentProjectId,
+            proposedProjectId: entry.newProjectId
+          };
+        }
+        return {
+          action: entry.action,
+          id: entry.id,
+          label: conversation.title ?? entry.id,
+          originalValue,
+          proposedValue,
+          changed: true,
+          valid: true,
+          originalProjectId: currentProjectId,
+          proposedProjectId: entry.newProjectId
+        };
+      })
+    };
+  }
+  function useGMStorage(key2, initialValue) {
+    const [storedValue, setStoredValue] = h$4(() => ScriptStorage.get(key2) ?? initialValue);
+    const setValue = (value) => {
+      setStoredValue(value);
+      ScriptStorage.set(key2, value);
+    };
+    return [storedValue, setValue];
+  }
+  const defaultFormat = "ChatGPT-{title}";
+  const defaultExportAllLimit = 1e3;
+  const defaultExportMetaList = [
+    { name: "title", value: "{title}" },
+    { name: "source", value: "{source}" }
+  ];
+  const SettingContext = G$1({
+    format: defaultFormat,
+    setFormat: (_24) => {
+    },
+    enableTimestamp: false,
+    setEnableTimestamp: (_24) => {
+    },
+    timeStamp24H: false,
+    setTimeStamp24H: (_24) => {
+    },
+    enableTimestampHTML: false,
+    setEnableTimestampHTML: (_24) => {
+    },
+    enableTimestampMarkdown: false,
+    setEnableTimestampMarkdown: (_24) => {
+    },
+    enableMeta: false,
+    setEnableMeta: (_24) => {
+    },
+    exportMetaList: defaultExportMetaList,
+    setExportMetaList: (_24) => {
+    },
+    enableThinking: false,
+    setEnableThinking: (_24) => {
+    },
+    enableSources: true,
+    setEnableSources: (_24) => {
+    },
+    exportAllLimit: defaultExportAllLimit,
+    setExportAllLimit: (_24) => {
+    },
+    resetDefault: () => {
+    }
+  });
+  const SettingProvider = ({ children }) => {
+    const [format, setFormat] = useGMStorage(KEY_FILENAME_FORMAT, defaultFormat);
+    const [enableTimestamp, setEnableTimestamp] = useGMStorage(KEY_TIMESTAMP_ENABLED, false);
+    const [timeStamp24H, setTimeStamp24H] = useGMStorage(KEY_TIMESTAMP_24H, false);
+    const [enableTimestampHTML, setEnableTimestampHTML] = useGMStorage(KEY_TIMESTAMP_HTML, false);
+    const [enableTimestampMarkdown, setEnableTimestampMarkdown] = useGMStorage(KEY_TIMESTAMP_MARKDOWN, false);
+    const [enableMeta, setEnableMeta] = useGMStorage(KEY_META_ENABLED, false);
+    const [exportMetaList, setExportMetaList] = useGMStorage(KEY_META_LIST, defaultExportMetaList);
+    const [enableThinking, setEnableThinking] = useGMStorage(KEY_THINKING_ENABLED, false);
+    const [enableSources, setEnableSources] = useGMStorage(KEY_SOURCES_ENABLED, true);
+    const [exportAllLimit, setExportAllLimit] = useGMStorage(KEY_EXPORT_ALL_LIMIT, defaultExportAllLimit);
+    const resetDefault = T$4(() => {
+      setFormat(defaultFormat);
+      setEnableTimestamp(false);
+      setEnableMeta(false);
+      setExportMetaList(defaultExportMetaList);
+      setEnableThinking(false);
+      setEnableSources(true);
+      setExportAllLimit(defaultExportAllLimit);
+    }, [
+      setFormat,
+      setEnableTimestamp,
+      setEnableMeta,
+      setExportMetaList,
+      setEnableThinking,
+      setEnableSources,
+      setExportAllLimit
+    ]);
+    return /* @__PURE__ */ o$8(
+      SettingContext.Provider,
+      {
+        value: {
+          format,
+          setFormat,
+          enableTimestamp,
+          setEnableTimestamp,
+          timeStamp24H,
+          setTimeStamp24H,
+          enableTimestampHTML,
+          setEnableTimestampHTML,
+          enableTimestampMarkdown,
+          setEnableTimestampMarkdown,
+          enableMeta,
+          setEnableMeta,
+          exportMetaList,
+          setExportMetaList,
+          enableThinking,
+          setEnableThinking,
+          enableSources,
+          setEnableSources,
+          exportAllLimit,
+          setExportAllLimit,
+          resetDefault
+        },
+        children
+      }
+    );
+  };
+  const useSettingContext = () => q$1(SettingContext);
+  function mergeUnique$1(existing, incoming) {
+    const byId = new Map(existing.map((item) => [item.id, item]));
+    for (const item of incoming) byId.set(item.id, item);
+    return [...byId.values()];
+  }
+  function actionLabel(action) {
+    return action === "moveConversation" ? "Move conversation" : "Rename Project";
+  }
+  const BulkProjectManagementDialog = ({ open, onOpenChange, children }) => {
+    const { exportAllLimit } = useSettingContext();
+    const [projects, setProjects] = h$4([]);
+    const [projectsLoaded, setProjectsLoaded] = h$4(false);
+    const [projectsLoading, setProjectsLoading] = h$4(false);
+    const [conversations, setConversations] = h$4([]);
+    const [conversationsLoading, setConversationsLoading] = h$4(false);
+    const [manifest, setManifest] = h$4("");
+    const [processing, setProcessing] = h$4(false);
+    const [error2, setError] = h$4("");
+    const [summary, setSummary] = h$4(null);
+    const [progress, setProgress] = h$4({ total: 0, completed: 0, currentName: "" });
+    const queue = F$1(() => new RequestQueue(200, 1600), []);
+    const pendingPlanRef = _([]);
+    const pendingUnchangedRef = _(0);
+    const pendingInvalidRef = _(0);
+    const projectIds = F$1(() => projects.map((project) => project.id), [projects]);
+    p$6(() => {
+      if (!open) return;
+      let cancelled = false;
+      setProjectsLoading(true);
+      setProjectsLoaded(false);
+      setError("");
+      setSummary(null);
+      fetchProjects().then((items) => {
+        if (cancelled) return;
+        setProjects(items);
+        setProjectsLoaded(true);
+      }).catch((err) => {
+        if (cancelled) return;
+        console.error("Error fetching projects for bulk Project management:", err);
+        setProjects([]);
+        setError(err.message || "Failed to load Projects");
+      }).finally(() => {
+        if (!cancelled) setProjectsLoading(false);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [open]);
+    p$6(() => {
+      if (!open || !projectsLoaded) return;
+      let cancelled = false;
+      setConversations([]);
+      setConversationsLoading(true);
+      setSummary(null);
+      setError("");
+      const onBatch = (batch) => {
+        if (cancelled) return;
+        setConversations((previous2) => mergeUnique$1(previous2, batch));
+      };
+      fetchAllConversationsAll(projects, exportAllLimit, onBatch).catch((err) => {
+        if (cancelled) return;
+        console.error("Error fetching conversations for bulk Project management:", err);
+        setError(err.message || "Failed to load conversations");
+      }).finally(() => {
+        if (!cancelled) setConversationsLoading(false);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [exportAllLimit, open, projects, projectsLoaded]);
+    const rawPreview = F$1(
+      () => buildProjectManagementPreview(manifest, conversations, projects),
+      [manifest, conversations, projects]
+    );
+    const preview = rawPreview.rows;
+    const manifestError = rawPreview.error;
+    const previewCounts = F$1(() => preview.reduce((counts, row) => {
+      if (!row.valid) counts.invalid++;
+      else if (row.changed) counts.changed++;
+      else counts.unchanged++;
+      return counts;
+    }, {
+      changed: 0,
+      unchanged: 0,
+      invalid: manifestError ? 1 : 0
+    }), [manifestError, preview]);
+    p$6(() => {
+      const off = queue.on("progress", (event) => setProgress({
+        total: event.total,
+        completed: event.completed,
+        currentName: event.currentName
+      }));
+      return () => off();
+    }, [queue]);
+    p$6(() => {
+      const off = queue.on("done", (results) => {
+        const plan = pendingPlanRef.current;
+        const successful = new Map(results.map((result) => [result.id, result]));
+        if (successful.size > 0) {
+          setConversations((previous2) => previous2.map((conversation) => {
+            const result = successful.get(conversation.id);
+            return (result == null ? void 0 : result.kind) === "conversation-project" && result.projectId ? { ...conversation, gizmo_id: result.projectId } : conversation;
+          }));
+          setProjects((previous2) => previous2.map((project) => {
+            const result = successful.get(project.id);
+            return (result == null ? void 0 : result.kind) === "project-rename" && result.name ? { ...project, display: { ...project.display, name: result.name } } : project;
+          }));
+        }
+        const appliedChanges = results.filter((result) => result.changed).length;
+        const idempotentResults = results.length - appliedChanges;
+        setSummary({
+          changed: appliedChanges,
+          unchanged: pendingUnchangedRef.current + idempotentResults,
+          invalid: pendingInvalidRef.current,
+          failed: Math.max(0, plan.length - results.length)
+        });
+        setProcessing(false);
+        pendingPlanRef.current = [];
+      });
+      return () => off();
+    }, [queue]);
+    p$6(() => () => queue.clear(), [queue]);
+    const applyChanges = T$4(() => {
+      if (processing || previewCounts.invalid > 0 || previewCounts.changed === 0) return;
+      const plan = preview.filter((row) => row.valid && row.changed);
+      const approved = confirm(
+        `Apply ${plan.length} previewed Project-management change${plan.length === 1 ? "" : "s"}?`
+      );
+      if (!approved) return;
+      pendingPlanRef.current = plan;
+      pendingUnchangedRef.current = previewCounts.unchanged;
+      pendingInvalidRef.current = previewCounts.invalid;
+      setSummary(null);
+      setProcessing(true);
+      setProgress({ total: plan.length, completed: 0, currentName: "" });
+      queue.clear();
+      for (const row of plan) {
+        if (row.action === "moveConversation") {
+          queue.add({
+            name: row.label,
+            request: () => moveConversationToProject(
+              row.id,
+              row.originalProjectId ?? null,
+              row.proposedProjectId,
+              projectIds
+            )
+          });
+        } else {
+          queue.add({
+            name: row.label,
+            request: () => renameProject(row.id, row.originalValue, row.proposedValue)
+          });
+        }
+      }
+      queue.start();
+    }, [preview, previewCounts, processing, projectIds, queue]);
+    const closeGuarded = T$4((value) => {
+      if (!processing) onOpenChange(value);
+    }, [onOpenChange, processing]);
+    const busy = projectsLoading || conversationsLoading || processing;
+    const statusText = error2 ? `Error: ${error2}` : processing ? `Applying ${progress.completed} / ${progress.total}` : projectsLoading ? "Loading Projects..." : conversationsLoading ? "Loading conversations..." : summary ? `Changed ${summary.changed}; unchanged ${summary.unchanged}; invalid ${summary.invalid}; failed ${summary.failed}` : `${preview.length} action${preview.length === 1 ? "" : "s"} loaded`;
+    let statusDetail = "";
+    if (processing) {
+      statusDetail = progress.currentName;
+    } else if (!error2 && !busy) {
+      statusDetail = `${conversations.length} conversations across general + Project sources · general scan limit ${exportAllLimit}`;
+    }
+    return /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$be92b6f5f03c0fe9, { open, onOpenChange: closeGuarded, children: [
+      /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$41fb9f06171c75f4, { asChild: true, children }),
+      /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$602eac185826482c, { children: [
+        /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$c6fdb837b070b4ff, { className: "DialogOverlay" }),
+        /* @__PURE__ */ o$8(
+          $5d3850c4d0b4e6c7$export$7c6e2c02157bb7d2,
+          {
+            className: "DialogContent _export BulkProjectManagementDialog",
+            onEscapeKeyDown: (event) => {
+              if (processing) event.preventDefault();
+            },
+            onPointerDownOutside: (event) => {
+              if (processing) event.preventDefault();
+            },
+            children: [
+              /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$f99233281efd08a0, { className: "DialogTitle", children: "Bulk Project Management" }),
+              /* @__PURE__ */ o$8("div", { className: "ExportStatusBox", role: "status", "aria-live": "polite", children: [
+                busy && /* @__PURE__ */ o$8(IconLoading, { className: "w-4 h-4 shrink-0" }),
+                /* @__PURE__ */ o$8("span", { className: "ExportStatusText", children: statusText }),
+                statusDetail && /* @__PURE__ */ o$8("span", { className: "ExportStatusDetail", children: statusDetail })
+              ] }),
+              /* @__PURE__ */ o$8("section", { className: "ProjectManagementManifest", "aria-label": "Project management manifest", children: [
+                /* @__PURE__ */ o$8("label", { className: "ProjectManagementSectionTitle", htmlFor: "project-management-manifest", children: "Approved JSON manifest" }),
+                /* @__PURE__ */ o$8(
+                  "textarea",
+                  {
+                    id: "project-management-manifest",
+                    className: "ProjectManagementManifestInput",
+                    rows: 12,
+                    spellCheck: false,
+                    disabled: busy,
+                    value: manifest,
+                    placeholder: '[\n  {"action":"moveConversation","id":"<conversation-id>","expectedProjectId":null,"newProjectId":"g-p-..."},\n  {"action":"renameProject","id":"g-p-...","expectedName":"Current name","newName":"New name"}\n]',
+                    onInput: (event) => {
+                      setManifest(event.currentTarget.value);
+                      setSummary(null);
+                    }
+                  }
+                ),
+                /* @__PURE__ */ o$8("div", { className: "RenameHelpText", children: "One manifest can contain any number of moveConversation and renameProject actions. Every action is validated against current state before Apply is enabled." })
+              ] }),
+              /* @__PURE__ */ o$8("section", { className: "ProjectManagementPreview", "aria-label": "Project management preview", children: [
+                /* @__PURE__ */ o$8("div", { className: "ProjectManagementPreviewHeader", children: [
+                  /* @__PURE__ */ o$8("span", { children: "Preview" }),
+                  /* @__PURE__ */ o$8("span", { children: [
+                    "change ",
+                    previewCounts.changed,
+                    " · unchanged ",
+                    previewCounts.unchanged,
+                    " · invalid ",
+                    previewCounts.invalid
+                  ] })
+                ] }),
+                manifestError && /* @__PURE__ */ o$8("div", { className: "RenameValidationError", children: manifestError }),
+                /* @__PURE__ */ o$8("div", { className: "ProjectManagementPreviewTableWrap", children: /* @__PURE__ */ o$8("table", { className: "ProjectManagementPreviewTable", children: [
+                  /* @__PURE__ */ o$8("thead", { children: /* @__PURE__ */ o$8("tr", { children: [
+                    /* @__PURE__ */ o$8("th", { children: "Action" }),
+                    /* @__PURE__ */ o$8("th", { children: "Item" }),
+                    /* @__PURE__ */ o$8("th", { children: "Current" }),
+                    /* @__PURE__ */ o$8("th", { children: "Proposed" }),
+                    /* @__PURE__ */ o$8("th", { children: "Status" })
+                  ] }) }),
+                  /* @__PURE__ */ o$8("tbody", { children: [
+                    preview.length === 0 && /* @__PURE__ */ o$8("tr", { children: /* @__PURE__ */ o$8("td", { colSpan: 5, children: "Enter a manifest to preview changes." }) }),
+                    preview.map((row) => /* @__PURE__ */ o$8("tr", { children: [
+                      /* @__PURE__ */ o$8("td", { children: actionLabel(row.action) }),
+                      /* @__PURE__ */ o$8("td", { title: row.id, children: row.label }),
+                      /* @__PURE__ */ o$8("td", { children: row.originalValue }),
+                      /* @__PURE__ */ o$8("td", { children: row.proposedValue }),
+                      /* @__PURE__ */ o$8("td", { className: row.valid ? "" : "ProjectManagementInvalid", children: !row.valid ? row.error : row.changed ? "Ready" : "Unchanged" })
+                    ] }, row.id))
+                  ] })
+                ] }) })
+              ] }),
+              /* @__PURE__ */ o$8("div", { className: "DialogActions ProjectManagementActions", children: [
+                /* @__PURE__ */ o$8(
+                  "button",
+                  {
+                    className: "Button neutral",
+                    disabled: processing || !manifest,
+                    onClick: () => {
+                      setManifest("");
+                      setSummary(null);
+                    },
+                    children: "Clear"
+                  }
+                ),
+                /* @__PURE__ */ o$8(
+                  "button",
+                  {
+                    className: "Button danger",
+                    disabled: busy || previewCounts.invalid > 0 || previewCounts.changed === 0,
+                    onClick: applyChanges,
+                    children: [
+                      "Apply ",
+                      previewCounts.changed,
+                      " previewed change",
+                      previewCounts.changed === 1 ? "" : "s"
+                    ]
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$f39c2d165cd861fe, { asChild: true, children: /* @__PURE__ */ o$8("button", { className: "IconButton DialogCloseButton", disabled: processing, "aria-label": "Close", children: /* @__PURE__ */ o$8(IconCross, {}) }) })
+            ]
+          }
+        )
+      ] })
+    ] });
+  };
+  const sessionApi = _default(baseUrl, "/api/auth/session");
+  const conversationApi = (id) => _default(apiUrl, "/conversation/:id", { id });
+  async function fetchSession() {
+    const response = await fetch(sessionApi);
+    if (!response.ok) {
+      throw new Error(response.statusText || "Failed to load ChatGPT session");
+    }
+    return response.json();
+  }
+  const getSession = memorize(fetchSession);
+  async function renameConversation(chatId, title2) {
+    if (!chatId.trim()) throw new Error("Conversation id is required");
+    if (!title2.trim()) throw new Error("Conversation title cannot be empty");
+    const session = await getSession();
+    const accountId = await getTeamAccountId();
+    const response = await fetch(conversationApi(chatId), {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${session.accessToken}`,
+        "X-Authorization": `Bearer ${session.accessToken}`,
+        "Content-Type": "application/json",
+        ...accountId ? { "Chatgpt-Account-Id": accountId } : {}
+      },
+      body: JSON.stringify({ title: title2 })
+    });
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new RateLimitError(response.headers.get("Retry-After"));
+      }
+      throw new Error(response.statusText || `Rename failed (${response.status})`);
+    }
+    const payload = await response.json();
+    if (payload.success !== true) {
+      throw new Error("ChatGPT did not confirm the rename");
+    }
+    return { id: chatId, title: title2 };
+  }
   const CheckBox = ({
     className,
     checked = false,
@@ -23172,113 +24058,6 @@ ${content2}`;
       valid: true
     };
   }
-  function useGMStorage(key2, initialValue) {
-    const [storedValue, setStoredValue] = h$4(() => ScriptStorage.get(key2) ?? initialValue);
-    const setValue = (value) => {
-      setStoredValue(value);
-      ScriptStorage.set(key2, value);
-    };
-    return [storedValue, setValue];
-  }
-  const defaultFormat = "ChatGPT-{title}";
-  const defaultExportAllLimit = 1e3;
-  const defaultExportMetaList = [
-    { name: "title", value: "{title}" },
-    { name: "source", value: "{source}" }
-  ];
-  const SettingContext = G$1({
-    format: defaultFormat,
-    setFormat: (_24) => {
-    },
-    enableTimestamp: false,
-    setEnableTimestamp: (_24) => {
-    },
-    timeStamp24H: false,
-    setTimeStamp24H: (_24) => {
-    },
-    enableTimestampHTML: false,
-    setEnableTimestampHTML: (_24) => {
-    },
-    enableTimestampMarkdown: false,
-    setEnableTimestampMarkdown: (_24) => {
-    },
-    enableMeta: false,
-    setEnableMeta: (_24) => {
-    },
-    exportMetaList: defaultExportMetaList,
-    setExportMetaList: (_24) => {
-    },
-    enableThinking: false,
-    setEnableThinking: (_24) => {
-    },
-    enableSources: true,
-    setEnableSources: (_24) => {
-    },
-    exportAllLimit: defaultExportAllLimit,
-    setExportAllLimit: (_24) => {
-    },
-    resetDefault: () => {
-    }
-  });
-  const SettingProvider = ({ children }) => {
-    const [format, setFormat] = useGMStorage(KEY_FILENAME_FORMAT, defaultFormat);
-    const [enableTimestamp, setEnableTimestamp] = useGMStorage(KEY_TIMESTAMP_ENABLED, false);
-    const [timeStamp24H, setTimeStamp24H] = useGMStorage(KEY_TIMESTAMP_24H, false);
-    const [enableTimestampHTML, setEnableTimestampHTML] = useGMStorage(KEY_TIMESTAMP_HTML, false);
-    const [enableTimestampMarkdown, setEnableTimestampMarkdown] = useGMStorage(KEY_TIMESTAMP_MARKDOWN, false);
-    const [enableMeta, setEnableMeta] = useGMStorage(KEY_META_ENABLED, false);
-    const [exportMetaList, setExportMetaList] = useGMStorage(KEY_META_LIST, defaultExportMetaList);
-    const [enableThinking, setEnableThinking] = useGMStorage(KEY_THINKING_ENABLED, false);
-    const [enableSources, setEnableSources] = useGMStorage(KEY_SOURCES_ENABLED, true);
-    const [exportAllLimit, setExportAllLimit] = useGMStorage(KEY_EXPORT_ALL_LIMIT, defaultExportAllLimit);
-    const resetDefault = T$4(() => {
-      setFormat(defaultFormat);
-      setEnableTimestamp(false);
-      setEnableMeta(false);
-      setExportMetaList(defaultExportMetaList);
-      setEnableThinking(false);
-      setEnableSources(true);
-      setExportAllLimit(defaultExportAllLimit);
-    }, [
-      setFormat,
-      setEnableTimestamp,
-      setEnableMeta,
-      setExportMetaList,
-      setEnableThinking,
-      setEnableSources,
-      setExportAllLimit
-    ]);
-    return /* @__PURE__ */ o$8(
-      SettingContext.Provider,
-      {
-        value: {
-          format,
-          setFormat,
-          enableTimestamp,
-          setEnableTimestamp,
-          timeStamp24H,
-          setTimeStamp24H,
-          enableTimestampHTML,
-          setEnableTimestampHTML,
-          enableTimestampMarkdown,
-          setEnableTimestampMarkdown,
-          enableMeta,
-          setEnableMeta,
-          exportMetaList,
-          setExportMetaList,
-          enableThinking,
-          setEnableThinking,
-          enableSources,
-          setEnableSources,
-          exportAllLimit,
-          setExportAllLimit,
-          resetDefault
-        },
-        children
-      }
-    );
-  };
-  const useSettingContext = () => q$1(SettingContext);
   const NOT_IN_PROJECT_ID$2 = "__not_in_project__";
   function timeToMs(value) {
     if (value == null) return 0;
@@ -26544,6 +27323,7 @@ ${body2}
     const [exportOpen, setExportOpen] = h$4(false);
     const [inventoryOpen, setInventoryOpen] = h$4(false);
     const [renameOpen, setRenameOpen] = h$4(false);
+    const [projectManagementOpen, setProjectManagementOpen] = h$4(false);
     const [settingOpen, setSettingOpen] = h$4(false);
     const {
       format,
@@ -26608,7 +27388,7 @@ ${body2}
               Portal,
               {
                 container: isMobile ? container : document.body,
-                forceMount: open || jsonOpen || settingOpen || exportOpen || inventoryOpen || renameOpen,
+                forceMount: open || jsonOpen || settingOpen || exportOpen || inventoryOpen || renameOpen || projectManagementOpen,
                 children: /* @__PURE__ */ o$8(
                   $cef8881cdc69808e$export$7c6e2c02157bb7d2,
                   {
@@ -26764,6 +27544,20 @@ ${body2}
                             MenuItem,
                             {
                               text: "Bulk Rename Conversations",
+                              icon: IconCopy
+                            }
+                          ) })
+                        }
+                      ),
+                      /* @__PURE__ */ o$8(
+                        BulkProjectManagementDialog,
+                        {
+                          open: projectManagementOpen,
+                          onOpenChange: setProjectManagementOpen,
+                          children: /* @__PURE__ */ o$8("div", { className: "row-full", children: /* @__PURE__ */ o$8(
+                            MenuItem,
+                            {
+                              text: "Bulk Project Management",
                               icon: IconCopy
                             }
                           ) })

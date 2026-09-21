@@ -1,5 +1,43 @@
 # Changelog
 
+## [2.35.0](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.34.0...userscript-v2.35.0) (2026-09-21)
+
+### Features
+
+* add **Bulk Project Management** for controlled assignment of unassigned conversations to existing Projects, Project-to-Project conversation moves and existing-Project renames
+* support one self-describing JSON manifest containing 1-N mixed `moveConversation` and `renameProject` actions
+* add unified preview of Action, Item, Current, Proposed and Status before any write
+* preserve stable identifiers and require expected-current-state checks before mutation
+
+### Safety and compatibility
+
+* block stale manifests when current Project membership or Project name no longer matches the approved expected state
+* treat already-reached target state as unchanged, making approved manifests safely rerunnable
+* reject non-Project gizmo conversations, unknown destination Projects, duplicate identifiers and invalid actions
+* retain explicit confirmation, rate-limit-aware execution, per-item failure isolation and post-write read-back verification
+* keep Project removal, Project creation/deletion and automatic classification out of scope
+* add no new runtime dependency or external service
+
+### UI
+
+* replace the separate operation selector with action-discriminated manifest entries
+* support genuine heterogeneous bulk batches in one manifest
+* expand the JSON editor and add a readable scrollable preview table
+* clarify conversation discovery status and correct footer button sizing
+
+### Validation
+
+* lint passed with only the pre-existing TypeScript parser compatibility warning
+* full TypeScript and regression suite passed, including mixed Project-management manifest fixtures
+* production build passed and the generated userscript was verified deterministic
+* live-account smoke testing passed for mixed conversation move + Project rename execution, reverse restore, post-write refresh, idempotent rerun and stale-state rejection
+* final stale-state test correctly blocked Apply with zero writes when `expectedProjectId` did not match current membership
+
+### References
+
+* Issue #101
+* Pull request #102
+
 ## [2.34.0](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.33.8...userscript-v2.34.0) (2026-09-20)
 
 ### Features
