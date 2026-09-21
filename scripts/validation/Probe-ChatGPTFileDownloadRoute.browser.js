@@ -26,7 +26,7 @@
 
     const FILE_ID_PATTERN = /^file[-_][A-Za-z0-9_-]+$/
 
-    if (!FILE_ID_PATTERN.test(INPUT.fileId)) {
+    if (INPUT.fileId === 'file_REPLACE_ME' || !FILE_ID_PATTERN.test(INPUT.fileId)) {
         throw new Error('Set INPUT.fileId to a real file_... or file-... identifier from File Discovery.')
     }
 
