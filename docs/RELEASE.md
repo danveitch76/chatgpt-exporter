@@ -31,12 +31,12 @@ Use downstream tags in downstream changelog comparison links.
 5. Keep release packaging/documentation together in a final commit using the convention:
 
    ```text
-   release: userscript X.Y.Z
+   build: release userscript X.Y.Z
    ```
 
 6. Run all quality gates and confirm the generated userscript is byte-for-byte reproducible.
 7. Install the userscript from that exact final release tree and complete the live smoke tests before publication.
-8. Create the annotated `userscript-vX.Y.Z` tag on that exact final release commit.
+8. Before creating the tag, fail if the same tag already exists locally or on `origin`; inherited/upstream-derived tags must not be silently reused. Then create the annotated `userscript-vX.Y.Z` tag on that exact final release commit.
 9. Push the tag only after the commit is present on `master`.
 10. The tag workflow re-runs the release validation and, only if every check succeeds, creates the GitHub Release object for that tag.
 11. Complete the post-release publication checks.
@@ -62,9 +62,17 @@ Verify metadata:
 Select-String -Path .\dist\chatgpt.user.js -Pattern '@namespace|@version'
 ```
 
-Expected namespace: `danveitch76`.
+Expected namespace: `danveitch76`. The update and download URLs must both resolve to the maintained downstream `master/dist/chatgpt.user.js` raw file.
 
-Before tagging, confirm the working tree is clean and the target version is identical in:
+Before tagging, confirm the tag name is unused locally and remotely:
+
+```powershell
+$tag = "userscript-vX.Y.Z"
+if (git tag -l $tag) { throw "Tag already exists locally: $tag" }
+if (git ls-remote --exit-code --tags origin "refs/tags/$tag" 2>$null) { throw "Tag already exists on origin: $tag" }
+```
+
+Then confirm the working tree is clean and the target version is identical in:
 
 - `package.json`;
 - `.release-please-manifest.json`;
@@ -91,7 +99,7 @@ The `Release Validation` workflow runs only for `userscript-v*` tag pushes. It n
 
 ## Live smoke-test gate
 
-Before tagging, install the userscript from the exact final release tree and smoke-test the capabilities affected by the release plus the core regression paths. For userscript 2.35.0 this includes:
+Before tagging, install the userscript from the exact final release tree and smoke-test the capabilities affected by the release plus the core regression paths. For userscript 2.35.1 this includes:
 
 - single-conversation export;
 - Export All with **JSON (ZIP)**;
@@ -100,7 +108,10 @@ Before tagging, install the userscript from the exact final release tree and smo
 - Bulk Rename against a disposable/test conversation, including preview and confirmed rename;
 - Bulk Project Management against disposable/non-critical records, including a mixed move/rename batch, idempotent rerun and stale-state rejection;
 - source selection/filtering;
-- collapsed-sidebar behaviour.
+- collapsed-sidebar behaviour;
+- Tampermonkey installation from the downstream GitHub raw userscript and update metadata visibility. 
+
+For 2.35.1, also verify that an installed downstream script can discover a later test version through Tampermonkey's update mechanism before treating auto-update as validated.
 
 For changes to multi-conversation selection, also verify the default selection size and at least one non-default value plus resume selection behaviour.
 
