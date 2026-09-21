@@ -617,6 +617,158 @@ html {\r
         stroke-dashoffset: -125px;\r
     }\r
 }\r
+\r
+\r
+/* Bulk Project management dialog ----------------------------------------- */\r
+.DialogContent._export.BulkProjectManagementDialog {\r
+    width: min(96vw, 82rem);\r
+    max-width: 82rem;\r
+    height: min(92vh, 64rem);\r
+    max-height: 92vh;\r
+    display: grid;\r
+    grid-template-rows: auto auto minmax(13rem, 0.9fr) minmax(12rem, 1.1fr) auto;\r
+    gap: 0.65rem;\r
+    overflow: hidden;\r
+}\r
+\r
+.BulkProjectManagementDialog > .DialogTitle,\r
+.BulkProjectManagementDialog > .ExportStatusBox {\r
+    margin: 0;\r
+}\r
+\r
+.ProjectManagementManifest,\r
+.ProjectManagementPreview {\r
+    min-width: 0;\r
+    min-height: 0;\r
+    display: flex;\r
+    flex-direction: column;\r
+}\r
+\r
+.ProjectManagementSectionTitle,\r
+.ProjectManagementPreviewHeader {\r
+    display: flex;\r
+    align-items: baseline;\r
+    justify-content: space-between;\r
+    gap: 1rem;\r
+    margin-bottom: 0.4rem;\r
+    color: var(--ce-text-primary);\r
+    font-size: 0.875rem;\r
+    font-weight: 600;\r
+}\r
+\r
+.ProjectManagementManifestInput {\r
+    width: 100%;\r
+    min-width: 0;\r
+    min-height: 10rem;\r
+    flex: 1 1 auto;\r
+    box-sizing: border-box;\r
+    padding: 0.75rem;\r
+    resize: vertical;\r
+    overflow: auto;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 5px;\r
+    background: var(--ce-menu-primary);\r
+    color: var(--ce-text-primary);\r
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;\r
+    font-size: 0.8125rem;\r
+    line-height: 1.45;\r
+    white-space: pre;\r
+}\r
+\r
+.ProjectManagementManifest .RenameHelpText {\r
+    margin-top: 0.4rem;\r
+}\r
+\r
+.ProjectManagementPreviewHeader > span:last-child {\r
+    font-weight: 400;\r
+    color: #9ca3af;\r
+}\r
+\r
+.ProjectManagementPreviewTableWrap {\r
+    min-height: 0;\r
+    flex: 1 1 auto;\r
+    overflow: auto;\r
+    border: 1px solid var(--ce-border-light);\r
+    border-radius: 5px;\r
+}\r
+\r
+.ProjectManagementPreviewTable {\r
+    width: 100%;\r
+    min-width: 68rem;\r
+    border-collapse: collapse;\r
+    table-layout: fixed;\r
+    color: var(--ce-text-primary);\r
+    font-size: 0.8125rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable th,\r
+.ProjectManagementPreviewTable td {\r
+    padding: 0.55rem 0.65rem;\r
+    border-bottom: 1px solid var(--ce-border-light);\r
+    text-align: left;\r
+    vertical-align: top;\r
+    overflow-wrap: anywhere;\r
+}\r
+\r
+.ProjectManagementPreviewTable th {\r
+    position: sticky;\r
+    top: 0;\r
+    z-index: 1;\r
+    background: var(--ce-menu-secondary);\r
+    font-size: 0.75rem;\r
+    font-weight: 600;\r
+}\r
+\r
+.ProjectManagementPreviewTable th:nth-child(1) {\r
+    width: 9rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable th:nth-child(2) {\r
+    width: 18rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable th:nth-child(3),\r
+.ProjectManagementPreviewTable th:nth-child(4) {\r
+    width: 13rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable th:nth-child(5) {\r
+    width: 18rem;\r
+}\r
+\r
+.ProjectManagementPreviewTable tbody tr:last-child td {\r
+    border-bottom: 0;\r
+}\r
+\r
+.ProjectManagementInvalid {\r
+    font-weight: 500;\r
+}\r
+\r
+.ProjectManagementActions {\r
+    margin: 0;\r
+    padding-top: 0.65rem;\r
+    border-top: 1px solid var(--ce-border-light);\r
+}\r
+\r
+@media (max-width: 820px) {\r
+    .DialogContent._export.BulkProjectManagementDialog {\r
+        width: 96vw;\r
+        height: 94vh;\r
+        max-height: 94vh;\r
+        grid-template-rows: auto auto minmax(11rem, 0.9fr) minmax(10rem, 1.1fr) auto;\r
+        padding-right: 1rem;\r
+        padding-left: 1rem;\r
+    }\r
+\r
+    .BulkProjectManagementDialog .ExportStatusBox {\r
+        align-items: flex-start;\r
+        flex-direction: column;\r
+    }\r
+\r
+    .BulkProjectManagementDialog .ExportStatusDetail {\r
+        white-space: normal;\r
+    }\r
+}\r
 .DialogOverlay {\r
     background-color: rgba(0, 0, 0, 0.44);\r
     position: fixed;\r
@@ -23047,7 +23199,7 @@ ${content2}`;
     if (typeof value === "string") return value.trim() || void 0;
     return void 0;
   }
-  function parseConversationProjectManifest(value) {
+  function parseProjectManagementManifest(value) {
     if (!value.trim()) return [];
     let parsed;
     try {
@@ -23063,178 +23215,184 @@ ${content2}`;
       if (!isRecord$1(item)) {
         throw new TypeError(`Manifest entry ${index2 + 1} must be an object.`);
       }
+      const action = typeof item.action === "string" ? item.action.trim() : "";
       const id = typeof item.id === "string" ? item.id.trim() : "";
-      const expectedProjectId = optionalString(item.expectedProjectId);
-      const newProjectId = typeof item.newProjectId === "string" ? item.newProjectId.trim() : "";
-      if (!id) throw new Error(`Manifest entry ${index2 + 1} requires a conversation id.`);
-      if (seen.has(id)) throw new Error(`Manifest contains duplicate conversation id: ${id}`);
-      if (expectedProjectId === void 0) {
-        throw new Error(`Manifest entry ${index2 + 1} requires expectedProjectId as a Project id or null.`);
+      if (action !== "moveConversation" && action !== "renameProject") {
+        throw new Error(`Manifest entry ${index2 + 1} requires action "moveConversation" or "renameProject".`);
       }
-      if (!newProjectId) {
-        throw new Error(`Manifest entry ${index2 + 1} requires a destination newProjectId.`);
-      }
+      if (!id) throw new Error(`Manifest entry ${index2 + 1} requires an id.`);
+      if (seen.has(id)) throw new Error(`Manifest contains duplicate id: ${id}`);
       seen.add(id);
-      return { id, expectedProjectId, newProjectId };
-    });
-  }
-  function parseProjectRenameManifest(value) {
-    if (!value.trim()) return [];
-    let parsed;
-    try {
-      parsed = JSON.parse(value);
-    } catch {
-      throw new Error("Manifest must be valid JSON.");
-    }
-    if (!Array.isArray(parsed)) {
-      throw new TypeError("Manifest root must be a JSON array.");
-    }
-    const seen = /* @__PURE__ */ new Set();
-    return parsed.map((item, index2) => {
-      if (!isRecord$1(item)) {
-        throw new TypeError(`Manifest entry ${index2 + 1} must be an object.`);
+      if (action === "moveConversation") {
+        const expectedProjectId = optionalString(item.expectedProjectId);
+        const newProjectId = typeof item.newProjectId === "string" ? item.newProjectId.trim() : "";
+        if (expectedProjectId === void 0) {
+          throw new Error(`Manifest entry ${index2 + 1} requires expectedProjectId as a Project id or null.`);
+        }
+        if (!newProjectId) {
+          throw new Error(`Manifest entry ${index2 + 1} requires a destination newProjectId.`);
+        }
+        return { action, id, expectedProjectId, newProjectId };
       }
-      const id = typeof item.id === "string" ? item.id.trim() : "";
       const expectedName = typeof item.expectedName === "string" ? item.expectedName : null;
       const newName = typeof item.newName === "string" ? item.newName : null;
-      if (!id) throw new Error(`Manifest entry ${index2 + 1} requires a Project id.`);
-      if (seen.has(id)) throw new Error(`Manifest contains duplicate Project id: ${id}`);
       if (expectedName === null) throw new Error(`Manifest entry ${index2 + 1} requires expectedName.`);
       if (newName === null || !newName.trim()) {
         throw new Error(`Manifest entry ${index2 + 1} requires a non-empty newName.`);
       }
-      seen.add(id);
-      return { id, expectedName, newName };
+      return { action, id, expectedName, newName };
     });
   }
-  function buildConversationProjectPreview(value, conversations, projects) {
+  function buildProjectManagementPreview(value, conversations, projects) {
     let entries;
     try {
-      entries = parseConversationProjectManifest(value);
+      entries = parseProjectManagementManifest(value);
     } catch (error2) {
       return { rows: [], error: error2 instanceof Error ? error2.message : "Manifest is invalid." };
     }
     const projectIds = new Set(projects.map((project) => project.id));
+    const projectNames = new Map(projects.map((project) => {
+      var _a;
+      return [project.id, ((_a = project.display) == null ? void 0 : _a.name) ?? project.id];
+    }));
+    const projectsById = new Map(projects.map((project) => [project.id, project]));
     const conversationsById = new Map(conversations.map((conversation) => [conversation.id, conversation]));
     return {
       rows: entries.map((entry) => {
-        var _a;
+        var _a, _b;
+        if (entry.action === "renameProject") {
+          const project = projectsById.get(entry.id);
+          if (!project) {
+            return {
+              action: entry.action,
+              id: entry.id,
+              label: entry.id,
+              originalValue: entry.expectedName,
+              proposedValue: entry.newName,
+              changed: true,
+              valid: false,
+              error: "Project is not loaded."
+            };
+          }
+          const currentName = ((_a = project.display) == null ? void 0 : _a.name) ?? "";
+          if (currentName === entry.newName) {
+            return {
+              action: entry.action,
+              id: entry.id,
+              label: currentName || entry.id,
+              originalValue: currentName,
+              proposedValue: entry.newName,
+              changed: false,
+              valid: true
+            };
+          }
+          if (currentName !== entry.expectedName) {
+            return {
+              action: entry.action,
+              id: entry.id,
+              label: currentName || entry.id,
+              originalValue: currentName,
+              proposedValue: entry.newName,
+              changed: true,
+              valid: false,
+              error: "Current Project name does not match expectedName."
+            };
+          }
+          return {
+            action: entry.action,
+            id: entry.id,
+            label: currentName || entry.id,
+            originalValue: currentName,
+            proposedValue: entry.newName,
+            changed: true,
+            valid: true
+          };
+        }
         const conversation = conversationsById.get(entry.id);
         if (!conversation) {
           return {
+            action: entry.action,
             id: entry.id,
-            title: "",
-            originalProjectId: entry.expectedProjectId,
-            proposedProjectId: entry.newProjectId,
+            label: entry.id,
+            originalValue: entry.expectedProjectId === null ? "Not in a Project" : projectNames.get(entry.expectedProjectId) ?? entry.expectedProjectId,
+            proposedValue: projectNames.get(entry.newProjectId) ?? entry.newProjectId,
             changed: true,
             valid: false,
-            error: "Conversation is not loaded in the current scope."
+            error: "Conversation is not loaded in the current scope.",
+            originalProjectId: entry.expectedProjectId,
+            proposedProjectId: entry.newProjectId
           };
         }
         if (!projectIds.has(entry.newProjectId)) {
+          const currentProjectId2 = projectIds.has(conversation.gizmo_id ?? "") ? conversation.gizmo_id : null;
           return {
+            action: entry.action,
             id: entry.id,
-            title: conversation.title ?? "",
-            originalProjectId: projectIds.has(conversation.gizmo_id ?? "") ? conversation.gizmo_id : null,
-            proposedProjectId: entry.newProjectId,
+            label: conversation.title ?? entry.id,
+            originalValue: currentProjectId2 === null ? "Not in a Project" : projectNames.get(currentProjectId2) ?? currentProjectId2,
+            proposedValue: entry.newProjectId,
             changed: true,
             valid: false,
-            error: "Destination Project is not loaded."
+            error: "Destination Project is not loaded.",
+            originalProjectId: currentProjectId2,
+            proposedProjectId: entry.newProjectId
           };
         }
-        const rawGizmoId = ((_a = conversation.gizmo_id) == null ? void 0 : _a.trim()) || null;
+        const rawGizmoId = ((_b = conversation.gizmo_id) == null ? void 0 : _b.trim()) || null;
         if (rawGizmoId && !projectIds.has(rawGizmoId)) {
           return {
+            action: entry.action,
             id: entry.id,
-            title: conversation.title ?? "",
-            originalProjectId: null,
-            proposedProjectId: entry.newProjectId,
+            label: conversation.title ?? entry.id,
+            originalValue: "Non-Project gizmo",
+            proposedValue: projectNames.get(entry.newProjectId) ?? entry.newProjectId,
             changed: true,
             valid: false,
-            error: "Conversation belongs to a non-Project gizmo and cannot be moved safely."
+            error: "Conversation belongs to a non-Project gizmo and cannot be moved safely.",
+            originalProjectId: null,
+            proposedProjectId: entry.newProjectId
           };
         }
         const currentProjectId = rawGizmoId;
+        const originalValue = currentProjectId === null ? "Not in a Project" : projectNames.get(currentProjectId) ?? currentProjectId;
+        const proposedValue = projectNames.get(entry.newProjectId) ?? entry.newProjectId;
         if (currentProjectId === entry.newProjectId) {
           return {
+            action: entry.action,
             id: entry.id,
-            title: conversation.title ?? "",
-            originalProjectId: currentProjectId,
-            proposedProjectId: entry.newProjectId,
+            label: conversation.title ?? entry.id,
+            originalValue,
+            proposedValue,
             changed: false,
-            valid: true
+            valid: true,
+            originalProjectId: currentProjectId,
+            proposedProjectId: entry.newProjectId
           };
         }
         if (currentProjectId !== entry.expectedProjectId) {
           return {
+            action: entry.action,
             id: entry.id,
-            title: conversation.title ?? "",
+            label: conversation.title ?? entry.id,
+            originalValue,
+            proposedValue,
+            changed: true,
+            valid: false,
+            error: "Current Project membership does not match expectedProjectId.",
             originalProjectId: currentProjectId,
-            proposedProjectId: entry.newProjectId,
-            changed: true,
-            valid: false,
-            error: "Current Project membership does not match expectedProjectId."
+            proposedProjectId: entry.newProjectId
           };
         }
         return {
+          action: entry.action,
           id: entry.id,
-          title: conversation.title ?? "",
+          label: conversation.title ?? entry.id,
+          originalValue,
+          proposedValue,
+          changed: true,
+          valid: true,
           originalProjectId: currentProjectId,
-          proposedProjectId: entry.newProjectId,
-          changed: true,
-          valid: true
-        };
-      })
-    };
-  }
-  function buildProjectRenamePreview(value, projects) {
-    let entries;
-    try {
-      entries = parseProjectRenameManifest(value);
-    } catch (error2) {
-      return { rows: [], error: error2 instanceof Error ? error2.message : "Manifest is invalid." };
-    }
-    const projectsById = new Map(projects.map((project) => [project.id, project]));
-    return {
-      rows: entries.map((entry) => {
-        var _a;
-        const project = projectsById.get(entry.id);
-        if (!project) {
-          return {
-            id: entry.id,
-            originalName: entry.expectedName,
-            proposedName: entry.newName,
-            changed: true,
-            valid: false,
-            error: "Project is not loaded."
-          };
-        }
-        const currentName = ((_a = project.display) == null ? void 0 : _a.name) ?? "";
-        if (currentName === entry.newName) {
-          return {
-            id: entry.id,
-            originalName: currentName,
-            proposedName: entry.newName,
-            changed: false,
-            valid: true
-          };
-        }
-        if (currentName !== entry.expectedName) {
-          return {
-            id: entry.id,
-            originalName: currentName,
-            proposedName: entry.newName,
-            changed: true,
-            valid: false,
-            error: "Current Project name does not match expectedName."
-          };
-        }
-        return {
-          id: entry.id,
-          originalName: currentName,
-          proposedName: entry.newName,
-          changed: true,
-          valid: true
+          proposedProjectId: entry.newProjectId
         };
       })
     };
@@ -23351,16 +23509,17 @@ ${content2}`;
     for (const item of incoming) byId.set(item.id, item);
     return [...byId.values()];
   }
+  function actionLabel(action) {
+    return action === "moveConversation" ? "Move conversation" : "Rename Project";
+  }
   const BulkProjectManagementDialog = ({ open, onOpenChange, children }) => {
     const { exportAllLimit } = useSettingContext();
-    const [mode, setMode] = h$4("conversation-project");
     const [projects, setProjects] = h$4([]);
     const [projectsLoaded, setProjectsLoaded] = h$4(false);
     const [projectsLoading, setProjectsLoading] = h$4(false);
     const [conversations, setConversations] = h$4([]);
     const [conversationsLoading, setConversationsLoading] = h$4(false);
-    const [conversationManifest, setConversationManifest] = h$4("");
-    const [projectRenameManifest, setProjectRenameManifest] = h$4("");
+    const [manifest, setManifest] = h$4("");
     const [processing, setProcessing] = h$4(false);
     const [error2, setError] = h$4("");
     const [summary, setSummary] = h$4(null);
@@ -23369,15 +23528,7 @@ ${content2}`;
     const pendingPlanRef = _([]);
     const pendingUnchangedRef = _(0);
     const pendingInvalidRef = _(0);
-    const pendingModeRef = _("conversation-project");
     const projectIds = F$1(() => projects.map((project) => project.id), [projects]);
-    const projectNames = F$1(
-      () => new Map(projects.map((project) => {
-        var _a;
-        return [project.id, ((_a = project.display) == null ? void 0 : _a.name) ?? project.id];
-      })),
-      [projects]
-    );
     p$6(() => {
       if (!open) return;
       let cancelled = false;
@@ -23402,7 +23553,7 @@ ${content2}`;
       };
     }, [open]);
     p$6(() => {
-      if (!open || !projectsLoaded || mode !== "conversation-project") return;
+      if (!open || !projectsLoaded) return;
       let cancelled = false;
       setConversations([]);
       setConversationsLoading(true);
@@ -23422,40 +23573,13 @@ ${content2}`;
       return () => {
         cancelled = true;
       };
-    }, [exportAllLimit, mode, open, projects, projectsLoaded]);
-    const manifestText = mode === "conversation-project" ? conversationManifest : projectRenameManifest;
-    const rawConversationPreview = F$1(
-      () => buildConversationProjectPreview(conversationManifest, conversations, projects),
-      [conversationManifest, conversations, projects]
+    }, [exportAllLimit, open, projects, projectsLoaded]);
+    const rawPreview = F$1(
+      () => buildProjectManagementPreview(manifest, conversations, projects),
+      [manifest, conversations, projects]
     );
-    const rawProjectRenamePreview = F$1(
-      () => buildProjectRenamePreview(projectRenameManifest, projects),
-      [projectRenameManifest, projects]
-    );
-    const manifestError = mode === "conversation-project" ? rawConversationPreview.error : rawProjectRenamePreview.error;
-    const preview = F$1(() => {
-      if (mode === "conversation-project") {
-        return rawConversationPreview.rows.map((row) => ({
-          id: row.id,
-          label: row.title || row.id,
-          originalValue: row.originalProjectId === null ? "Not in a Project" : projectNames.get(row.originalProjectId) ?? row.originalProjectId,
-          proposedValue: projectNames.get(row.proposedProjectId) ?? row.proposedProjectId,
-          changed: row.changed,
-          valid: row.valid,
-          error: row.error,
-          originalProjectId: row.originalProjectId
-        }));
-      }
-      return rawProjectRenamePreview.rows.map((row) => ({
-        id: row.id,
-        label: row.id,
-        originalValue: row.originalName,
-        proposedValue: row.proposedName,
-        changed: row.changed,
-        valid: row.valid,
-        error: row.error
-      }));
-    }, [mode, projectNames, rawConversationPreview.rows, rawProjectRenamePreview.rows]);
+    const preview = rawPreview.rows;
+    const manifestError = rawPreview.error;
     const previewCounts = F$1(() => preview.reduce((counts, row) => {
       if (!row.valid) counts.invalid++;
       else if (row.changed) counts.changed++;
@@ -23478,13 +23602,11 @@ ${content2}`;
       const off = queue.on("done", (results) => {
         const plan = pendingPlanRef.current;
         const successful = new Map(results.map((result) => [result.id, result]));
-        if (pendingModeRef.current === "conversation-project" && successful.size > 0) {
+        if (successful.size > 0) {
           setConversations((previous2) => previous2.map((conversation) => {
             const result = successful.get(conversation.id);
             return (result == null ? void 0 : result.kind) === "conversation-project" && result.projectId ? { ...conversation, gizmo_id: result.projectId } : conversation;
           }));
-        }
-        if (pendingModeRef.current === "project-rename" && successful.size > 0) {
           setProjects((previous2) => previous2.map((project) => {
             const result = successful.get(project.id);
             return (result == null ? void 0 : result.kind) === "project-rename" && result.name ? { ...project, display: { ...project.display, name: result.name } } : project;
@@ -23507,28 +23629,25 @@ ${content2}`;
     const applyChanges = T$4(() => {
       if (processing || previewCounts.invalid > 0 || previewCounts.changed === 0) return;
       const plan = preview.filter((row) => row.valid && row.changed);
-      const action = mode === "conversation-project" ? "move" : "rename";
       const approved = confirm(
-        `${action === "move" ? "Move" : "Rename"} ${plan.length} ${mode === "conversation-project" ? "conversation" : "Project"}${plan.length === 1 ? "" : "s"} using the previewed manifest?`
+        `Apply ${plan.length} previewed Project-management change${plan.length === 1 ? "" : "s"}?`
       );
       if (!approved) return;
       pendingPlanRef.current = plan;
       pendingUnchangedRef.current = previewCounts.unchanged;
       pendingInvalidRef.current = previewCounts.invalid;
-      pendingModeRef.current = mode;
       setSummary(null);
       setProcessing(true);
       setProgress({ total: plan.length, completed: 0, currentName: "" });
       queue.clear();
       for (const row of plan) {
-        if (mode === "conversation-project") {
-          const targetProjectId = rawConversationPreview.rows.find((item) => item.id === row.id).proposedProjectId;
+        if (row.action === "moveConversation") {
           queue.add({
             name: row.label,
             request: () => moveConversationToProject(
               row.id,
               row.originalProjectId ?? null,
-              targetProjectId,
+              row.proposedProjectId,
               projectIds
             )
           });
@@ -23540,19 +23659,17 @@ ${content2}`;
         }
       }
       queue.start();
-    }, [mode, preview, previewCounts, processing, projectIds, queue, rawConversationPreview.rows]);
+    }, [preview, previewCounts, processing, projectIds, queue]);
     const closeGuarded = T$4((value) => {
       if (!processing) onOpenChange(value);
     }, [onOpenChange, processing]);
     const busy = projectsLoading || conversationsLoading || processing;
-    const statusText = error2 ? `Error: ${error2}` : processing ? `Applying ${progress.completed} / ${progress.total}` : projectsLoading ? "Loading Projects..." : conversationsLoading ? "Loading conversations..." : summary ? `Changed ${summary.changed}; unchanged ${summary.unchanged}; invalid ${summary.invalid}; failed ${summary.failed}` : `${preview.length} manifest entries`;
+    const statusText = error2 ? `Error: ${error2}` : processing ? `Applying ${progress.completed} / ${progress.total}` : projectsLoading ? "Loading Projects..." : conversationsLoading ? "Loading conversations..." : summary ? `Changed ${summary.changed}; unchanged ${summary.unchanged}; invalid ${summary.invalid}; failed ${summary.failed}` : `${preview.length} action${preview.length === 1 ? "" : "s"} loaded`;
     let statusDetail = "";
     if (processing) {
       statusDetail = progress.currentName;
-    } else if (!error2 && !busy && mode === "conversation-project") {
-      statusDetail = `${conversations.length} conversations loaded · source scan limit ${exportAllLimit}`;
     } else if (!error2 && !busy) {
-      statusDetail = `${projects.length} Projects loaded`;
+      statusDetail = `${conversations.length} conversations across general + Project sources · general scan limit ${exportAllLimit}`;
     }
     return /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$be92b6f5f03c0fe9, { open, onOpenChange: closeGuarded, children: [
       /* @__PURE__ */ o$8($5d3850c4d0b4e6c7$export$41fb9f06171c75f4, { asChild: true, children }),
@@ -23561,7 +23678,7 @@ ${content2}`;
         /* @__PURE__ */ o$8(
           $5d3850c4d0b4e6c7$export$7c6e2c02157bb7d2,
           {
-            className: "DialogContent _export BulkRenameDialog",
+            className: "DialogContent _export BulkProjectManagementDialog",
             onEscapeKeyDown: (event) => {
               if (processing) event.preventDefault();
             },
@@ -23575,88 +23692,67 @@ ${content2}`;
                 /* @__PURE__ */ o$8("span", { className: "ExportStatusText", children: statusText }),
                 statusDetail && /* @__PURE__ */ o$8("span", { className: "ExportStatusDetail", children: statusDetail })
               ] }),
-              /* @__PURE__ */ o$8("section", { className: "ExportFilters", "aria-label": "Bulk Project management mode", children: [
-                /* @__PURE__ */ o$8("div", { className: "ExportFiltersTitle", children: "Operation" }),
-                /* @__PURE__ */ o$8("div", { className: "ExportFilterRow", children: [
-                  /* @__PURE__ */ o$8("label", { className: "ExportFilterLabel", htmlFor: "project-management-mode", children: "Mode" }),
-                  /* @__PURE__ */ o$8(
-                    "select",
-                    {
-                      id: "project-management-mode",
-                      className: "Select",
-                      value: mode,
-                      disabled: busy,
-                      onChange: (event) => {
-                        setMode(event.currentTarget.value);
-                        setSummary(null);
-                        setError("");
-                      },
-                      children: [
-                        /* @__PURE__ */ o$8("option", { value: "conversation-project", children: "Move conversations to Projects" }),
-                        /* @__PURE__ */ o$8("option", { value: "project-rename", children: "Rename Projects" })
-                      ]
-                    }
-                  )
-                ] })
-              ] }),
-              /* @__PURE__ */ o$8("section", { className: "RenameControls", "aria-label": "Project management manifest", children: [
-                /* @__PURE__ */ o$8("div", { className: "ExportFiltersTitle", children: "Approved JSON manifest" }),
+              /* @__PURE__ */ o$8("section", { className: "ProjectManagementManifest", "aria-label": "Project management manifest", children: [
+                /* @__PURE__ */ o$8("label", { className: "ProjectManagementSectionTitle", htmlFor: "project-management-manifest", children: "Approved JSON manifest" }),
                 /* @__PURE__ */ o$8(
                   "textarea",
                   {
-                    className: "RenameManifestInput",
-                    rows: 8,
+                    id: "project-management-manifest",
+                    className: "ProjectManagementManifestInput",
+                    rows: 12,
                     spellCheck: false,
                     disabled: busy,
-                    value: manifestText,
-                    placeholder: mode === "conversation-project" ? '[{"id":"<conversation-id>","expectedProjectId":null,"newProjectId":"g-p-..."}]' : '[{"id":"g-p-...","expectedName":"Current name","newName":"New name"}]',
+                    value: manifest,
+                    placeholder: '[\n  {"action":"moveConversation","id":"<conversation-id>","expectedProjectId":null,"newProjectId":"g-p-..."},\n  {"action":"renameProject","id":"g-p-...","expectedName":"Current name","newName":"New name"}\n]',
                     onInput: (event) => {
-                      const value = event.currentTarget.value;
-                      if (mode === "conversation-project") setConversationManifest(value);
-                      else setProjectRenameManifest(value);
+                      setManifest(event.currentTarget.value);
                       setSummary(null);
                     }
                   }
                 ),
-                /* @__PURE__ */ o$8("div", { className: "RenameHelpText", children: "Manifest-driven execution only. This feature does not decide Project placement or generate names." })
+                /* @__PURE__ */ o$8("div", { className: "RenameHelpText", children: "One manifest can contain any number of moveConversation and renameProject actions. Every action is validated against current state before Apply is enabled." })
               ] }),
-              /* @__PURE__ */ o$8("section", { className: "RenamePreview", "aria-label": "Project management preview", children: [
-                /* @__PURE__ */ o$8("div", { className: "ExportFiltersTitle", children: [
-                  "Preview · change ",
-                  previewCounts.changed,
-                  " · unchanged ",
-                  previewCounts.unchanged,
-                  " · invalid ",
-                  previewCounts.invalid
+              /* @__PURE__ */ o$8("section", { className: "ProjectManagementPreview", "aria-label": "Project management preview", children: [
+                /* @__PURE__ */ o$8("div", { className: "ProjectManagementPreviewHeader", children: [
+                  /* @__PURE__ */ o$8("span", { children: "Preview" }),
+                  /* @__PURE__ */ o$8("span", { children: [
+                    "change ",
+                    previewCounts.changed,
+                    " · unchanged ",
+                    previewCounts.unchanged,
+                    " · invalid ",
+                    previewCounts.invalid
+                  ] })
                 ] }),
                 manifestError && /* @__PURE__ */ o$8("div", { className: "RenameValidationError", children: manifestError }),
-                /* @__PURE__ */ o$8("div", { className: "RenamePreviewTableWrap", children: /* @__PURE__ */ o$8("table", { className: "RenamePreviewTable", children: [
+                /* @__PURE__ */ o$8("div", { className: "ProjectManagementPreviewTableWrap", children: /* @__PURE__ */ o$8("table", { className: "ProjectManagementPreviewTable", children: [
                   /* @__PURE__ */ o$8("thead", { children: /* @__PURE__ */ o$8("tr", { children: [
-                    /* @__PURE__ */ o$8("th", { children: mode === "conversation-project" ? "Conversation" : "Project" }),
+                    /* @__PURE__ */ o$8("th", { children: "Action" }),
+                    /* @__PURE__ */ o$8("th", { children: "Item" }),
                     /* @__PURE__ */ o$8("th", { children: "Current" }),
                     /* @__PURE__ */ o$8("th", { children: "Proposed" }),
                     /* @__PURE__ */ o$8("th", { children: "Status" })
                   ] }) }),
                   /* @__PURE__ */ o$8("tbody", { children: [
-                    preview.length === 0 && /* @__PURE__ */ o$8("tr", { children: /* @__PURE__ */ o$8("td", { colSpan: 4, children: "Enter a manifest to preview changes." }) }),
+                    preview.length === 0 && /* @__PURE__ */ o$8("tr", { children: /* @__PURE__ */ o$8("td", { colSpan: 5, children: "Enter a manifest to preview changes." }) }),
                     preview.map((row) => /* @__PURE__ */ o$8("tr", { children: [
+                      /* @__PURE__ */ o$8("td", { children: actionLabel(row.action) }),
                       /* @__PURE__ */ o$8("td", { title: row.id, children: row.label }),
                       /* @__PURE__ */ o$8("td", { children: row.originalValue }),
                       /* @__PURE__ */ o$8("td", { children: row.proposedValue }),
-                      /* @__PURE__ */ o$8("td", { children: !row.valid ? row.error : row.changed ? "Change" : "Unchanged" })
+                      /* @__PURE__ */ o$8("td", { className: row.valid ? "" : "ProjectManagementInvalid", children: !row.valid ? row.error : row.changed ? "Ready" : "Unchanged" })
                     ] }, row.id))
                   ] })
                 ] }) })
               ] }),
-              /* @__PURE__ */ o$8("div", { className: "DialogActions", children: [
+              /* @__PURE__ */ o$8("div", { className: "DialogActions ProjectManagementActions", children: [
                 /* @__PURE__ */ o$8(
                   "button",
                   {
                     className: "Button neutral",
-                    disabled: processing || !manifestText,
+                    disabled: processing || !manifest,
                     onClick: () => {
-                      if (mode === "conversation-project") setConversationManifest("");
-                      else setProjectRenameManifest("");
+                      setManifest("");
                       setSummary(null);
                     },
                     children: "Clear"
@@ -23668,7 +23764,12 @@ ${content2}`;
                     className: "Button danger",
                     disabled: busy || previewCounts.invalid > 0 || previewCounts.changed === 0,
                     onClick: applyChanges,
-                    children: "Apply previewed changes"
+                    children: [
+                      "Apply ",
+                      previewCounts.changed,
+                      " previewed change",
+                      previewCounts.changed === 1 ? "" : "s"
+                    ]
                   }
                 )
               ] }),
