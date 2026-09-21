@@ -748,6 +748,16 @@ html {\r
     margin: 0;\r
     padding-top: 0.65rem;\r
     border-top: 1px solid var(--ce-border-light);\r
+    display: flex;\r
+    align-items: center;\r
+    justify-content: flex-end;\r
+    gap: 0.5rem;\r
+}\r
+\r
+.ProjectManagementActions .Button {\r
+    flex: 0 0 auto;\r
+    width: auto;\r
+    min-width: 0;\r
 }\r
 \r
 @media (max-width: 820px) {\r
