@@ -30,6 +30,8 @@ export default defineConfig({
                     'zh-TW': packageJson['description:zh-TW'],
                 },
                 'license': packageJson.license,
+                'updateURL': 'https://raw.githubusercontent.com/danveitch76/chatgpt-exporter/master/dist/chatgpt.user.js',
+                'downloadURL': 'https://raw.githubusercontent.com/danveitch76/chatgpt-exporter/master/dist/chatgpt.user.js',
                 'match': [
                     'https://chat.openai.com/',
                     // support https://chat.openai.com/?model={model}
