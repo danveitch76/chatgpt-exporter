@@ -8,8 +8,8 @@ import { buildProjectManagementPreview } from './projectManagementManifest'
 import { useSettingContext } from './SettingContext'
 import type { ApiConversationItem, ApiProjectInfo } from '../api'
 import type { ProjectManagementResult } from '../projectManagement'
-import type { ProjectManagementPreviewRow } from './projectManagementManifest'
 import type { FC } from '../type'
+import type { ProjectManagementPreviewRow } from './projectManagementManifest'
 
 interface BulkProjectManagementDialogProps {
     open: boolean
