@@ -4,31 +4,16 @@ import { fetchAllConversationsAll, fetchProjects } from '../api'
 import { moveConversationToProject, renameProject } from '../projectManagement'
 import { RequestQueue } from '../utils/queue'
 import { IconCross, IconLoading } from './Icons'
-import {
-    buildConversationProjectPreview,
-    buildProjectRenamePreview,
-} from './projectManagementManifest'
+import { buildProjectManagementPreview } from './projectManagementManifest'
 import { useSettingContext } from './SettingContext'
 import type { ApiConversationItem, ApiProjectInfo } from '../api'
 import type { ProjectManagementResult } from '../projectManagement'
+import type { ProjectManagementPreviewRow } from './projectManagementManifest'
 import type { FC } from '../type'
 
 interface BulkProjectManagementDialogProps {
     open: boolean
     onOpenChange: (value: boolean) => void
-}
-
-type ManagementMode = 'conversation-project' | 'project-rename'
-
-interface ManagementPreviewRow {
-    id: string
-    label: string
-    originalValue: string
-    proposedValue: string
-    changed: boolean
-    valid: boolean
-    error?: string
-    originalProjectId?: string | null
 }
 
 interface ManagementSummary {
@@ -47,32 +32,29 @@ function mergeUnique(
     return [...byId.values()]
 }
 
+function actionLabel(action: ProjectManagementPreviewRow['action']): string {
+    return action === 'moveConversation' ? 'Move conversation' : 'Rename Project'
+}
+
 export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> = ({ open, onOpenChange, children }) => {
     const { exportAllLimit } = useSettingContext()
-    const [mode, setMode] = useState<ManagementMode>('conversation-project')
     const [projects, setProjects] = useState<ApiProjectInfo[]>([])
     const [projectsLoaded, setProjectsLoaded] = useState(false)
     const [projectsLoading, setProjectsLoading] = useState(false)
     const [conversations, setConversations] = useState<ApiConversationItem[]>([])
     const [conversationsLoading, setConversationsLoading] = useState(false)
-    const [conversationManifest, setConversationManifest] = useState('')
-    const [projectRenameManifest, setProjectRenameManifest] = useState('')
+    const [manifest, setManifest] = useState('')
     const [processing, setProcessing] = useState(false)
     const [error, setError] = useState('')
     const [summary, setSummary] = useState<ManagementSummary | null>(null)
     const [progress, setProgress] = useState({ total: 0, completed: 0, currentName: '' })
 
     const queue = useMemo(() => new RequestQueue<ProjectManagementResult>(200, 1600), [])
-    const pendingPlanRef = useRef<ManagementPreviewRow[]>([])
+    const pendingPlanRef = useRef<ProjectManagementPreviewRow[]>([])
     const pendingUnchangedRef = useRef(0)
     const pendingInvalidRef = useRef(0)
-    const pendingModeRef = useRef<ManagementMode>('conversation-project')
 
     const projectIds = useMemo(() => projects.map(project => project.id), [projects])
-    const projectNames = useMemo(
-        () => new Map(projects.map(project => [project.id, project.display?.name ?? project.id])),
-        [projects],
-    )
 
     useEffect(() => {
         if (!open) return
@@ -104,7 +86,7 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
     }, [open])
 
     useEffect(() => {
-        if (!open || !projectsLoaded || mode !== 'conversation-project') return
+        if (!open || !projectsLoaded) return
         let cancelled = false
         setConversations([])
         setConversationsLoading(true)
@@ -129,48 +111,14 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
         return () => {
             cancelled = true
         }
-    }, [exportAllLimit, mode, open, projects, projectsLoaded])
+    }, [exportAllLimit, open, projects, projectsLoaded])
 
-    const manifestText = mode === 'conversation-project' ? conversationManifest : projectRenameManifest
-
-    const rawConversationPreview = useMemo(
-        () => buildConversationProjectPreview(conversationManifest, conversations, projects),
-        [conversationManifest, conversations, projects],
+    const rawPreview = useMemo(
+        () => buildProjectManagementPreview(manifest, conversations, projects),
+        [manifest, conversations, projects],
     )
-    const rawProjectRenamePreview = useMemo(
-        () => buildProjectRenamePreview(projectRenameManifest, projects),
-        [projectRenameManifest, projects],
-    )
-
-    const manifestError = mode === 'conversation-project'
-        ? rawConversationPreview.error
-        : rawProjectRenamePreview.error
-
-    const preview = useMemo<ManagementPreviewRow[]>(() => {
-        if (mode === 'conversation-project') {
-            return rawConversationPreview.rows.map(row => ({
-                id: row.id,
-                label: row.title || row.id,
-                originalValue: row.originalProjectId === null
-                    ? 'Not in a Project'
-                    : (projectNames.get(row.originalProjectId) ?? row.originalProjectId),
-                proposedValue: projectNames.get(row.proposedProjectId) ?? row.proposedProjectId,
-                changed: row.changed,
-                valid: row.valid,
-                error: row.error,
-                originalProjectId: row.originalProjectId,
-            }))
-        }
-        return rawProjectRenamePreview.rows.map(row => ({
-            id: row.id,
-            label: row.id,
-            originalValue: row.originalName,
-            proposedValue: row.proposedName,
-            changed: row.changed,
-            valid: row.valid,
-            error: row.error,
-        }))
-    }, [mode, projectNames, rawConversationPreview.rows, rawProjectRenamePreview.rows])
+    const preview = rawPreview.rows
+    const manifestError = rawPreview.error
 
     const previewCounts = useMemo(() => preview.reduce((counts, row) => {
         if (!row.valid) counts.invalid++
@@ -197,15 +145,13 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
             const plan = pendingPlanRef.current
             const successful = new Map(results.map(result => [result.id, result]))
 
-            if (pendingModeRef.current === 'conversation-project' && successful.size > 0) {
+            if (successful.size > 0) {
                 setConversations(previous => previous.map((conversation) => {
                     const result = successful.get(conversation.id)
                     return result?.kind === 'conversation-project' && result.projectId
                         ? { ...conversation, gizmo_id: result.projectId }
                         : conversation
                 }))
-            }
-            if (pendingModeRef.current === 'project-rename' && successful.size > 0) {
                 setProjects(previous => previous.map((project) => {
                     const result = successful.get(project.id)
                     return result?.kind === 'project-rename' && result.name
@@ -234,30 +180,27 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
         if (processing || previewCounts.invalid > 0 || previewCounts.changed === 0) return
 
         const plan = preview.filter(row => row.valid && row.changed)
-        const action = mode === 'conversation-project' ? 'move' : 'rename'
         const approved = confirm(
-            `${action === 'move' ? 'Move' : 'Rename'} ${plan.length} ${mode === 'conversation-project' ? 'conversation' : 'Project'}${plan.length === 1 ? '' : 's'} using the previewed manifest?`,
+            `Apply ${plan.length} previewed Project-management change${plan.length === 1 ? '' : 's'}?`,
         )
         if (!approved) return
 
         pendingPlanRef.current = plan
         pendingUnchangedRef.current = previewCounts.unchanged
         pendingInvalidRef.current = previewCounts.invalid
-        pendingModeRef.current = mode
         setSummary(null)
         setProcessing(true)
         setProgress({ total: plan.length, completed: 0, currentName: '' })
 
         queue.clear()
         for (const row of plan) {
-            if (mode === 'conversation-project') {
-                const targetProjectId = rawConversationPreview.rows.find(item => item.id === row.id)!.proposedProjectId
+            if (row.action === 'moveConversation') {
                 queue.add({
                     name: row.label,
                     request: () => moveConversationToProject(
                         row.id,
                         row.originalProjectId ?? null,
-                        targetProjectId,
+                        row.proposedProjectId!,
                         projectIds,
                     ),
                 })
@@ -270,7 +213,7 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
             }
         }
         queue.start()
-    }, [mode, preview, previewCounts, processing, projectIds, queue, rawConversationPreview.rows])
+    }, [preview, previewCounts, processing, projectIds, queue])
 
     const closeGuarded = useCallback((value: boolean) => {
         if (!processing) onOpenChange(value)
@@ -287,16 +230,13 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
                     ? 'Loading conversations...'
                     : summary
                         ? `Changed ${summary.changed}; unchanged ${summary.unchanged}; invalid ${summary.invalid}; failed ${summary.failed}`
-                        : `${preview.length} manifest entries`
+                        : `${preview.length} action${preview.length === 1 ? '' : 's'} loaded`
     let statusDetail = ''
     if (processing) {
         statusDetail = progress.currentName
     }
-    else if (!error && !busy && mode === 'conversation-project') {
-        statusDetail = `${conversations.length} conversations loaded · source scan limit ${exportAllLimit}`
-    }
     else if (!error && !busy) {
-        statusDetail = `${projects.length} Projects loaded`
+        statusDetail = `${conversations.length} conversations across general + Project sources · general scan limit ${exportAllLimit}`
     }
 
     return (
@@ -305,7 +245,7 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
             <Dialog.Portal>
                 <Dialog.Overlay className="DialogOverlay" />
                 <Dialog.Content
-                    className="DialogContent _export BulkRenameDialog"
+                    className="DialogContent _export BulkProjectManagementDialog"
                     onEscapeKeyDown={(event: Event) => {
                         if (processing) event.preventDefault()
                     }}
@@ -321,60 +261,43 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
                         {statusDetail && <span className="ExportStatusDetail">{statusDetail}</span>}
                     </div>
 
-                    <section className="ExportFilters" aria-label="Bulk Project management mode">
-                        <div className="ExportFiltersTitle">Operation</div>
-                        <div className="ExportFilterRow">
-                            <label className="ExportFilterLabel" htmlFor="project-management-mode">Mode</label>
-                            <select
-                                id="project-management-mode"
-                                className="Select"
-                                value={mode}
-                                disabled={busy}
-                                onChange={(event: Event) => {
-                                    setMode((event.currentTarget as HTMLSelectElement).value as ManagementMode)
-                                    setSummary(null)
-                                    setError('')
-                                }}
-                            >
-                                <option value="conversation-project">Move conversations to Projects</option>
-                                <option value="project-rename">Rename Projects</option>
-                            </select>
-                        </div>
-                    </section>
-
-                    <section className="RenameControls" aria-label="Project management manifest">
-                        <div className="ExportFiltersTitle">Approved JSON manifest</div>
+                    <section className="ProjectManagementManifest" aria-label="Project management manifest">
+                        <label className="ProjectManagementSectionTitle" htmlFor="project-management-manifest">
+                            Approved JSON manifest
+                        </label>
                         <textarea
-                            className="RenameManifestInput"
-                            rows={8}
+                            id="project-management-manifest"
+                            className="ProjectManagementManifestInput"
+                            rows={12}
                             spellCheck={false}
                             disabled={busy}
-                            value={manifestText}
-                            placeholder={mode === 'conversation-project'
-                                ? '[{"id":"<conversation-id>","expectedProjectId":null,"newProjectId":"g-p-..."}]'
-                                : '[{"id":"g-p-...","expectedName":"Current name","newName":"New name"}]'}
+                            value={manifest}
+                            placeholder={'[\n  {"action":"moveConversation","id":"<conversation-id>","expectedProjectId":null,"newProjectId":"g-p-..."},\n  {"action":"renameProject","id":"g-p-...","expectedName":"Current name","newName":"New name"}\n]'}
                             onInput={(event: Event) => {
-                                const value = (event.currentTarget as HTMLTextAreaElement).value
-                                if (mode === 'conversation-project') setConversationManifest(value)
-                                else setProjectRenameManifest(value)
+                                setManifest((event.currentTarget as HTMLTextAreaElement).value)
                                 setSummary(null)
                             }}
                         />
                         <div className="RenameHelpText">
-                            Manifest-driven execution only. This feature does not decide Project placement or generate names.
+                            One manifest can contain any number of moveConversation and renameProject actions.
+                            Every action is validated against current state before Apply is enabled.
                         </div>
                     </section>
 
-                    <section className="RenamePreview" aria-label="Project management preview">
-                        <div className="ExportFiltersTitle">
-                            Preview · change {previewCounts.changed} · unchanged {previewCounts.unchanged} · invalid {previewCounts.invalid}
+                    <section className="ProjectManagementPreview" aria-label="Project management preview">
+                        <div className="ProjectManagementPreviewHeader">
+                            <span>Preview</span>
+                            <span>
+                                change {previewCounts.changed} · unchanged {previewCounts.unchanged} · invalid {previewCounts.invalid}
+                            </span>
                         </div>
                         {manifestError && <div className="RenameValidationError">{manifestError}</div>}
-                        <div className="RenamePreviewTableWrap">
-                            <table className="RenamePreviewTable">
+                        <div className="ProjectManagementPreviewTableWrap">
+                            <table className="ProjectManagementPreviewTable">
                                 <thead>
                                     <tr>
-                                        <th>{mode === 'conversation-project' ? 'Conversation' : 'Project'}</th>
+                                        <th>Action</th>
+                                        <th>Item</th>
                                         <th>Current</th>
                                         <th>Proposed</th>
                                         <th>Status</th>
@@ -383,15 +306,18 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
                                 <tbody>
                                     {preview.length === 0 && (
                                         <tr>
-                                            <td colSpan={4}>Enter a manifest to preview changes.</td>
+                                            <td colSpan={5}>Enter a manifest to preview changes.</td>
                                         </tr>
                                     )}
                                     {preview.map(row => (
                                         <tr key={row.id}>
+                                            <td>{actionLabel(row.action)}</td>
                                             <td title={row.id}>{row.label}</td>
                                             <td>{row.originalValue}</td>
                                             <td>{row.proposedValue}</td>
-                                            <td>{!row.valid ? row.error : row.changed ? 'Change' : 'Unchanged'}</td>
+                                            <td className={row.valid ? '' : 'ProjectManagementInvalid'}>
+                                                {!row.valid ? row.error : row.changed ? 'Ready' : 'Unchanged'}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -399,13 +325,12 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
                         </div>
                     </section>
 
-                    <div className="DialogActions">
+                    <div className="DialogActions ProjectManagementActions">
                         <button
                             className="Button neutral"
-                            disabled={processing || !manifestText}
+                            disabled={processing || !manifest}
                             onClick={() => {
-                                if (mode === 'conversation-project') setConversationManifest('')
-                                else setProjectRenameManifest('')
+                                setManifest('')
                                 setSummary(null)
                             }}
                         >
@@ -416,7 +341,7 @@ export const BulkProjectManagementDialog: FC<BulkProjectManagementDialogProps> =
                             disabled={busy || previewCounts.invalid > 0 || previewCounts.changed === 0}
                             onClick={applyChanges}
                         >
-                            Apply previewed changes
+                            Apply {previewCounts.changed} previewed change{previewCounts.changed === 1 ? '' : 's'}
                         </button>
                     </div>
 
