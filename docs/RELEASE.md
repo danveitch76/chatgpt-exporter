@@ -91,13 +91,14 @@ The `Release Validation` workflow runs only for `userscript-v*` tag pushes. It n
 
 ## Live smoke-test gate
 
-Before tagging, install the userscript from the exact final release tree and smoke-test the capabilities affected by the release plus the core regression paths. For userscript 2.34.0 this includes:
+Before tagging, install the userscript from the exact final release tree and smoke-test the capabilities affected by the release plus the core regression paths. For userscript 2.35.0 this includes:
 
 - single-conversation export;
 - Export All with **JSON (ZIP)**;
 - Project and Chat inventory exports;
 - File Discovery;
 - Bulk Rename against a disposable/test conversation, including preview and confirmed rename;
+- Bulk Project Management against disposable/non-critical records, including a mixed move/rename batch, idempotent rerun and stale-state rejection;
 - source selection/filtering;
 - collapsed-sidebar behaviour.
 
