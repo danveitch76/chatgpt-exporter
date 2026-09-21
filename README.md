@@ -21,7 +21,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp
 > [!NOTE]
 > This repository is a maintained downstream fork of [`pionxzh/chatgpt-exporter`](https://github.com/pionxzh/chatgpt-exporter). It preserves upstream attribution while adding File Discovery and asset classification, filtered Project/Chat inventory exports, Bulk Rename Conversations, validation tooling and governed upstream-maintenance automation.
 
-**Current downstream version:** `2.35.0`
+**Current downstream version:** `2.35.1`
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
@@ -304,7 +304,7 @@ The inventory includes:
 
 ### Current capability boundary
 
-Version 2.35.0 includes discovery and asset classification, current `file-...` / `file_...` reference recognition, resolver proof and backend-path mapping, filtered Project/Chat inventory exports, corrected All-conversations discovery, bulk conversation title transformations, and manifest-driven Bulk Project Management for controlled conversation-to-Project moves and Project renames. This capability remains unreleased until full repository validation, generated-userscript rebuild and live-account smoke validation are complete.
+Version 2.35.0 includes discovery and asset classification, current `file-...` / `file_...` reference recognition, resolver proof and backend-path mapping, filtered Project/Chat inventory exports, corrected All-conversations discovery, bulk conversation title transformations, and manifest-driven Bulk Project Management for controlled conversation-to-Project moves and Project renames. Bulk Project Management was released in 2.35.0; version 2.35.1 adds downstream Tampermonkey update metadata so installations sourced from this fork can discover future updates.
 
 The **File Discovery** user-interface option remains inventory-only. It does not yet perform complete live bulk download and ZIP packaging of all discovered assets. Backend file routes have been identified, but live authenticated download remains subject to further Phase 1 validation.
 

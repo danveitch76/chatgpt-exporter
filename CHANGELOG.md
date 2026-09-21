@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.35.1](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.35.0...userscript-v2.35.1) (2026-09-21)
+
+### Bug Fixes
+
+* add downstream Tampermonkey `@updateURL` and `@downloadURL` metadata pointing to the maintained `master/dist/chatgpt.user.js`
+* correct the documented release commit convention to match the repository's allowed Conventional Commit types
+* add explicit local and remote release-tag collision checks before creating a downstream tag
+
+### References
+
+* Issue #103
+
+
 ## [2.35.0](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.34.0...userscript-v2.35.0) (2026-09-21)
 
 ### Features

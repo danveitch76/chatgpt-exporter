@@ -3,13 +3,15 @@
 // @name:zh-CN         ChatGPT Exporter
 // @name:zh-TW         ChatGPT Exporter
 // @namespace          danveitch76
-// @version            2.35.0
+// @version            2.35.1
 // @author             danveitch76
 // @description        Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.
 // @description:zh-CN  一键导出 ChatGPT 对话，轻松备份与分享
 // @description:zh-TW  一鍵導出 ChatGPT 對話，輕鬆備份與分享
 // @license            MIT
 // @icon               https://chatgpt.com/favicon.ico
+// @downloadURL        https://raw.githubusercontent.com/danveitch76/chatgpt-exporter/master/dist/chatgpt.user.js
+// @updateURL          https://raw.githubusercontent.com/danveitch76/chatgpt-exporter/master/dist/chatgpt.user.js
 // @match              https://chat.openai.com/
 // @match              https://chat.openai.com/?*
 // @match              https://chat.openai.com/c/*
