@@ -669,6 +669,7 @@ html {
 .ProjectManagementActions .Button {
     flex: 0 0 auto;
     width: auto;
+    min-width: 0;
 }
 
 @media (max-width: 820px) {
