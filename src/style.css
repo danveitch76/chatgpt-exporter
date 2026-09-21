@@ -660,6 +660,15 @@ html {
     margin: 0;
     padding-top: 0.65rem;
     border-top: 1px solid var(--ce-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.ProjectManagementActions .Button {
+    flex: 0 0 auto;
+    width: auto;
 }
 
 @media (max-width: 820px) {
