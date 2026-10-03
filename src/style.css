@@ -475,6 +475,11 @@ html {
     padding: 0.25rem;
 }
 
+.ce-menu-header-offset {
+    position: relative;
+    top: 48px;
+}
+
 .ce-menu-floating .ce-nav-trigger {
     margin: 0;
     padding: 0.5rem 0.75rem;

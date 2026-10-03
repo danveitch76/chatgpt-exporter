@@ -11,6 +11,17 @@ function isVisible(element: Element, document: Document): boolean {
 
 /** Keep one menu reachable even when ChatGPT replaces or hides its old anchor. */
 export function syncExporterMenu(container: HTMLDivElement, document: Document, sharePage = false): void {
+    positionExporterMenu(container, document, sharePage)
+    // Some current layouts place the original anchor beside the Project title.
+    // Measure without our existing offset so repeated scans cannot toggle it.
+    const offset = container.classList.contains('ce-menu-header-offset') ? 48 : 0
+    const top = container.getBoundingClientRect().top - offset
+    const nearHeader = container.dataset.ceMenuMode !== 'floating' && top >= 0 && top < 48
+    if (nearHeader) container.classList.add('ce-menu-header-offset')
+    else container.classList.remove('ce-menu-header-offset')
+}
+
+function positionExporterMenu(container: HTMLDivElement, document: Document, sharePage: boolean): void {
     const profile = Array.from(document.querySelectorAll(PROFILE_SELECTOR))
         .find(element => isVisible(element, document))
 

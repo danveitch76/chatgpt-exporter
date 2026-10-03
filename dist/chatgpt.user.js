@@ -3,7 +3,7 @@
 // @name:zh-CN         ChatGPT Exporter
 // @name:zh-TW         ChatGPT Exporter
 // @namespace          danveitch76
-// @version            2.35.3
+// @version            2.35.4
 // @author             danveitch76
 // @description        Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.
 // @description:zh-CN  一键导出 ChatGPT 对话，轻松备份与分享
@@ -549,6 +549,11 @@ html {
 .ce-menu-sidebar-slot {
     flex-shrink: 0;
     padding: 0.25rem;
+}
+
+.ce-menu-header-offset {
+    position: relative;
+    top: 48px;
 }
 
 .ce-menu-floating .ce-nav-trigger {
@@ -27645,6 +27650,14 @@ ${body2}
     return element2.getClientRects().length > 0 && (style == null ? void 0 : style.visibility) !== "hidden" && (style == null ? void 0 : style.visibility) !== "collapse";
   }
   function syncExporterMenu(container, document2, sharePage = false) {
+    positionExporterMenu(container, document2, sharePage);
+    const offset = container.classList.contains("ce-menu-header-offset") ? 48 : 0;
+    const top = container.getBoundingClientRect().top - offset;
+    const nearHeader = container.dataset.ceMenuMode !== "floating" && top >= 0 && top < 48;
+    if (nearHeader) container.classList.add("ce-menu-header-offset");
+    else container.classList.remove("ce-menu-header-offset");
+  }
+  function positionExporterMenu(container, document2, sharePage) {
     const profile = Array.from(document2.querySelectorAll(PROFILE_SELECTOR)).find((element2) => isVisible(element2, document2));
     if (profile) {
       container.classList.remove("ce-menu-sidebar-slot");
@@ -27713,7 +27726,7 @@ ${body2}
   main();
   function main() {
     onloadSafe(() => {
-      console.log("[Exporter] Loaded", "2.35.3");
+      console.log("[Exporter] Loaded", "2.35.4");
       const styleEl = document.createElement("style");
       styleEl.id = "sentinel-css";
       document.head.append(styleEl);

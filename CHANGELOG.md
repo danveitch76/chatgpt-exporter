@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.35.4 (unreleased)
+
+### Bug Fixes
+
+* lower top-mounted exporter launchers by 48 pixels to clear the Project title while preserving the accepted horizontal position
+* apply the offset only near the page header and keep it stable across repeated menu scans
+
+### References
+
+* Issue #109; follows live approval of 2.35.3 menu appearance and position, with a requested header-clearance adjustment
+
 ## 2.35.3 (unreleased)
 
 ### Bug Fixes

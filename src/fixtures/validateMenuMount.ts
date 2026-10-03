@@ -12,11 +12,12 @@ class FixtureElement {
     overflowY = 'visible'
     scrollHeight = 600
     clientHeight = 600
-    rect = { left: 0, width: 300, height: 600 }
+    rect = { left: 0, top: 200, width: 300, height: 600 }
     classes = new Set<string>()
     classList = {
         add: (name: string) => this.classes.add(name),
         remove: (name: string) => this.classes.delete(name),
+        contains: (name: string) => this.classes.has(name),
     }
 
     get nextElementSibling() {
@@ -33,7 +34,7 @@ class FixtureElement {
     }
 
     getBoundingClientRect() {
-        return this.rect
+        return { ...this.rect, top: this.rect.top + (this.classes.has('ce-menu-header-offset') ? 48 : 0) }
     }
 
     getClientRects() {
@@ -111,6 +112,14 @@ sync()
 assert.deepEqual(nav.children, [menu, wrapper])
 assert.equal(menu.dataset.ceMenuMode, 'sidebar')
 assert.equal(menu.classes.has('ce-menu-floating'), false)
+menu.rect.top = 8
+sync()
+assert.ok(menu.classes.has('ce-menu-header-offset'))
+for (let i = 0; i < 10; i++) sync()
+assert.ok(menu.classes.has('ce-menu-header-offset'))
+menu.rect.top = 200
+sync()
+assert.equal(menu.classes.has('ce-menu-header-offset'), false)
 for (let i = 0; i < 10; i++) sync()
 assert.deepEqual(nav.children, [menu, wrapper])
 

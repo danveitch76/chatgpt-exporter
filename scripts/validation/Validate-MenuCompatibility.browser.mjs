@@ -79,6 +79,23 @@ try {
     assert.ok(mr.x >= 0 && mr.y >= 0 && mr.x + mr.width <= 390 && mr.y + mr.height <= 844)
     await mobile.locator('.ce-export-menu').evaluate(el => Promise.all(el.getAnimations().map(a => a.finished)))
     await mobile.screenshot({ path: join(screenshotDir, 'mobile-fallback.png') })
-    console.log('Browser fixture passed: opaque dark/light menus, self-contained layout, recognised sidebar, collapse, relocation, one menu, right-hand fallback, settings interaction and mobile bounds.')
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await fixture(page, 'dark')
+    await page.evaluate(() => {
+        document.querySelector('.chatlist').style.position = 'absolute'
+        document.querySelector('aside > header').style.position = 'absolute'
+        document.querySelector('aside > footer').style.position = 'absolute'
+    })
+    await page.waitForFunction(() => document.querySelector('#chatgpt-exporter-menu')?.classList.contains('ce-menu-header-offset'))
+    const title = await page.locator('aside > header').boundingBox()
+    const launcher = await page.locator('#chatgpt-exporter-menu').boundingBox()
+    assert.ok(launcher.y >= title.y + title.height)
+    await page.waitForTimeout(1100)
+    assert.equal((await page.locator('#chatgpt-exporter-menu').boundingBox()).y, launcher.y)
+    await page.locator('#chatgpt-exporter-menu .ce-nav-trigger').click()
+    await page.locator('.ce-export-menu').waitFor({ state: 'visible' })
+    await page.locator('.ce-export-menu').evaluate(el => Promise.all(el.getAnimations().map(a => a.finished)))
+    await page.screenshot({ path: join(screenshotDir, 'header-clearance.png') })
+    console.log('Browser fixture passed: opaque dark/light menus, self-contained layout, recognised sidebar, collapse, relocation, one menu, right-hand fallback, settings interaction, mobile bounds and stable header clearance.')
 }
 finally { await browser.close() }

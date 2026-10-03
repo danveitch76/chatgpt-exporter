@@ -55,6 +55,14 @@ node scripts/validation/Validate-MenuCompatibility.browser.mjs \
 
 Build `dist/chatgpt.user.js` first. The script loads local installed exporter dependencies, substitutes local browser-storage functions and intercepts requests to a synthetic fixture host. It writes synthetic screenshots only.
 
+## Header clearance follow-up: 2.35.4
+
+Dan subsequently approved the launcher position and requested a small downward move because it obscured the Project title. The launcher now moves down 48 pixels when its mounting position is within the top 48 pixels of the viewport. Its horizontal position is preserved. Existing lower sidebar positions and the floating fallback retain their positions.
+
+The offset is subtracted when measuring the original mounting position so periodic scans cannot alternate the offset. Regression fixtures verify this remains stable across repeated scans. The browser fixture also verifies clearance below a synthetic title row and stability after a subsequent scan. The rendered header-clearance screenshot was visually inspected.
+
+Lint, TypeScript compilation, all thirteen fixtures and the expanded browser compatibility check passed. Two production builds were byte-identical. Distribution SHA-256: `6fe7c2a24da85911eb474eec8567b40d4ae9109fc1300663fcff823f798b8ed0`.
+
 ## Outstanding gate
 
-Install 2.35.3, reload ChatGPT and confirm the actual menu appearance and placement. Follow the release-guide checks and perform one small read-only export. Keep the pull request draft and #109 open until live validation is sufficient. No release or merge is claimed.
+Install 2.35.4, reload ChatGPT and confirm the actual launcher clears the Project title. Follow the release-guide checks and perform one small read-only export. Keep the pull request draft and #109 open until live validation is sufficient. No release or merge is claimed.
