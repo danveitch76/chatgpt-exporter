@@ -133,7 +133,7 @@ The menu-mount fixture verifies relocation and idempotency against a simulated e
 
 On 3 October 2026, Dan explicitly authorised promotion of the validated 2.35.4 repair to `master` before the outstanding live conversation export smoke test. The supplied live screenshots confirm menu appearance and header clearance only. This is a recorded exception for main-channel deployment, not a claim that the full smoke-test gate passed.
 
-Keep #109 open for the remaining account verification. GitHub Actions still reports zero workflow runs (#98). After verifying the main raw userscript serves 2.35.4 and matches the tested distribution, Dan authorised browser publication of the version tag and GitHub Release page. This uses the manual publication route. Verify the tag resolves to the final publication commit; do not infer its Git object type or successful workflow execution from the release page.
+Keep #109 open for the remaining account verification. GitHub Actions still reports zero workflow runs (#98). After verifying the main raw userscript serves 2.35.4 and matches the tested distribution, Dan authorised browser publication of the version tag and GitHub Release page. This uses the manual publication route. Post-publication verification confirmed that `userscript-v2.35.4` resolves to final publication commit `c7bda10a265d66d8df8f37289d0ea05467af3505`. GitHub created a lightweight tag, an explicitly recorded exception to the usual annotated-tag requirement. Preserve the published tag rather than rewriting it. The tagged distribution matches the tested userscript, and the release page is the latest non-draft, non-prerelease release. No workflow execution or live export success is inferred.
 
 ## Post-release checks
 

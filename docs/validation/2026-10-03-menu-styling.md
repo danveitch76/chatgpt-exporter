@@ -74,3 +74,11 @@ The distribution remains byte-identical to the previously tested 2.35.4 build. G
 ## Outstanding verification
 
 Perform one small read-only conversation export and check identity, message order and content. The remaining release-guide account checks and restoration of workflow execution are still outstanding. Keep #109 open for that verification and #98 open for the automation incident. Do not claim backend export success or a complete tagged release from menu screenshots alone.
+
+## Post-publication verification
+
+On 3 October 2026 at 17:07:58 UTC, the GitHub Release page was published as the latest non-draft, non-prerelease release: `userscript-v2.35.4`. The release tag resolves directly to final publication commit `c7bda10a265d66d8df8f37289d0ea05467af3505`. The tagged distribution reports 2.35.4 and its Git blob remains `e263fced838f0cadce7f4c90bcf73459d0993ac9`, exactly matching the tested distribution.
+
+GitHub's browser publication route created a lightweight tag (the tag ref points directly to a commit), rather than the annotated tag specified by the usual release procedure. This is an explicitly recorded publication exception. The already-published tag is not rewritten. GitHub Actions still reports zero workflow runs after publication; #98 remains open. #109 remains open for the outstanding live export/account checks.
+
+Release page: https://github.com/danveitch76/chatgpt-exporter/releases/tag/userscript-v2.35.4
