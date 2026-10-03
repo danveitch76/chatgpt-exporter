@@ -129,6 +129,12 @@ For the 2.35.4 menu-compatibility repair (#109), also verify the exact candidate
 
 The menu-mount fixture verifies relocation and idempotency against a simulated element tree. It does not prove real browser rendering, Tampermonkey execution, changed-account compatibility or backend export success. Keep #109 open until that live evidence exists.
 
+## Authorised main-channel repair: 2.35.4
+
+On 3 October 2026, Dan explicitly authorised promotion of the validated 2.35.4 repair to `master` before the outstanding live conversation export smoke test. The supplied live screenshots confirm menu appearance and header clearance only. This is a recorded exception for main-channel deployment, not a claim that the full smoke-test gate passed.
+
+Keep #109 open for the remaining account verification. GitHub Actions still reports zero workflow runs (#98); the annotated release tag and GitHub Release object remain pending. Verify the main raw userscript serves 2.35.4 and matches the tested distribution before describing the install/update channel as live.
+
 ## Post-release checks
 
 1. Confirm the annotated tag resolves to the intended final release commit.

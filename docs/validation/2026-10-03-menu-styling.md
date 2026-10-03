@@ -63,6 +63,14 @@ The offset is subtracted when measuring the original mounting position so period
 
 Lint, TypeScript compilation, all thirteen fixtures and the expanded browser compatibility check passed. Two production builds were byte-identical. Distribution SHA-256: `6fe7c2a24da85911eb474eec8567b40d4ae9109fc1300663fcff823f798b8ed0`.
 
-## Outstanding gate
+## Authorised main-channel deployment
 
-Install 2.35.4, reload ChatGPT and confirm the actual launcher clears the Project title. Follow the release-guide checks and perform one small read-only export. Keep the pull request draft and #109 open until live validation is sufficient. No release or merge is claimed.
+On 3 October 2026, Dan supplied further screenshots showing the lowered launcher clearing the title and the opaque menu displaying correctly, including placement on the home page. These screenshots were reviewed privately and are not included in the repository.
+
+Dan then explicitly instructed: "Let's make it live." The repair is promoted to the main install/update channel at version 2.35.4 under that instruction. This authorisation permits deployment before the remaining live export smoke test; it is not evidence that such a test passed.
+
+The distribution remains byte-identical to the previously tested 2.35.4 build. GitHub Actions still reports zero workflow runs. Release-tag and GitHub Release creation remain pending. Promotion to `master` must be verified independently by reading the main userscript metadata and comparing its blob with the tested distribution.
+
+## Outstanding verification
+
+Perform one small read-only conversation export and check identity, message order and content. The remaining release-guide account checks and restoration of workflow execution are still outstanding. Keep #109 open for that verification and #98 open for the automation incident. Do not claim backend export success or a complete tagged release from menu screenshots alone.
