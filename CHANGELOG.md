@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.35.4 (2026-10-03)
+## [2.35.4](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.35.1...userscript-v2.35.4) (2026-10-03)
 
 ### Bug Fixes
 
@@ -19,7 +19,7 @@
 * live screenshots confirm menu presentation and title clearance; a live conversation export test remains outstanding
 * Dan explicitly authorised promotion to the main install/update channel on 3 October 2026 despite the outstanding live export test
 * versions 2.35.2 and 2.35.3 were repair candidates and were not released separately
-* GitHub Actions still reports zero workflow runs (#98); the release tag and GitHub Release object remain pending
+* GitHub Actions still reports zero workflow runs (#98); the tag and GitHub Release page are published through the authorised manual route, with no remote automated-validation claim
 
 ### References
 

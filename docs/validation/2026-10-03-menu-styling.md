@@ -69,7 +69,7 @@ On 3 October 2026, Dan supplied further screenshots showing the lowered launcher
 
 Dan then explicitly instructed: "Let's make it live." The repair is promoted to the main install/update channel at version 2.35.4 under that instruction. This authorisation permits deployment before the remaining live export smoke test; it is not evidence that such a test passed.
 
-The distribution remains byte-identical to the previously tested 2.35.4 build. GitHub Actions still reports zero workflow runs. Release-tag and GitHub Release creation remain pending. Promotion to `master` must be verified independently by reading the main userscript metadata and comparing its blob with the tested distribution.
+The distribution remains byte-identical to the previously tested 2.35.4 build. GitHub Actions still reports zero workflow runs. The main channel was independently verified at commit `37fc77fa50840916fdc61dc53d62a0c9234cad2b`: the raw file reports 2.35.4 and its Git blob is `e263fced838f0cadce7f4c90bcf73459d0993ac9`, matching the tested distribution. Dan subsequently authorised the browser route to publish `userscript-v2.35.4` and its GitHub Release page. The final publication commit includes these updated records and preserves that userscript blob. Verify the created tag target and object type separately; no workflow execution or live backend export success is inferred.
 
 ## Outstanding verification
 

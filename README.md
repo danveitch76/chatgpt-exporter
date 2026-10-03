@@ -23,7 +23,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp
 
 **Current downstream version:** `2.35.4`
 
-The main GitHub install/update channel carries the 2.35.4 menu-compatibility repair. Its release tag and GitHub Release page remain pending while repository automation is unavailable. Live screenshots confirm the menu presentation and title clearance; a live conversation export test remains outstanding. See [validation evidence](./docs/validation/2026-10-03-menu-styling.md).
+The main GitHub install/update channel carries the 2.35.4 menu-compatibility repair, published as [userscript-v2.35.4](https://github.com/danveitch76/chatgpt-exporter/releases/tag/userscript-v2.35.4). Publication uses the authorised manual release route because repository automation remains unavailable. Live screenshots confirm the menu presentation and title clearance; a live conversation export test remains outstanding. See [validation evidence](./docs/validation/2026-10-03-menu-styling.md).
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
