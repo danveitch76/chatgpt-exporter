@@ -9,6 +9,10 @@ class FixtureElement {
     dataset: Record<string, string> = {}
     visible = true
     visibility = 'visible'
+    overflowY = 'visible'
+    scrollHeight = 600
+    clientHeight = 600
+    rect = { left: 0, width: 300, height: 600 }
     classes = new Set<string>()
     classList = {
         add: (name: string) => this.classes.add(name),
@@ -22,6 +26,14 @@ class FixtureElement {
 
     get firstElementChild() {
         return this.children[0] ?? null
+    }
+
+    get lastElementChild() {
+        return this.children[this.children.length - 1] ?? null
+    }
+
+    getBoundingClientRect() {
+        return this.rect
     }
 
     getClientRects() {
@@ -60,10 +72,16 @@ const body = new FixtureElement()
 const menu = new FixtureElement()
 let profiles: FixtureElement[] = []
 let shareTargets: FixtureElement[] = []
+let sidebars: FixtureElement[] = []
 const documentFixture = {
     body,
-    defaultView: { getComputedStyle: (element: FixtureElement) => ({ visibility: element.visibility }) },
-    querySelectorAll: (selector: string) => selector.includes('accounts-profile-button') ? profiles : shareTargets,
+    defaultView: {
+        innerHeight: 900,
+        getComputedStyle: (element: FixtureElement) => ({ visibility: element.visibility, overflowY: element.overflowY }),
+    },
+    querySelectorAll: (selector: string) => selector.includes('accounts-profile-button')
+        ? profiles
+        : selector.includes('.flex.w-full') ? shareTargets : sidebars,
 }
 function sync(sharePage = false) {
     syncExporterMenu(
@@ -107,6 +125,37 @@ assert.equal(menu.parentElement, body)
 profile.visibility = 'visible'
 sync()
 assert.equal(menu.parentElement, nav)
+
+// Recognised non-scrolling sidebar with the original profile identifier absent.
+profiles = []
+sidebars = [nav]
+sync()
+assert.equal(menu.parentElement, nav)
+assert.equal(menu.dataset.ceMenuMode, 'sidebar-fallback')
+assert.ok(menu.classes.has('ce-menu-sidebar-slot'))
+assert.equal(nav.lastElementChild, menu)
+for (let i = 0; i < 10; i++) sync()
+assert.equal(nav.children.filter(child => child === menu).length, 1)
+
+// Short header navigation and overflowing lists are not sidebar mounting slots.
+nav.rect.height = 80
+sync()
+assert.equal(menu.parentElement, body)
+nav.rect.height = 600
+nav.overflowY = 'auto'
+nav.scrollHeight = 1200
+sync()
+assert.equal(menu.parentElement, body)
+nav.scrollHeight = 600
+sync()
+assert.equal(menu.parentElement, nav)
+nav.visible = false
+sync()
+assert.equal(menu.parentElement, body)
+assert.equal(menu.classes.has('ce-menu-sidebar-slot'), false)
+nav.visible = true
+profiles = [profile]
+sidebars = []
 
 // A profile sharing a parent with other controls is mounted directly.
 const extra = new FixtureElement()

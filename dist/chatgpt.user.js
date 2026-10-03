@@ -3,7 +3,7 @@
 // @name:zh-CN         ChatGPT Exporter
 // @name:zh-TW         ChatGPT Exporter
 // @namespace          danveitch76
-// @version            2.35.2
+// @version            2.35.3
 // @author             danveitch76
 // @description        Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.
 // @description:zh-CN  一键导出 ChatGPT 对话，轻松备份与分享
@@ -455,26 +455,70 @@ html {
     --ce-border-light: #0d0d0d26;
 }
 
-.dark {
+.dark, html[data-ce-theme="dark"], html[data-theme="dark"], html[style*="color-scheme: dark"], html[style*="color-scheme:dark"] {
     --ce-text-primary: var(--text-primary, #ececec);
     --ce-menu-primary: #2A2A2A;
     --ce-menu-secondary: var(--sidebar-surface-secondary, #212121);
     --ce-border-light: var(--border-default, rgba(255, 255, 255, .15));
 }
 
-.dark .bg-menu {
+.bg-menu {
     background-color: var(--ce-menu-primary);
+}
+
+/* Own the menu layout: ChatGPT's utility classes are not a stable dependency. */
+.ce-export-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    box-sizing: border-box;
+    max-width: calc(100vw - 1.5rem);
+    max-height: calc(100vh - 1.5rem);
+    overflow-y: auto;
+    background-color: var(--ce-menu-primary);
+    color: var(--ce-text-primary);
+    border: 1px solid var(--ce-border-light);
+    font-size: 14px;
+    line-height: 1.4;
+    isolation: isolate;
+    z-index: 999;
+}
+
+.ce-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    height: 46px;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 0.5rem;
+    color: var(--ce-text-primary);
+    cursor: pointer;
+    background-color: transparent;
+}
+
+.ce-menu-item:hover {
+    background-color: var(--ce-menu-secondary);
+}
+
+.ce-menu-item > svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+.ce-menu-item .ce-menu-item-text {
+    min-width: 0;
 }
 
 .border-menu {
     border-color: var(--ce-border-light);
 }
 
-.menu-item {
-    height: 46px;
-}
-
-.menu-item[disabled] {
+.ce-menu-item[disabled] {
     filter: brightness(0.5);
 }
 
@@ -482,6 +526,7 @@ html {
     min-width: 0;
     border: 0;
     color: var(--ce-text-primary);
+    margin: 0.25rem;
 }
 
 .ce-nav-trigger .ce-menu-item-text {
@@ -492,13 +537,18 @@ html {
 
 .ce-menu-floating {
     position: fixed;
-    left: max(1rem, env(safe-area-inset-left));
+    right: max(1rem, env(safe-area-inset-right));
     bottom: max(5rem, env(safe-area-inset-bottom));
     max-width: calc(100vw - 2rem);
     border: 1px solid var(--ce-border-light);
     border-radius: 0.75rem;
     background: var(--ce-menu-primary);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ce-menu-sidebar-slot {
+    flex-shrink: 0;
+    padding: 0.25rem;
 }
 
 .ce-menu-floating .ce-nav-trigger {
@@ -26616,12 +26666,7 @@ ${body2}
       "div",
       {
         className: `
-            menu-item
-            __menu-item hoverable
-            flex flex-shrink-0 m-0 items-center gap-3 rounded-lg
-            transition-colors duration-200
-            cursor-pointer
-            border border-menu ${className}`,
+            ce-menu-item ${className}`,
         onClick: handleClick,
         onTouchStart: handleClick,
         disabled,
@@ -27399,20 +27444,18 @@ ${body2}
                     className: `
                         grid grid-cols-2
                         bg-menu
-                        ce-card
+                        ce-card ce-export-menu
                         transition-opacity duration-200
                         gap-1 py-2 px-1
                         ${isMobile ? "animate-slideUp" : "animate-fadeIn"}`,
                     style: {
-                      width: isMobile ? 316 : 268,
-                      left: -6,
-                      bottom: 0
+                      width: isMobile ? 316 : 268
                     },
                     sideOffset: isMobile ? 0 : 8,
                     side: isMobile ? "bottom" : "right",
                     align: "start",
-                    alignOffset: isMobile ? 0 : -64,
-                    collisionPadding: isMobile ? 0 : 8,
+                    alignOffset: 0,
+                    collisionPadding: 12,
                     children: [
                       /* @__PURE__ */ o$8(
                         SettingDialog,
@@ -27595,6 +27638,7 @@ ${body2}
   }
   const PROFILE_SELECTOR = '[data-testid="accounts-profile-button"]';
   const SHARE_SELECTOR = 'div[role="presentation"] > .w-full > div > .flex.w-full';
+  const SIDEBAR_SELECTOR = '[data-testid="sidebar"], [aria-label="Sidebar"], aside, nav, [role="navigation"]';
   function isVisible(element2, document2) {
     var _a;
     const style = (_a = document2.defaultView) == null ? void 0 : _a.getComputedStyle(element2);
@@ -27603,6 +27647,7 @@ ${body2}
   function syncExporterMenu(container, document2, sharePage = false) {
     const profile = Array.from(document2.querySelectorAll(PROFILE_SELECTOR)).find((element2) => isVisible(element2, document2));
     if (profile) {
+      container.classList.remove("ce-menu-sidebar-slot");
       const wrapper = profile.parentElement;
       const siblings2 = wrapper ? Array.from(wrapper.children).filter((child) => child !== container) : [];
       const target = wrapper && siblings2.length === 1 ? wrapper : profile;
@@ -27615,6 +27660,7 @@ ${body2}
     }
     const shareTarget = sharePage ? Array.from(document2.querySelectorAll(SHARE_SELECTOR)).find((element2) => isVisible(element2, document2)) : void 0;
     if (shareTarget) {
+      container.classList.remove("ce-menu-sidebar-slot");
       container.classList.remove("ce-menu-floating");
       container.dataset.ceMenuMode = "share";
       if (container.parentElement !== shareTarget || shareTarget.firstElementChild !== container) {
@@ -27622,19 +27668,60 @@ ${body2}
       }
       return;
     }
+    const sidebar = Array.from(document2.querySelectorAll(SIDEBAR_SELECTOR)).filter((element2) => {
+      var _a, _b;
+      if (!isVisible(element2, document2)) return false;
+      const rect = element2.getBoundingClientRect();
+      const minHeight = Math.max(160, (((_a = document2.defaultView) == null ? void 0 : _a.innerHeight) ?? 0) / 2);
+      const style = (_b = document2.defaultView) == null ? void 0 : _b.getComputedStyle(element2);
+      const scrolls = ((style == null ? void 0 : style.overflowY) === "auto" || (style == null ? void 0 : style.overflowY) === "scroll") && element2.scrollHeight > element2.clientHeight;
+      return rect.left >= -2 && rect.left <= 32 && rect.width >= 40 && rect.width <= 440 && rect.height >= minHeight && !scrolls;
+    }).sort((a2, b2) => b2.getBoundingClientRect().height - a2.getBoundingClientRect().height)[0];
+    if (sidebar) {
+      container.classList.remove("ce-menu-floating");
+      container.classList.add("ce-menu-sidebar-slot");
+      container.dataset.ceMenuMode = "sidebar-fallback";
+      if (container.parentElement !== sidebar || sidebar.lastElementChild !== container) {
+        sidebar.append(container);
+      }
+      return;
+    }
+    container.classList.remove("ce-menu-sidebar-slot");
     container.classList.add("ce-menu-floating");
     container.dataset.ceMenuMode = "floating";
     if (document2.body && container.parentElement !== document2.body) document2.body.append(container);
   }
+  function syncExporterTheme(document2) {
+    var _a;
+    const root2 = document2.documentElement;
+    const view = document2.defaultView;
+    if (!root2 || !view) return;
+    const scheme = view.getComputedStyle(root2).colorScheme;
+    let dark = scheme === "dark" || root2.matches('.dark, [data-theme="dark"]');
+    if (scheme !== "dark" && scheme !== "light" && !dark) {
+      const background = view.getComputedStyle(document2.body).backgroundColor;
+      const components = (_a = background.match(/[\d.]+/g)) == null ? void 0 : _a.map(Number);
+      if (components && components.length >= 3 && (components[3] ?? 1) > 0) {
+        dark = (components[0] + components[1] + components[2]) / 3 < 128;
+      } else {
+        dark = view.matchMedia("(prefers-color-scheme: dark)").matches;
+      }
+    }
+    const theme = dark ? "dark" : "light";
+    if (root2.dataset.ceTheme !== theme) root2.dataset.ceTheme = theme;
+  }
   main();
   function main() {
     onloadSafe(() => {
-      console.log("[Exporter] Loaded", "2.35.2");
+      console.log("[Exporter] Loaded", "2.35.3");
       const styleEl = document.createElement("style");
       styleEl.id = "sentinel-css";
       document.head.append(styleEl);
       const container = getMenuContainer();
-      const syncMenu = () => syncExporterMenu(container, document, isSharePage());
+      const syncMenu = () => {
+        syncExporterTheme(document);
+        syncExporterMenu(container, document, isSharePage());
+      };
       syncMenu();
       setInterval(syncMenu, 1e3);
       let chatId = "";

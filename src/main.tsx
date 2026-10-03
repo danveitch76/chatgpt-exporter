@@ -4,6 +4,7 @@ import { fetchConversation, processConversation } from './api'
 import { getChatIdFromUrl, isSharePage } from './page'
 import { Menu } from './ui/Menu'
 import { syncExporterMenu } from './ui/menuMount'
+import { syncExporterTheme } from './ui/menuTheme'
 import { onloadSafe } from './utils/utils'
 
 import './i18n'
@@ -21,7 +22,10 @@ function main() {
         document.head.append(styleEl)
 
         const container = getMenuContainer()
-        const syncMenu = () => syncExporterMenu(container, document, isSharePage())
+        const syncMenu = () => {
+            syncExporterTheme(document)
+            syncExporterMenu(container, document, isSharePage())
+        }
         syncMenu()
         // Polling also recovers hidden anchors and client-side navigation without
         // observing every streaming message mutation or recreating menu state.

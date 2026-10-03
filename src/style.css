@@ -379,26 +379,70 @@ html {
     --ce-border-light: #0d0d0d26;
 }
 
-.dark {
+.dark, html[data-ce-theme="dark"], html[data-theme="dark"], html[style*="color-scheme: dark"], html[style*="color-scheme:dark"] {
     --ce-text-primary: var(--text-primary, #ececec);
     --ce-menu-primary: #2A2A2A;
     --ce-menu-secondary: var(--sidebar-surface-secondary, #212121);
     --ce-border-light: var(--border-default, rgba(255, 255, 255, .15));
 }
 
-.dark .bg-menu {
+.bg-menu {
     background-color: var(--ce-menu-primary);
+}
+
+/* Own the menu layout: ChatGPT's utility classes are not a stable dependency. */
+.ce-export-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    box-sizing: border-box;
+    max-width: calc(100vw - 1.5rem);
+    max-height: calc(100vh - 1.5rem);
+    overflow-y: auto;
+    background-color: var(--ce-menu-primary);
+    color: var(--ce-text-primary);
+    border: 1px solid var(--ce-border-light);
+    font-size: 14px;
+    line-height: 1.4;
+    isolation: isolate;
+    z-index: 999;
+}
+
+.ce-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    height: 46px;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 0.5rem;
+    color: var(--ce-text-primary);
+    cursor: pointer;
+    background-color: transparent;
+}
+
+.ce-menu-item:hover {
+    background-color: var(--ce-menu-secondary);
+}
+
+.ce-menu-item > svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+.ce-menu-item .ce-menu-item-text {
+    min-width: 0;
 }
 
 .border-menu {
     border-color: var(--ce-border-light);
 }
 
-.menu-item {
-    height: 46px;
-}
-
-.menu-item[disabled] {
+.ce-menu-item[disabled] {
     filter: brightness(0.5);
 }
 
@@ -406,6 +450,7 @@ html {
     min-width: 0;
     border: 0;
     color: var(--ce-text-primary);
+    margin: 0.25rem;
 }
 
 .ce-nav-trigger .ce-menu-item-text {
@@ -416,13 +461,18 @@ html {
 
 .ce-menu-floating {
     position: fixed;
-    left: max(1rem, env(safe-area-inset-left));
+    right: max(1rem, env(safe-area-inset-right));
     bottom: max(5rem, env(safe-area-inset-bottom));
     max-width: calc(100vw - 2rem);
     border: 1px solid var(--ce-border-light);
     border-radius: 0.75rem;
     background: var(--ce-menu-primary);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ce-menu-sidebar-slot {
+    flex-shrink: 0;
+    padding: 0.25rem;
 }
 
 .ce-menu-floating .ce-nav-trigger {

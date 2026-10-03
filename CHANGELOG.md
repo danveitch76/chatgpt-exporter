@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.35.3 (unreleased)
+
+### Bug Fixes
+
+* make menu background, grid, item layout and icons independent of ChatGPT utility classes
+* detect the current page theme without requiring the previous `.dark` class
+* use a recognised non-scrolling sidebar when the original profile identifier is missing
+* move the unknown-layout launcher to the bottom right, away from the chat list
+* remove hard-coded popup offsets and improve popup stacking and viewport containment
+
+### References
+
+* Issue #109; supersedes the visually rejected 2.35.2 candidate; live validation remains required
+
 ## 2.35.2 (unreleased)
 
 ### Bug Fixes

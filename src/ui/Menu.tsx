@@ -160,7 +160,7 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
                         className={`
                         grid grid-cols-2
                         bg-menu
-                        ce-card
+                        ce-card ce-export-menu
                         transition-opacity duration-200
                         gap-1 py-2 px-1
                         ${isMobile
@@ -168,14 +168,12 @@ function MenuInner({ container }: { container: HTMLDivElement }) {
                             : 'animate-fadeIn'}`}
                         style={{
                             width: isMobile ? 316 : 268,
-                            left: -6,
-                            bottom: 0,
                         }}
                         sideOffset={isMobile ? 0 : 8}
                         side={isMobile ? 'bottom' : 'right'}
                         align="start"
-                        alignOffset={isMobile ? 0 : -64}
-                        collisionPadding={isMobile ? 0 : 8}
+                        alignOffset={0}
+                        collisionPadding={12}
                     >
                         <SettingDialog
                             open={settingOpen}
