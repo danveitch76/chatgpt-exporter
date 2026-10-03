@@ -3,6 +3,8 @@ import sentinel from 'sentinel-js'
 import { fetchConversation, processConversation } from './api'
 import { getChatIdFromUrl, isSharePage } from './page'
 import { Menu } from './ui/Menu'
+import { syncExporterMenu } from './ui/menuMount'
+import { syncExporterTheme } from './ui/menuTheme'
 import { onloadSafe } from './utils/utils'
 
 import './i18n'
@@ -13,47 +15,21 @@ main()
 function main() {
     onloadSafe(() => {
         // eslint-disable-next-line no-console
-        console.log('[Exporter] Loaded')
+        console.log('[Exporter] Loaded', __EXPORTER_VERSION__)
 
         const styleEl = document.createElement('style')
         styleEl.id = 'sentinel-css'
         document.head.append(styleEl)
 
-        const injectionMap = new Map<Element, Element>()
-
-        const injectNavMenu = (target: Element) => {
-            if (injectionMap.has(target)) return
-
-            // eslint-disable-next-line no-console
-            console.log('[Exporter] Injecting nav', target)
-
-            const container = getMenuContainer()
-            injectionMap.set(target, container)
-            getNavMenuInsertionTarget(target).before(container)
+        const container = getMenuContainer()
+        const syncMenu = () => {
+            syncExporterTheme(document)
+            syncExporterMenu(container, document, isSharePage())
         }
-
-        const selector = '[data-testid="accounts-profile-button"]'
-
-        sentinel.on('selector', injectNavMenu)
-
-        setInterval(() => {
-            injectionMap.forEach((container, target) => {
-                if (!target.isConnected) {
-                    container.remove()
-                    injectionMap.delete(target)
-                }
-            })
-
-            const targets = Array.from(document.querySelectorAll(selector)).filter(target => !injectionMap.has(target))
-            targets.forEach(injectNavMenu)
-        }, 1000)
-
-        // Support for share page
-        if (isSharePage()) {
-            sentinel.on(`div[role="presentation"] > .w-full > div >.flex.w-full`, (target) => {
-                target.prepend(getMenuContainer())
-            })
-        }
+        syncMenu()
+        // Polling also recovers hidden anchors and client-side navigation without
+        // observing every streaming message mutation or recreating menu state.
+        setInterval(syncMenu, 1000)
 
         /** Insert timestamp to the bottom right of each message */
         let chatId = ''
@@ -94,15 +70,9 @@ function main() {
 
 function getMenuContainer() {
     const container = document.createElement('div')
+    container.id = 'chatgpt-exporter-menu'
     // to overlap on the list section
     container.style.zIndex = '99'
     render(<Menu container={container} />, container)
     return container
-}
-
-function getNavMenuInsertionTarget(target: Element) {
-    const wrapper = target.parentElement
-    if (!wrapper || wrapper.children.length !== 1) return target
-
-    return wrapper
 }

@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.35.4 (2026-10-03)
+
+### Bug Fixes
+
+* restore access to one existing exporter menu when the original ChatGPT profile anchor is absent or hidden
+* recover after navigation, sidebar replacement and collapse/expand without recreating menu state
+* give the popup its own opaque background, grid, item/icon layout and theme detection, independent of ChatGPT utility classes
+* use a recognised non-scrolling left-hand navigation region where available, with a bottom-right fallback
+* lower top-mounted launchers by 48 pixels to clear the Project title and keep the offset stable across repeated scans
+* preserve supported shared-page placement and remove the accidental literal selector listener
+* cover all application paths on the current and legacy ChatGPT hosts and log the installed version at startup
+
+### Validation and publication
+
+* lint, TypeScript compilation, thirteen regression fixtures and synthetic Chromium compatibility checks passed
+* production builds were byte-identical; existing export and management implementations remain unchanged
+* live screenshots confirm menu presentation and title clearance; a live conversation export test remains outstanding
+* Dan explicitly authorised promotion to the main install/update channel on 3 October 2026 despite the outstanding live export test
+* versions 2.35.2 and 2.35.3 were repair candidates and were not released separately
+* GitHub Actions still reports zero workflow runs (#98); the release tag and GitHub Release object remain pending
+
+### References
+
+* Issue #109 and pull request #110
+* `docs/validation/2026-10-03-menu-styling.md`
+
 ## [2.35.1](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.35.0...userscript-v2.35.1) (2026-09-21)
 
 ### Bug Fixes

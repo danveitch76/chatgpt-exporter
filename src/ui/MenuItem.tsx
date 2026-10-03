@@ -44,12 +44,7 @@ export const MenuItem: FC<MenuItemProps> = ({ text, successText, disabled = fals
     return (
         <div
             className={`
-            menu-item
-            __menu-item hoverable
-            flex flex-shrink-0 m-0 items-center gap-3 rounded-lg
-            transition-colors duration-200
-            cursor-pointer
-            border border-menu ${className}`}
+            ce-menu-item ${className}`}
             onClick={handleClick}
             onTouchStart={handleClick}
             disabled={disabled}

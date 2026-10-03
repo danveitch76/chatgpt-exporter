@@ -3,7 +3,7 @@
 // @name:zh-CN         ChatGPT Exporter
 // @name:zh-TW         ChatGPT Exporter
 // @namespace          danveitch76
-// @version            2.35.1
+// @version            2.35.4
 // @author             danveitch76
 // @description        Export ChatGPT conversations and discover attached files, generated assets and extraction inventories.
 // @description:zh-CN  一键导出 ChatGPT 对话，轻松备份与分享
@@ -12,22 +12,8 @@
 // @icon               https://chatgpt.com/favicon.ico
 // @downloadURL        https://raw.githubusercontent.com/danveitch76/chatgpt-exporter/master/dist/chatgpt.user.js
 // @updateURL          https://raw.githubusercontent.com/danveitch76/chatgpt-exporter/master/dist/chatgpt.user.js
-// @match              https://chat.openai.com/
-// @match              https://chat.openai.com/?*
-// @match              https://chat.openai.com/c/*
-// @match              https://chat.openai.com/g/*
-// @match              https://chat.openai.com/gpts
-// @match              https://chat.openai.com/gpts/*
-// @match              https://chat.openai.com/share/*
-// @match              https://chat.openai.com/share/*/continue
-// @match              https://chatgpt.com/
-// @match              https://chatgpt.com/?*
-// @match              https://chatgpt.com/c/*
-// @match              https://chatgpt.com/g/*
-// @match              https://chatgpt.com/gpts
-// @match              https://chatgpt.com/gpts/*
-// @match              https://chatgpt.com/share/*
-// @match              https://chatgpt.com/share/*/continue
+// @match              https://chat.openai.com/*
+// @match              https://chatgpt.com/*
 // @require            https://cdn.jsdelivr.net/npm/jszip@3.9.1/dist/jszip.min.js
 // @require            https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js
 // @grant              GM_deleteValue
@@ -37,1274 +23,1345 @@
 // @run-at             document-end
 // ==/UserScript==
 
-(n=>{const r=document.createElement("style");r.textContent=n,document.head.append(r),setInterval(()=>{r.isConnected||document.head.append(r)},300)})(` .CheckBoxLabel {\r
-    position: relative;\r
-    display: flex;\r
-    font-size: 16px;\r
-    vertical-align: middle;\r
-}\r
-\r
-.CheckBoxLabel * {\r
-    cursor: pointer;\r
-}\r
-\r
-.CheckBoxLabel[disabled] {\r
-    opacity: 0.7;\r
-}\r
-\r
-.CheckBoxLabel[disabled] * {\r
-    cursor: not-allowed;\r
-}\r
-\r
-.CheckBoxLabel input {\r
-    position: absolute;\r
-    opacity: 0;\r
-    width: 100%;\r
-    height: 100%;\r
-    top: 0;\r
-    left: 0;\r
-    margin: 0;\r
-    padding: 0;\r
-}\r
-\r
-.CheckBoxLabel .IconWrapper {\r
-    display: inline-flex;\r
-    align-items: center;\r
-    position: relative;\r
-    vertical-align: middle;\r
-    font-size: 1.5rem;\r
-}\r
-\r
-.CheckBoxLabel input:checked ~ svg {\r
-    color: rgb(28 100 242);\r
-}\r
-\r
-.dark .CheckBoxLabel input:checked ~ svg {\r
-    color: rgb(144, 202, 249);\r
-}\r
-\r
-.CheckBoxLabel .LabelText {\r
-    margin-left: 0.5rem;\r
-    font-size: 1rem;\r
-    line-height: 1.5;\r
-}\r
-span[data-time-format] {\r
-    display: none;\r
-}\r
-\r
-body[data-time-format="12"] span[data-time-format="12"] {\r
-    display: inline;\r
-}\r
-\r
-body[data-time-format="24"] span[data-time-format="24"] {\r
-    display: inline;\r
-}\r
-\r
-.Select {\r
-    padding: 0 2rem 0 0.5rem;\r
-    width: auto;\r
-    min-width: 7.5rem;\r
-    border-radius: 4px;\r
-    box-shadow: 0 0 0 1px #6f6e77;\r
-}\r
-\r
-.dark .Select {\r
-    background-color: #2f2f2f;\r
-    color: #fff;\r
-    box-shadow: 0 0 0 1px #6f6e77;\r
-}\r
-\r
-/* Export dialog layout ---------------------------------------------------- */\r
-.DialogContent._export {\r
-    width: min(94vw, 76rem);\r
-    max-width: 76rem;\r
-    height: 92vh;\r
-    max-height: 92vh;\r
-}\r
-\r
-.ExportStatusBox {\r
-    position: relative;\r
-    display: flex;\r
-    align-items: center;\r
-    gap: 0.65rem;\r
-    min-height: 2.75rem;\r
-    margin: 0.4rem 0 0.65rem;\r
-    padding: 0.5rem 0.85rem;\r
-    overflow: hidden;\r
-    border: 1px solid var(--ce-border-light);\r
-    border-radius: 5px;\r
-    color: var(--ce-text-primary);\r
-}\r
-\r
-.ExportStatusText {\r
-    min-width: 0;\r
-    flex: 1 1 auto;\r
-    overflow: hidden;\r
-    text-overflow: ellipsis;\r
-    white-space: nowrap;\r
-}\r
-\r
-.ExportStatusDetail {\r
-    flex: 0 0 auto;\r
-    font-variant-numeric: tabular-nums;\r
-    color: #6ea8ff;\r
-}\r
-\r
-.ExportStatusProgress {\r
-    position: absolute;\r
-    right: 0;\r
-    bottom: 0;\r
-    left: 0;\r
-    height: 2px;\r
-    background: transparent;\r
-}\r
-\r
-.ExportStatusProgress > span {\r
-    display: block;\r
-    height: 100%;\r
-    background: #3b82f6;\r
-    transition: width 160ms ease;\r
-}\r
-\r
-.ExportFilters {\r
-    margin-bottom: 0.65rem;\r
-    padding: 0.35rem 1rem;\r
-    border: 1px solid var(--ce-border-light);\r
-    border-radius: 5px;\r
-}\r
-\r
-/* The filter box itself provides enough context; omit a redundant title row. */\r
-.ExportFiltersTitle {\r
-    display: none;\r
-}\r
-\r
-.ExportFilterRow,\r
-.ProjectSelect.ExportFilterRow {\r
-    display: grid;\r
-    grid-template-columns: 7.5rem minmax(0, 1fr);\r
-    align-items: center;\r
-    gap: 0.7rem;\r
-    margin: 0;\r
-    padding: 0.45rem 0;\r
-    color: var(--ce-text-primary);\r
-}\r
-\r
-.ExportFilterRow + .ExportFilterRow,\r
-.ExportFilterRow + .ProjectSelect.ExportFilterRow,\r
-.ProjectSelect.ExportFilterRow + .ExportFilterRow {\r
-    border-top: 1px solid var(--ce-border-light);\r
-}\r
-\r
-.ExportFilterLabel {\r
-    white-space: nowrap;\r
-    font-size: 0.875rem;\r
-    font-weight: 500;\r
-}\r
-\r
-.ExportFilterControl {\r
-    min-width: 0;\r
-}\r
-\r
-.ExportFilterControl > .Select,\r
-.ProjectSelect.ExportFilterRow > .Select {\r
-    width: 100%;\r
-}\r
-\r
-.ExportSourceRow {\r
-    grid-template-columns: 7.5rem minmax(16rem, 1fr) auto;\r
-}\r
-\r
-.ExportSourceActions {\r
-    display: flex;\r
-    align-items: center;\r
-    justify-content: flex-end;\r
-    gap: 0.5rem;\r
-    white-space: nowrap;\r
-}\r
-\r
-.ExportDateRow {\r
-    grid-template-columns: 7.5rem 9rem auto minmax(8.5rem, 1fr) auto minmax(8.5rem, 1fr) auto;\r
-}\r
-\r
-.ExportDateRow label {\r
-    white-space: nowrap;\r
-    font-size: 0.875rem;\r
-}\r
-\r
-.ExportDateRow input[type="date"] {\r
-    width: 100%;\r
-    min-width: 0;\r
-    height: 1.95rem;\r
-    box-sizing: border-box;\r
-}\r
-\r
-.ExportSearchRow {\r
-    grid-template-columns: 7.5rem minmax(0, 1fr);\r
-}\r
-\r
-.ExportSearchRow .SelectSearch {\r
-    width: 100%;\r
-    min-width: 0;\r
-    margin: 0;\r
-    box-sizing: border-box;\r
-    border: 1px solid #6f6e77;\r
-    border-radius: 4px;\r
-    box-shadow: none;\r
-}\r
-\r
-.SelectToolbar {\r
-    margin: 0 0 0.6rem;\r
-    border: 1px solid var(--ce-border-light);\r
-    border-radius: 5px;\r
-}\r
-\r
-.InventoryPreview {\r
-    display: flex;\r
-    min-height: 0;\r
-    flex: 1 1 auto;\r
-    flex-direction: column;\r
-    overflow: hidden;\r
-    border: 1px solid var(--ce-border-light);\r
-    border-radius: 5px;\r
-    color: var(--ce-text-primary);\r
-}\r
-\r
-.InventoryPreviewHeader,\r
-.InventoryPreviewRow {\r
-    display: grid;\r
-    grid-template-columns: minmax(16rem, 1.6fr) minmax(12rem, 1fr) minmax(12rem, 1fr) minmax(20rem, 1.8fr);\r
-    align-items: center;\r
-}\r
-\r
-.InventoryPreviewHeader {\r
-    flex: 0 0 auto;\r
-    border-bottom: 1px solid var(--ce-border-light);\r
-    background: var(--ce-menu-secondary);\r
-    font-size: 0.75rem;\r
-    font-weight: 600;\r
-}\r
-\r
-.InventoryPreviewHeaderCell,\r
-.InventoryPreviewCell {\r
-    min-width: 0;\r
-    padding: 0.45rem 0.6rem;\r
-    overflow: hidden;\r
-    text-overflow: ellipsis;\r
-    white-space: nowrap;\r
-}\r
-\r
-.InventoryPreviewHeaderCell + .InventoryPreviewHeaderCell,\r
-.InventoryPreviewCell + .InventoryPreviewCell {\r
-    border-left: 1px solid var(--ce-border-light);\r
-}\r
-\r
-.InventoryPreviewBody {\r
-    min-height: 0;\r
-    flex: 1 1 auto;\r
-    overflow: auto;\r
-}\r
-\r
-.InventoryPreviewRow {\r
-    min-width: 70rem;\r
-    border-bottom: 1px solid var(--ce-border-light);\r
-    font-size: 0.8125rem;\r
-}\r
-\r
-.InventoryPreviewRow:last-child {\r
-    border-bottom: 0;\r
-}\r
-\r
-.InventoryPreviewCellPrimary {\r
-    font-weight: 500;\r
-}\r
-\r
-.InventoryPreviewEmpty {\r
-    padding: 1rem;\r
-    color: #9ca3af;\r
-}\r
-\r
-/* Bulk rename dialog ------------------------------------------------------ */\r
-.DialogContent._export.BulkRenameDialog {\r
-    width: min(94vw, 76rem);\r
-    max-width: 76rem;\r
-    height: min(90vh, 62rem);\r
-    max-height: 90vh;\r
-    display: grid;\r
-    grid-template-rows:\r
-        auto\r
-        auto\r
-        auto\r
-        auto\r
-        minmax(7rem, 1.15fr)\r
-        auto\r
-        auto\r
-        minmax(6rem, 0.85fr)\r
-        auto;\r
-    overflow: hidden;\r
-}\r
-\r
-.BulkRenameDialog > .DialogTitle {\r
-    margin-bottom: 0.4rem;\r
-}\r
-\r
-.BulkRenameDialog > .ExportStatusBox {\r
-    margin: 0 0 0.55rem;\r
-}\r
-\r
-.BulkRenameDialog > .ExportFilters {\r
-    margin-bottom: 0.55rem;\r
-}\r
-\r
-.BulkRenameDialog > .SelectToolbar {\r
-    margin: 0;\r
-    border-radius: 5px 5px 0 0;\r
-}\r
-\r
-.BulkRenameConversationList {\r
-    min-height: 0;\r
-    max-height: none !important;\r
-    margin: 0 0 0.55rem;\r
-    border-top: 0;\r
-    border-radius: 0 0 5px 5px;\r
-}\r
-\r
-.BulkRenameTransform {\r
-    margin: 0 0 0.45rem !important;\r
-}\r
-\r
-.BulkRenamePreviewSummary {\r
-    display: flex;\r
-    align-items: baseline;\r
-    gap: 0.5rem;\r
-    min-height: 1.35rem;\r
-    margin: 0;\r
-    font-size: 0.78rem;\r
-}\r
-\r
-.BulkRenamePreviewSummary > span {\r
-    margin-left: 0 !important;\r
-}\r
-\r
-.BulkRenamePreviewTable {\r
-    min-height: 0;\r
-    margin-top: 0.3rem;\r
-    overflow: auto;\r
-    border: 1px solid var(--ce-border-light);\r
-    border-radius: 4px;\r
-}\r
-\r
-.BulkRenamePreviewTable > div:first-child {\r
-    position: sticky;\r
-    top: 0;\r
-    z-index: 1;\r
-    background: var(--ce-menu-primary);\r
-}\r
-\r
-.BulkRenameFooter {\r
-    min-height: 3rem;\r
-    margin-top: 0.55rem;\r
-    padding-top: 0.55rem;\r
-    border-top: 1px solid var(--ce-border-light);\r
-    background: var(--ce-menu-primary);\r
-}\r
-\r
-.BulkRenameFooter .Button.green {\r
-    min-width: 7rem;\r
-}\r
-\r
-@media (max-width: 820px) {\r
-    .DialogContent._export.BulkRenameDialog {\r
-        width: min(96vw, 48rem);\r
-        height: 94vh;\r
-        max-height: 94vh;\r
-        grid-template-rows:\r
-            auto\r
-            auto\r
-            auto\r
-            auto\r
-            minmax(6rem, 1fr)\r
-            auto\r
-            auto\r
-            minmax(5rem, 0.8fr)\r
-            auto;\r
-        padding-right: 1rem;\r
-        padding-left: 1rem;\r
-    }\r
-\r
-    .BulkRenameFooter {\r
-        position: sticky;\r
-        bottom: 0;\r
-        z-index: 2;\r
-    }\r
-\r
-    .DialogContent._export {\r
-        width: min(96vw, 48rem);\r
-        height: 92vh;\r
-        max-height: 92vh;\r
-    }\r
-\r
-    .ExportSourceRow,\r
-    .ExportDateRow,\r
-    .ExportFilterRow,\r
-    .ProjectSelect.ExportFilterRow,\r
-    .ExportSearchRow {\r
-        grid-template-columns: 1fr;\r
-        gap: 0.4rem;\r
-    }\r
-\r
-    .ExportSourceActions {\r
-        justify-content: flex-start;\r
-    }\r
-\r
-    .InventoryPreviewHeader,\r
-    .InventoryPreviewRow {\r
-        grid-template-columns: minmax(14rem, 1.5fr) minmax(10rem, 1fr) minmax(10rem, 1fr) minmax(18rem, 1.5fr);\r
-    }\r
-}\r
-\r
-html {\r
-    --ce-text-primary: var(--text-primary, #0d0d0d);\r
-    --ce-menu-primary: #ffffff;\r
-    --ce-menu-secondary: var(--sidebar-surface-secondary, #ececec);\r
-    --ce-border-light: #0d0d0d26;\r
-}\r
-\r
-.dark {\r
-    --ce-text-primary: var(--text-primary, #ececec);\r
-    --ce-menu-primary: #2A2A2A;\r
-    --ce-menu-secondary: var(--sidebar-surface-secondary, #212121);\r
-    --ce-border-light: var(--border-default, rgba(255, 255, 255, .15));\r
-}\r
-\r
-.dark .bg-menu {\r
-    background-color: var(--ce-menu-primary);\r
-}\r
-\r
-.border-menu {\r
-    border-color: var(--ce-border-light);\r
-}\r
-\r
-.menu-item {\r
-    height: 46px;\r
-}\r
-\r
-.menu-item[disabled] {\r
-    filter: brightness(0.5);\r
-}\r
-\r
-.ce-nav-trigger {\r
-    min-width: 0;\r
-    border: 0;\r
-    color: var(--ce-text-primary);\r
-}\r
-\r
-.ce-nav-trigger .ce-menu-item-text {\r
-    overflow: hidden;\r
-    text-overflow: ellipsis;\r
-    white-space: nowrap;\r
-}\r
-\r
-.ce-nav-trigger-collapsed {\r
-    width: 32px;\r
-    height: 32px;\r
-    margin: 0 auto 0.5rem;\r
-    padding: 0;\r
-    justify-content: center;\r
-    gap: 0;\r
-    border-radius: 8px;\r
-    color: var(--text-secondary, var(--ce-text-primary));\r
-}\r
-\r
-.ce-nav-trigger-collapsed:hover {\r
-    background-color: var(--sidebar-surface-secondary, rgba(255, 255, 255, 0.1));\r
-}\r
-\r
-.ce-nav-trigger-collapsed .ce-menu-item-text {\r
-    display: none;\r
-}\r
-\r
-.ce-card {\r
-    border-radius: 1rem;\r
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);\r
-}\r
-\r
-.dark .ce-card {\r
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);\r
-}\r
-\r
-.inputFieldSet {\r
-    display: block;\r
-    border-width: 2px;\r
-    border-style: groove;\r
-}\r
-\r
-.inputFieldSet legend {\r
-    margin-left: 4px;\r
-}\r
-\r
-.inputFieldSet input {\r
-    background-color: transparent;\r
-    box-shadow: none!important;\r
-}\r
-\r
-.row-half {\r
-    grid-column: auto / span 1;\r
-}\r
-\r
-.row-full {\r
-    grid-column: auto / span 2;\r
-}\r
-\r
-.dropdown-backdrop {\r
-    display: block;\r
-    position: fixed;\r
-    top: 0;\r
-    bottom: 0;\r
-    left: 0;\r
-    right: 0;\r
-    background-color: rgba(0,0,0,.5);\r
-    animation-name: pointerFadeIn;\r
-    animation-duration: .3s;\r
-}\r
-\r
-@keyframes fadeIn {\r
-    from {\r
-        opacity: 0;\r
-    }\r
-    to {\r
-        opacity: 1;\r
-    }\r
-}\r
-\r
-@keyframes slideUp {\r
-    from {\r
-        transform: translateY(100%);\r
-    }\r
-    to {\r
-        transform: translateY(0);\r
-    }\r
-}\r
-\r
-@keyframes pointerFadeIn {\r
-    from {\r
-        opacity: 0;\r
-        pointer-events: none;\r
-    }\r
-    to {\r
-        opacity: 1;\r
-        pointer-events: auto;\r
-    }\r
-}\r
-\r
-@keyframes rotate {\r
-    from {\r
-        transform: rotate(0deg);\r
-    }\r
-    to {\r
-        transform: rotate(360deg);\r
-    }\r
-}\r
-\r
-@keyframes circularDash {\r
-    0% {\r
-        stroke-dasharray: 1px, 200px;\r
-        stroke-dashoffset: 0;\r
-    }\r
-    50% {\r
-        stroke-dasharray: 100px, 200px;\r
-        stroke-dashoffset: -15px;\r
-    }\r
-    100% {\r
-        stroke-dasharray: 100px, 200px;\r
-        stroke-dashoffset: -125px;\r
-    }\r
-}\r
-\r
-\r
-/* Bulk Project management dialog ----------------------------------------- */\r
-.DialogContent._export.BulkProjectManagementDialog {\r
-    width: min(96vw, 82rem);\r
-    max-width: 82rem;\r
-    height: min(92vh, 64rem);\r
-    max-height: 92vh;\r
-    display: grid;\r
-    grid-template-rows: auto auto minmax(13rem, 0.9fr) minmax(12rem, 1.1fr) auto;\r
-    gap: 0.65rem;\r
-    overflow: hidden;\r
-}\r
-\r
-.BulkProjectManagementDialog > .DialogTitle,\r
-.BulkProjectManagementDialog > .ExportStatusBox {\r
-    margin: 0;\r
-}\r
-\r
-.ProjectManagementManifest,\r
-.ProjectManagementPreview {\r
-    min-width: 0;\r
-    min-height: 0;\r
-    display: flex;\r
-    flex-direction: column;\r
-}\r
-\r
-.ProjectManagementSectionTitle,\r
-.ProjectManagementPreviewHeader {\r
-    display: flex;\r
-    align-items: baseline;\r
-    justify-content: space-between;\r
-    gap: 1rem;\r
-    margin-bottom: 0.4rem;\r
-    color: var(--ce-text-primary);\r
-    font-size: 0.875rem;\r
-    font-weight: 600;\r
-}\r
-\r
-.ProjectManagementManifestInput {\r
-    width: 100%;\r
-    min-width: 0;\r
-    min-height: 10rem;\r
-    flex: 1 1 auto;\r
-    box-sizing: border-box;\r
-    padding: 0.75rem;\r
-    resize: vertical;\r
-    overflow: auto;\r
-    border: 1px solid var(--ce-border-light);\r
-    border-radius: 5px;\r
-    background: var(--ce-menu-primary);\r
-    color: var(--ce-text-primary);\r
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;\r
-    font-size: 0.8125rem;\r
-    line-height: 1.45;\r
-    white-space: pre;\r
-}\r
-\r
-.ProjectManagementManifest .RenameHelpText {\r
-    margin-top: 0.4rem;\r
-}\r
-\r
-.ProjectManagementPreviewHeader > span:last-child {\r
-    font-weight: 400;\r
-    color: #9ca3af;\r
-}\r
-\r
-.ProjectManagementPreviewTableWrap {\r
-    min-height: 0;\r
-    flex: 1 1 auto;\r
-    overflow: auto;\r
-    border: 1px solid var(--ce-border-light);\r
-    border-radius: 5px;\r
-}\r
-\r
-.ProjectManagementPreviewTable {\r
-    width: 100%;\r
-    min-width: 68rem;\r
-    border-collapse: collapse;\r
-    table-layout: fixed;\r
-    color: var(--ce-text-primary);\r
-    font-size: 0.8125rem;\r
-}\r
-\r
-.ProjectManagementPreviewTable th,\r
-.ProjectManagementPreviewTable td {\r
-    padding: 0.55rem 0.65rem;\r
-    border-bottom: 1px solid var(--ce-border-light);\r
-    text-align: left;\r
-    vertical-align: top;\r
-    overflow-wrap: anywhere;\r
-}\r
-\r
-.ProjectManagementPreviewTable th {\r
-    position: sticky;\r
-    top: 0;\r
-    z-index: 1;\r
-    background: var(--ce-menu-secondary);\r
-    font-size: 0.75rem;\r
-    font-weight: 600;\r
-}\r
-\r
-.ProjectManagementPreviewTable th:nth-child(1) {\r
-    width: 9rem;\r
-}\r
-\r
-.ProjectManagementPreviewTable th:nth-child(2) {\r
-    width: 18rem;\r
-}\r
-\r
-.ProjectManagementPreviewTable th:nth-child(3),\r
-.ProjectManagementPreviewTable th:nth-child(4) {\r
-    width: 13rem;\r
-}\r
-\r
-.ProjectManagementPreviewTable th:nth-child(5) {\r
-    width: 18rem;\r
-}\r
-\r
-.ProjectManagementPreviewTable tbody tr:last-child td {\r
-    border-bottom: 0;\r
-}\r
-\r
-.ProjectManagementInvalid {\r
-    font-weight: 500;\r
-}\r
-\r
-.ProjectManagementActions {\r
-    margin: 0;\r
-    padding-top: 0.65rem;\r
-    border-top: 1px solid var(--ce-border-light);\r
-    display: flex;\r
-    align-items: center;\r
-    justify-content: flex-end;\r
-    gap: 0.5rem;\r
-}\r
-\r
-.ProjectManagementActions .Button {\r
-    flex: 0 0 auto;\r
-    width: auto;\r
-    min-width: 0;\r
-}\r
-\r
-@media (max-width: 820px) {\r
-    .DialogContent._export.BulkProjectManagementDialog {\r
-        width: 96vw;\r
-        height: 94vh;\r
-        max-height: 94vh;\r
-        grid-template-rows: auto auto minmax(11rem, 0.9fr) minmax(10rem, 1.1fr) auto;\r
-        padding-right: 1rem;\r
-        padding-left: 1rem;\r
-    }\r
-\r
-    .BulkProjectManagementDialog .ExportStatusBox {\r
-        align-items: flex-start;\r
-        flex-direction: column;\r
-    }\r
-\r
-    .BulkProjectManagementDialog .ExportStatusDetail {\r
-        white-space: normal;\r
-    }\r
-}\r
-.DialogOverlay {\r
-    background-color: rgba(0, 0, 0, 0.44);\r
-    position: fixed;\r
-    inset: 0;\r
-    z-index: 1000;\r
-    animation: fadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1);\r
-}\r
-\r
-.DialogContent {\r
-    background-color: #f3f3f3;\r
-    border-radius: 6px;\r
-    box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;\r
-    position: fixed;\r
-    top: 50%;\r
-    left: 50%;\r
-    transform: translate(-50%, -50%);\r
-    width: 90vw;\r
-    max-width: 560px;\r
-    max-height: 85vh;\r
-    overflow: hidden;\r
-    padding: 16px 24px;\r
-    z-index: 1001;\r
-    outline: none;\r
-    animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);\r
-    display: flex;\r
-    flex-direction: column;\r
-}\r
-\r
-.dark .DialogContent {\r
-    background-color: #2a2a2a;\r
-    border-color: #40414f;\r
-    border-width: 1px;\r
-}\r
-\r
-.DialogContent._export {\r
-    background-color: #ffffff;\r
-}\r
-\r
-.dark .DialogContent._export {\r
-    background-color: #2a2a2a;\r
-}\r
-\r
-.DialogContent input[type="checkbox"] {\r
-    border: none;\r
-    outline: none;\r
-    box-shadow: none;\r
-}\r
-\r
-.DialogTitle {\r
-    margin: 0 0 16px 0;\r
-    font-weight: 500;\r
-    color: #1a1523;\r
-    font-size: 20px;\r
-    flex-shrink: 0;\r
-}\r
-\r
-.DialogBody {\r
-    flex: 1;\r
-    min-height: 0;\r
-    overflow-y: auto;\r
-    overflow-x: hidden;\r
-}\r
-\r
-.dark .DialogTitle {\r
-    color: #fff;\r
-}\r
-\r
-.Button {\r
-    display: inline-flex;\r
-    align-items: center;\r
-    justify-content: center;\r
-    border-radius: 4px;\r
-    padding: 0 15px;\r
-    font-size: 15px;\r
-    line-height: 1;\r
-    height: 35px;\r
-}\r
-.Button.green {\r
-    background-color: #ddf3e4;\r
-    color: #18794e;\r
-}\r
-.Button.red {\r
-    background-color: #f9d9d9;\r
-    color: #a71d2a;\r
-}\r
-.Button.neutral {\r
-    background-color: transparent;\r
-    color: #6f6e77;\r
-    border: 1px solid #6f6e77;\r
-    font-size: 13px;\r
-    height: 26px;\r
-    padding: 0 8px;\r
-}\r
-.Button.green:hover {\r
-    background-color: #ccebd7;\r
-}\r
-.Button.neutral:hover {\r
-    background-color: rgba(111, 110, 119, 0.1);\r
-}\r
-.dark .Button.neutral {\r
-    color: #a0a0a8;\r
-    border-color: #a0a0a8;\r
-}\r
-.dark .Button.neutral:hover {\r
-    background-color: rgba(160, 160, 168, 0.1);\r
-}\r
-.Button:disabled {\r
-    opacity: 0.5;\r
-    color: #6f6e77;\r
-    background-color: #e0e0e0;\r
-    cursor: not-allowed;\r
-}\r
-.Button:disabled:hover {\r
-    background-color: #e0e0e0;\r
-}\r
-\r
-.IconButton {\r
-    font-family: inherit;\r
-    border-radius: 100%;\r
-    height: 25px;\r
-    width: 25px;\r
-    display: inline-flex;\r
-    align-items: center;\r
-    justify-content: center;\r
-    color: #6f6e77;\r
-}\r
-.IconButton:hover {\r
-    background-color: rgba(0, 0, 0, 0.06);\r
-}\r
-\r
-.CloseButton {\r
-    position: absolute;\r
-    top: 10px;\r
-    right: 10px;\r
-}\r
-\r
-.Fieldset {\r
-    display: flex;\r
-    gap: 20px;\r
-    align-items: center;\r
-    margin-bottom: 15px;\r
-}\r
-\r
-.Label {\r
-    font-size: 15px;\r
-    color: #1a1523;\r
-    min-width: 90px;\r
-    text-align: right;\r
-}\r
-\r
-.dark .Label {\r
-    color: #fff;\r
-}\r
-\r
-.Input {\r
-    width: 100%;\r
-    flex: 1;\r
-    display: inline-flex;\r
-    align-items: center;\r
-    justify-content: center;\r
-    border-radius: 4px;\r
-    padding: 0 10px;\r
-    font-size: 15px;\r
-    line-height: 1;\r
-    color: #000;\r
-    background-color: #fafafa;\r
-    box-shadow: 0 0 0 1px #6f6e77;\r
-    height: 35px;\r
-    outline: none;\r
-}\r
-\r
-.dark .Input {\r
-    background-color: #2f2f2f;\r
-    color: #fff;\r
-    box-shadow: 0 0 0 1px #6f6e77;\r
-}\r
-\r
-.Description {\r
-    font-size: 13px;\r
-    color: #5a5865;\r
-    text-align: right;\r
-    margin-bottom: 4px;\r
-}\r
-\r
-.dark .Description {\r
-    color: #bcbcbc;\r
-}\r
-\r
-.SelectSearch {\r
-    width: 100%;\r
-    padding: 8px 16px;\r
-    border: 1px solid #6f6e77;\r
-    border-bottom: none;\r
-    border-radius: 4px 4px 0 0;\r
-    background-color: transparent;\r
-    color: inherit;\r
-    font-size: 14px;\r
-    outline: none;\r
-    flex-shrink: 0;\r
-}\r
-.SelectSearch::placeholder {\r
-    color: #9ca3af;\r
-}\r
-\r
-.SelectToolbar {\r
-    display: flex;\r
-    align-items: center;\r
-    padding: 12px 16px;\r
-    border-radius: 0;\r
-    border: 1px solid #6f6e77;\r
-    border-bottom: none;\r
-    flex-shrink: 0;\r
-}\r
-\r
-.ProjectSelect .Select {\r
-    width: auto;\r
-}\r
-\r
-.SelectList {\r
-    position: relative;\r
-    width: 100%;\r
-    flex: 1;\r
-    min-height: 120px;\r
-    padding: 12px 16px;\r
-    overflow-x: hidden;\r
-    overflow-y: auto;\r
-    border: 1px solid #6f6e77;\r
-    border-radius: 0 0 4px 4px;\r
-    white-space: nowrap;\r
-}\r
-\r
-.SelectItem {\r
-    display: flex;\r
-    align-items: center;\r
-    gap: 6px;\r
-    overflow: hidden;\r
-}\r
-\r
-.SelectItem .CheckBoxLabel {\r
-    flex: 1;\r
-    min-width: 0;\r
-}\r
-\r
-.SelectItem .LabelText {\r
-    overflow: hidden;\r
-    text-overflow: ellipsis;\r
-    white-space: nowrap;\r
-}\r
-\r
-.SelectItem label, .SelectItem input {\r
-    cursor: pointer;\r
-}\r
-\r
-.SelectItem span {\r
-    vertical-align: middle;\r
-}\r
-\r
-.SelectItemMeta {\r
-    flex-shrink: 0;\r
-    font-size: 0.7rem;\r
-    color: #9ca3af;\r
-    white-space: nowrap;\r
-    font-variant-numeric: tabular-nums;\r
-    min-width: 6.5rem;\r
-    text-align: right;\r
-}\r
-.SelectItemMetaActive {\r
-    color: #6b7280;\r
-    font-weight: 600;\r
-}\r
-.dark {\r
-    .SelectItemMetaActive { color: #d1d5db; }\r
-}\r
-\r
-/* \u2500\u2500 Sortable column header row \u2500\u2500 */\r
-.SelectListHeader {\r
-    display: flex;\r
-    align-items: center;\r
-    padding: 0 16px;\r
-    border: 1px solid #6f6e77;\r
-    border-bottom: none;\r
-    background: #f9fafb;\r
-    user-select: none;\r
-    flex-shrink: 0;\r
-}\r
-\r
-.dark {\r
-    .SelectListHeader { background: #1f2937; }\r
-}\r
-\r
-.SelectListHeaderCell {\r
-    flex-shrink: 0;\r
-    font-size: 0.68rem;\r
-    font-weight: 600;\r
-    color: #9ca3af;\r
-    letter-spacing: 0.03em;\r
-    text-transform: uppercase;\r
-    background: transparent;\r
-    border: none;\r
-    padding: 5px 4px;\r
-    cursor: pointer;\r
-    white-space: nowrap;\r
-    min-width: 6.5rem;\r
-    text-align: right;\r
-}\r
-.SelectListHeaderCell:hover { color: #374151; }\r
-.dark {\r
-    .SelectListHeaderCell:hover { color: #e5e7eb; }\r
-}\r
-.SelectListHeaderCellTitle {\r
-    flex: 1;\r
-    text-align: left;\r
-    padding-left: 28px; /* align with checkbox label */\r
-}\r
-.SelectListHeaderCellActive {\r
-    color: #2563eb;\r
-}\r
-.dark {\r
-    .SelectListHeaderCellActive { color: #60a5fa; }\r
-}\r
-\r
-\r
-@media (max-width: 480px) {\r
-    .DialogContent { max-height: 90vh; }\r
-    .SelectListHeaderCell:last-child { display: none; }\r
-    .SelectItemMeta:last-child { display: none; }\r
-    .SelectToolbar .Button.neutral,\r
-    .SelectToolbar input[type="number"] { display: none; }\r
-    .ActionBar { justify-content: flex-end; }\r
-    .ActionBar > .Select { width: 100%; }\r
-    .ActionBar > .flex-grow { display: none; }\r
-}\r
-\r
-@keyframes contentShow {\r
-    from {\r
-        opacity: 0;\r
-        transform: translate(-50%, -48%) scale(0.96);\r
-    }\r
-    to {\r
-        opacity: 1;\r
-        transform: translate(-50%, -50%) scale(1);\r
-    }\r
-}\r
-.animate-fadeIn  {\r
-    animation: fadeIn .3s;\r
-}\r
-\r
-.animate-slideUp  {\r
-    animation: slideUp .3s;\r
-}\r
-\r
-.bg-blue-600 {\r
-    background-color: rgb(28 100 242);\r
-}\r
-\r
-.hover\\:bg-gray-500\\/10:hover {\r
-    background-color: hsla(0, 0%, 61%, .1)\r
-}\r
-\r
-.border-\\[\\#6f6e77\\] {\r
-    border-color: #6f6e77;\r
-}\r
-\r
-.cursor-help {\r
-    cursor: help;\r
-}\r
-\r
-.dark .dark\\:bg-white\\/5 {\r
-    background-color: rgb(255 255 255 / 5%);\r
-}\r
-\r
-.dark .dark\\:text-gray-200 {\r
-    color: rgb(229 231 235 / 1);\r
-}\r
-\r
-.dark .dark\\:text-gray-300 {\r
-    color: rgb(209 213 219 / 1);\r
-}\r
-\r
-.dark .dark\\:border-gray-\\[\\#86858d\\] {\r
-    border-color: #86858d;\r
-}\r
-\r
-.gap-x-1 {\r
-    column-gap: 0.25rem;\r
-}\r
-\r
-.h-2\\.5 {\r
-    height: 0.625rem;\r
-}\r
-\r
-.h-4 {\r
-    height: 1rem;\r
-}\r
-\r
-.inline-flex {\r
-    display: inline-flex;\r
-}\r
-\r
-.items-center {\r
-    align-items: center;\r
-}\r
-\r
-.ml-3 {\r
-    margin-left: 0.75rem;\r
-}\r
-\r
-.ml-4 {\r
-    margin-left: 1rem;\r
-}\r
-\r
-.mr-8 {\r
-    margin-right: 2rem;\r
-}\r
-\r
-.pb-0 {\r
-    padding-bottom: 0;\r
-}\r
-\r
-.pr-8 {\r
-    padding-right: 2rem;\r
-}\r
-\r
-.right-4 {\r
-    right: 1rem;\r
-}\r
-\r
-.rounded-full {\r
-    border-radius: 9999px;\r
-}\r
-\r
-.select-all {\r
-    user-select: all!important;\r
-}\r
-\r
-.shrink-0 {\r
-    flex-shrink: 0;\r
-}\r
-\r
-.space-y-6>:not([hidden])~:not([hidden]) {\r
-    --tw-space-y-reverse: 0;\r
-    margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));\r
-    margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));\r
-}\r
-\r
-.truncate {\r
-    overflow: hidden;\r
-    text-overflow: ellipsis;\r
-    white-space: nowrap;\r
-}\r
-\r
-.whitespace-nowrap {\r
-    white-space: nowrap;\r
-}\r
-\r
-@media (min-width:768px) {\r
-    /* md */\r
-}\r
-\r
-@media (min-width:1024px) {\r
-    .lg\\:mt-0 {\r
-        margin-top: 0;\r
-    }\r
-\r
-    .lg\\:top-8 {\r
-        top: 2rem;\r
-    }\r
-}\r
-\r
-\r
-.toggle-switch {\r
-    position: relative;\r
-    outline: none;\r
-    background-color: rgb(229 231 235);\r
-    border: 1px solid rgb(107 114 128);\r
-    border-radius: 9999px;\r
-    cursor: pointer;\r
-    height: 20px;\r
-    width: 32px;\r
-}\r
-\r
-.dark .toggle-switch {\r
-    background-color: rgb(255 255 255 / 5%);\r
-    border-color: rgb(255 255 255 / 1);\r
-}\r
-\r
-.toggle-switch[data-state="checked"] {\r
-    background-color: rgb(0 0 0);\r
-    border-color: rgb(0 0 0);\r
-}\r
-\r
-.dark .toggle-switch[data-state="checked"] {\r
-    background-color: rgb(22 163 74);\r
-    border-color: rgb(22 163 74);\r
-}\r
-\r
-.toggle-switch-handle {\r
-    display: block;\r
-    background-color: rgb(255 255 255);\r
-    border-radius: 9999px;\r
-    height: 16px;\r
-    width: 16px;\r
-    transition: transform 0.1s;\r
-    will-change: transform;\r
-    transform: translateX(1px);\r
-}\r
-\r
-.toggle-switch-handle[data-state="checked"] {\r
-    transform: translateX(14px);\r
-}\r
-\r
-.toggle-switch-handle:hover {\r
-    background-color: rgb(243 244 246);\r
-}\r
-\r
-.toggle-switch-label {\r
-    color: rgb(107 114 128);\r
-    margin-left: 0.75rem;\r
-    font-size: 0.875rem;\r
-    font-weight: 500;\r
-}\r
-\r
-.toggle-switch-label:hover {\r
-    color: rgb(71 85 105);\r
+(e=>{const n=document.createElement("style");n.textContent=e,document.head.append(n),setInterval(()=>{n.isConnected||document.head.append(n)},300)})(` .CheckBoxLabel {
+    position: relative;
+    display: flex;
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.CheckBoxLabel * {
+    cursor: pointer;
+}
+
+.CheckBoxLabel[disabled] {
+    opacity: 0.7;
+}
+
+.CheckBoxLabel[disabled] * {
+    cursor: not-allowed;
+}
+
+.CheckBoxLabel input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.CheckBoxLabel .IconWrapper {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    vertical-align: middle;
+    font-size: 1.5rem;
+}
+
+.CheckBoxLabel input:checked ~ svg {
+    color: rgb(28 100 242);
+}
+
+.dark .CheckBoxLabel input:checked ~ svg {
+    color: rgb(144, 202, 249);
+}
+
+.CheckBoxLabel .LabelText {
+    margin-left: 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+span[data-time-format] {
+    display: none;
+}
+
+body[data-time-format="12"] span[data-time-format="12"] {
+    display: inline;
+}
+
+body[data-time-format="24"] span[data-time-format="24"] {
+    display: inline;
+}
+
+.Select {
+    padding: 0 2rem 0 0.5rem;
+    width: auto;
+    min-width: 7.5rem;
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px #6f6e77;
+}
+
+.dark .Select {
+    background-color: #2f2f2f;
+    color: #fff;
+    box-shadow: 0 0 0 1px #6f6e77;
+}
+
+/* Export dialog layout ---------------------------------------------------- */
+.DialogContent._export {
+    width: min(94vw, 76rem);
+    max-width: 76rem;
+    height: 92vh;
+    max-height: 92vh;
+}
+
+.ExportStatusBox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-height: 2.75rem;
+    margin: 0.4rem 0 0.65rem;
+    padding: 0.5rem 0.85rem;
+    overflow: hidden;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 5px;
+    color: var(--ce-text-primary);
+}
+
+.ExportStatusText {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ExportStatusDetail {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+    color: #6ea8ff;
+}
+
+.ExportStatusProgress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: transparent;
+}
+
+.ExportStatusProgress > span {
+    display: block;
+    height: 100%;
+    background: #3b82f6;
+    transition: width 160ms ease;
+}
+
+.ExportFilters {
+    margin-bottom: 0.65rem;
+    padding: 0.35rem 1rem;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 5px;
+}
+
+/* The filter box itself provides enough context; omit a redundant title row. */
+.ExportFiltersTitle {
+    display: none;
+}
+
+.ExportFilterRow,
+.ProjectSelect.ExportFilterRow {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.7rem;
+    margin: 0;
+    padding: 0.45rem 0;
+    color: var(--ce-text-primary);
+}
+
+.ExportFilterRow + .ExportFilterRow,
+.ExportFilterRow + .ProjectSelect.ExportFilterRow,
+.ProjectSelect.ExportFilterRow + .ExportFilterRow {
+    border-top: 1px solid var(--ce-border-light);
+}
+
+.ExportFilterLabel {
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.ExportFilterControl {
+    min-width: 0;
+}
+
+.ExportFilterControl > .Select,
+.ProjectSelect.ExportFilterRow > .Select {
+    width: 100%;
+}
+
+.ExportSourceRow {
+    grid-template-columns: 7.5rem minmax(16rem, 1fr) auto;
+}
+
+.ExportSourceActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.ExportDateRow {
+    grid-template-columns: 7.5rem 9rem auto minmax(8.5rem, 1fr) auto minmax(8.5rem, 1fr) auto;
+}
+
+.ExportDateRow label {
+    white-space: nowrap;
+    font-size: 0.875rem;
+}
+
+.ExportDateRow input[type="date"] {
+    width: 100%;
+    min-width: 0;
+    height: 1.95rem;
+    box-sizing: border-box;
+}
+
+.ExportSearchRow {
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+}
+
+.ExportSearchRow .SelectSearch {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    box-sizing: border-box;
+    border: 1px solid #6f6e77;
+    border-radius: 4px;
+    box-shadow: none;
+}
+
+.SelectToolbar {
+    margin: 0 0 0.6rem;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 5px;
+}
+
+.InventoryPreview {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 5px;
+    color: var(--ce-text-primary);
+}
+
+.InventoryPreviewHeader,
+.InventoryPreviewRow {
+    display: grid;
+    grid-template-columns: minmax(16rem, 1.6fr) minmax(12rem, 1fr) minmax(12rem, 1fr) minmax(20rem, 1.8fr);
+    align-items: center;
+}
+
+.InventoryPreviewHeader {
+    flex: 0 0 auto;
+    border-bottom: 1px solid var(--ce-border-light);
+    background: var(--ce-menu-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.InventoryPreviewHeaderCell,
+.InventoryPreviewCell {
+    min-width: 0;
+    padding: 0.45rem 0.6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.InventoryPreviewHeaderCell + .InventoryPreviewHeaderCell,
+.InventoryPreviewCell + .InventoryPreviewCell {
+    border-left: 1px solid var(--ce-border-light);
+}
+
+.InventoryPreviewBody {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+.InventoryPreviewRow {
+    min-width: 70rem;
+    border-bottom: 1px solid var(--ce-border-light);
+    font-size: 0.8125rem;
+}
+
+.InventoryPreviewRow:last-child {
+    border-bottom: 0;
+}
+
+.InventoryPreviewCellPrimary {
+    font-weight: 500;
+}
+
+.InventoryPreviewEmpty {
+    padding: 1rem;
+    color: #9ca3af;
+}
+
+/* Bulk rename dialog ------------------------------------------------------ */
+.DialogContent._export.BulkRenameDialog {
+    width: min(94vw, 76rem);
+    max-width: 76rem;
+    height: min(90vh, 62rem);
+    max-height: 90vh;
+    display: grid;
+    grid-template-rows:
+        auto
+        auto
+        auto
+        auto
+        minmax(7rem, 1.15fr)
+        auto
+        auto
+        minmax(6rem, 0.85fr)
+        auto;
+    overflow: hidden;
+}
+
+.BulkRenameDialog > .DialogTitle {
+    margin-bottom: 0.4rem;
+}
+
+.BulkRenameDialog > .ExportStatusBox {
+    margin: 0 0 0.55rem;
+}
+
+.BulkRenameDialog > .ExportFilters {
+    margin-bottom: 0.55rem;
+}
+
+.BulkRenameDialog > .SelectToolbar {
+    margin: 0;
+    border-radius: 5px 5px 0 0;
+}
+
+.BulkRenameConversationList {
+    min-height: 0;
+    max-height: none !important;
+    margin: 0 0 0.55rem;
+    border-top: 0;
+    border-radius: 0 0 5px 5px;
+}
+
+.BulkRenameTransform {
+    margin: 0 0 0.45rem !important;
+}
+
+.BulkRenamePreviewSummary {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-height: 1.35rem;
+    margin: 0;
+    font-size: 0.78rem;
+}
+
+.BulkRenamePreviewSummary > span {
+    margin-left: 0 !important;
+}
+
+.BulkRenamePreviewTable {
+    min-height: 0;
+    margin-top: 0.3rem;
+    overflow: auto;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 4px;
+}
+
+.BulkRenamePreviewTable > div:first-child {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--ce-menu-primary);
+}
+
+.BulkRenameFooter {
+    min-height: 3rem;
+    margin-top: 0.55rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--ce-border-light);
+    background: var(--ce-menu-primary);
+}
+
+.BulkRenameFooter .Button.green {
+    min-width: 7rem;
+}
+
+@media (max-width: 820px) {
+    .DialogContent._export.BulkRenameDialog {
+        width: min(96vw, 48rem);
+        height: 94vh;
+        max-height: 94vh;
+        grid-template-rows:
+            auto
+            auto
+            auto
+            auto
+            minmax(6rem, 1fr)
+            auto
+            auto
+            minmax(5rem, 0.8fr)
+            auto;
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+
+    .BulkRenameFooter {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+    }
+
+    .DialogContent._export {
+        width: min(96vw, 48rem);
+        height: 92vh;
+        max-height: 92vh;
+    }
+
+    .ExportSourceRow,
+    .ExportDateRow,
+    .ExportFilterRow,
+    .ProjectSelect.ExportFilterRow,
+    .ExportSearchRow {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+    }
+
+    .ExportSourceActions {
+        justify-content: flex-start;
+    }
+
+    .InventoryPreviewHeader,
+    .InventoryPreviewRow {
+        grid-template-columns: minmax(14rem, 1.5fr) minmax(10rem, 1fr) minmax(10rem, 1fr) minmax(18rem, 1.5fr);
+    }
+}
+
+html {
+    --ce-text-primary: var(--text-primary, #0d0d0d);
+    --ce-menu-primary: #ffffff;
+    --ce-menu-secondary: var(--sidebar-surface-secondary, #ececec);
+    --ce-border-light: #0d0d0d26;
+}
+
+.dark, html[data-ce-theme="dark"], html[data-theme="dark"], html[style*="color-scheme: dark"], html[style*="color-scheme:dark"] {
+    --ce-text-primary: var(--text-primary, #ececec);
+    --ce-menu-primary: #2A2A2A;
+    --ce-menu-secondary: var(--sidebar-surface-secondary, #212121);
+    --ce-border-light: var(--border-default, rgba(255, 255, 255, .15));
+}
+
+.bg-menu {
+    background-color: var(--ce-menu-primary);
+}
+
+/* Own the menu layout: ChatGPT's utility classes are not a stable dependency. */
+.ce-export-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    box-sizing: border-box;
+    max-width: calc(100vw - 1.5rem);
+    max-height: calc(100vh - 1.5rem);
+    overflow-y: auto;
+    background-color: var(--ce-menu-primary);
+    color: var(--ce-text-primary);
+    border: 1px solid var(--ce-border-light);
+    font-size: 14px;
+    line-height: 1.4;
+    isolation: isolate;
+    z-index: 999;
+}
+
+.ce-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    height: 46px;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 0.5rem;
+    color: var(--ce-text-primary);
+    cursor: pointer;
+    background-color: transparent;
+}
+
+.ce-menu-item:hover {
+    background-color: var(--ce-menu-secondary);
+}
+
+.ce-menu-item > svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+.ce-menu-item .ce-menu-item-text {
+    min-width: 0;
+}
+
+.border-menu {
+    border-color: var(--ce-border-light);
+}
+
+.ce-menu-item[disabled] {
+    filter: brightness(0.5);
+}
+
+.ce-nav-trigger {
+    min-width: 0;
+    border: 0;
+    color: var(--ce-text-primary);
+    margin: 0.25rem;
+}
+
+.ce-nav-trigger .ce-menu-item-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ce-menu-floating {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(5rem, env(safe-area-inset-bottom));
+    max-width: calc(100vw - 2rem);
+    border: 1px solid var(--ce-border-light);
+    border-radius: 0.75rem;
+    background: var(--ce-menu-primary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ce-menu-sidebar-slot {
+    flex-shrink: 0;
+    padding: 0.25rem;
+}
+
+.ce-menu-header-offset {
+    position: relative;
+    top: 48px;
+}
+
+.ce-menu-floating .ce-nav-trigger {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+}
+
+.ce-nav-trigger-collapsed {
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 0.5rem;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+    border-radius: 8px;
+    color: var(--text-secondary, var(--ce-text-primary));
+}
+
+.ce-nav-trigger-collapsed:hover {
+    background-color: var(--sidebar-surface-secondary, rgba(255, 255, 255, 0.1));
+}
+
+.ce-nav-trigger-collapsed .ce-menu-item-text {
+    display: none;
+}
+
+.ce-card {
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.dark .ce-card {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.inputFieldSet {
+    display: block;
+    border-width: 2px;
+    border-style: groove;
+}
+
+.inputFieldSet legend {
+    margin-left: 4px;
+}
+
+.inputFieldSet input {
+    background-color: transparent;
+    box-shadow: none!important;
+}
+
+.row-half {
+    grid-column: auto / span 1;
+}
+
+.row-full {
+    grid-column: auto / span 2;
+}
+
+.dropdown-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0,0,0,.5);
+    animation-name: pointerFadeIn;
+    animation-duration: .3s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes pointerFadeIn {
+    from {
+        opacity: 0;
+        pointer-events: none;
+    }
+    to {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes circularDash {
+    0% {
+        stroke-dasharray: 1px, 200px;
+        stroke-dashoffset: 0;
+    }
+    50% {
+        stroke-dasharray: 100px, 200px;
+        stroke-dashoffset: -15px;
+    }
+    100% {
+        stroke-dasharray: 100px, 200px;
+        stroke-dashoffset: -125px;
+    }
+}
+
+
+/* Bulk Project management dialog ----------------------------------------- */
+.DialogContent._export.BulkProjectManagementDialog {
+    width: min(96vw, 82rem);
+    max-width: 82rem;
+    height: min(92vh, 64rem);
+    max-height: 92vh;
+    display: grid;
+    grid-template-rows: auto auto minmax(13rem, 0.9fr) minmax(12rem, 1.1fr) auto;
+    gap: 0.65rem;
+    overflow: hidden;
+}
+
+.BulkProjectManagementDialog > .DialogTitle,
+.BulkProjectManagementDialog > .ExportStatusBox {
+    margin: 0;
+}
+
+.ProjectManagementManifest,
+.ProjectManagementPreview {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.ProjectManagementSectionTitle,
+.ProjectManagementPreviewHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.4rem;
+    color: var(--ce-text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.ProjectManagementManifestInput {
+    width: 100%;
+    min-width: 0;
+    min-height: 10rem;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    padding: 0.75rem;
+    resize: vertical;
+    overflow: auto;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 5px;
+    background: var(--ce-menu-primary);
+    color: var(--ce-text-primary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    white-space: pre;
+}
+
+.ProjectManagementManifest .RenameHelpText {
+    margin-top: 0.4rem;
+}
+
+.ProjectManagementPreviewHeader > span:last-child {
+    font-weight: 400;
+    color: #9ca3af;
+}
+
+.ProjectManagementPreviewTableWrap {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+    border: 1px solid var(--ce-border-light);
+    border-radius: 5px;
+}
+
+.ProjectManagementPreviewTable {
+    width: 100%;
+    min-width: 68rem;
+    border-collapse: collapse;
+    table-layout: fixed;
+    color: var(--ce-text-primary);
+    font-size: 0.8125rem;
+}
+
+.ProjectManagementPreviewTable th,
+.ProjectManagementPreviewTable td {
+    padding: 0.55rem 0.65rem;
+    border-bottom: 1px solid var(--ce-border-light);
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+
+.ProjectManagementPreviewTable th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--ce-menu-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.ProjectManagementPreviewTable th:nth-child(1) {
+    width: 9rem;
+}
+
+.ProjectManagementPreviewTable th:nth-child(2) {
+    width: 18rem;
+}
+
+.ProjectManagementPreviewTable th:nth-child(3),
+.ProjectManagementPreviewTable th:nth-child(4) {
+    width: 13rem;
+}
+
+.ProjectManagementPreviewTable th:nth-child(5) {
+    width: 18rem;
+}
+
+.ProjectManagementPreviewTable tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.ProjectManagementInvalid {
+    font-weight: 500;
+}
+
+.ProjectManagementActions {
+    margin: 0;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--ce-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.ProjectManagementActions .Button {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+}
+
+@media (max-width: 820px) {
+    .DialogContent._export.BulkProjectManagementDialog {
+        width: 96vw;
+        height: 94vh;
+        max-height: 94vh;
+        grid-template-rows: auto auto minmax(11rem, 0.9fr) minmax(10rem, 1.1fr) auto;
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+
+    .BulkProjectManagementDialog .ExportStatusBox {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .BulkProjectManagementDialog .ExportStatusDetail {
+        white-space: normal;
+    }
+}
+.DialogOverlay {
+    background-color: rgba(0, 0, 0, 0.44);
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    animation: fadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.DialogContent {
+    background-color: #f3f3f3;
+    border-radius: 6px;
+    box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 560px;
+    max-height: 85vh;
+    overflow: hidden;
+    padding: 16px 24px;
+    z-index: 1001;
+    outline: none;
+    animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.dark .DialogContent {
+    background-color: #2a2a2a;
+    border-color: #40414f;
+    border-width: 1px;
+}
+
+.DialogContent._export {
+    background-color: #ffffff;
+}
+
+.dark .DialogContent._export {
+    background-color: #2a2a2a;
+}
+
+.DialogContent input[type="checkbox"] {
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+.DialogTitle {
+    margin: 0 0 16px 0;
+    font-weight: 500;
+    color: #1a1523;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.DialogBody {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.dark .DialogTitle {
+    color: #fff;
+}
+
+.Button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    padding: 0 15px;
+    font-size: 15px;
+    line-height: 1;
+    height: 35px;
+}
+.Button.green {
+    background-color: #ddf3e4;
+    color: #18794e;
+}
+.Button.red {
+    background-color: #f9d9d9;
+    color: #a71d2a;
+}
+.Button.neutral {
+    background-color: transparent;
+    color: #6f6e77;
+    border: 1px solid #6f6e77;
+    font-size: 13px;
+    height: 26px;
+    padding: 0 8px;
+}
+.Button.green:hover {
+    background-color: #ccebd7;
+}
+.Button.neutral:hover {
+    background-color: rgba(111, 110, 119, 0.1);
+}
+.dark .Button.neutral {
+    color: #a0a0a8;
+    border-color: #a0a0a8;
+}
+.dark .Button.neutral:hover {
+    background-color: rgba(160, 160, 168, 0.1);
+}
+.Button:disabled {
+    opacity: 0.5;
+    color: #6f6e77;
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+}
+.Button:disabled:hover {
+    background-color: #e0e0e0;
+}
+
+.IconButton {
+    font-family: inherit;
+    border-radius: 100%;
+    height: 25px;
+    width: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6f6e77;
+}
+.IconButton:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.CloseButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.Fieldset {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.Label {
+    font-size: 15px;
+    color: #1a1523;
+    min-width: 90px;
+    text-align: right;
+}
+
+.dark .Label {
+    color: #fff;
+}
+
+.Input {
+    width: 100%;
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    padding: 0 10px;
+    font-size: 15px;
+    line-height: 1;
+    color: #000;
+    background-color: #fafafa;
+    box-shadow: 0 0 0 1px #6f6e77;
+    height: 35px;
+    outline: none;
+}
+
+.dark .Input {
+    background-color: #2f2f2f;
+    color: #fff;
+    box-shadow: 0 0 0 1px #6f6e77;
+}
+
+.Description {
+    font-size: 13px;
+    color: #5a5865;
+    text-align: right;
+    margin-bottom: 4px;
+}
+
+.dark .Description {
+    color: #bcbcbc;
+}
+
+.SelectSearch {
+    width: 100%;
+    padding: 8px 16px;
+    border: 1px solid #6f6e77;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background-color: transparent;
+    color: inherit;
+    font-size: 14px;
+    outline: none;
+    flex-shrink: 0;
+}
+.SelectSearch::placeholder {
+    color: #9ca3af;
+}
+
+.SelectToolbar {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 0;
+    border: 1px solid #6f6e77;
+    border-bottom: none;
+    flex-shrink: 0;
+}
+
+.ProjectSelect .Select {
+    width: auto;
+}
+
+.SelectList {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 120px;
+    padding: 12px 16px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid #6f6e77;
+    border-radius: 0 0 4px 4px;
+    white-space: nowrap;
+}
+
+.SelectItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+}
+
+.SelectItem .CheckBoxLabel {
+    flex: 1;
+    min-width: 0;
+}
+
+.SelectItem .LabelText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.SelectItem label, .SelectItem input {
+    cursor: pointer;
+}
+
+.SelectItem span {
+    vertical-align: middle;
+}
+
+.SelectItemMeta {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    min-width: 6.5rem;
+    text-align: right;
+}
+.SelectItemMetaActive {
+    color: #6b7280;
+    font-weight: 600;
+}
+.dark {
+    .SelectItemMetaActive { color: #d1d5db; }
+}
+
+/* \u2500\u2500 Sortable column header row \u2500\u2500 */
+.SelectListHeader {
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    border: 1px solid #6f6e77;
+    border-bottom: none;
+    background: #f9fafb;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.dark {
+    .SelectListHeader { background: #1f2937; }
+}
+
+.SelectListHeaderCell {
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #9ca3af;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    padding: 5px 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: 6.5rem;
+    text-align: right;
+}
+.SelectListHeaderCell:hover { color: #374151; }
+.dark {
+    .SelectListHeaderCell:hover { color: #e5e7eb; }
+}
+.SelectListHeaderCellTitle {
+    flex: 1;
+    text-align: left;
+    padding-left: 28px; /* align with checkbox label */
+}
+.SelectListHeaderCellActive {
+    color: #2563eb;
+}
+.dark {
+    .SelectListHeaderCellActive { color: #60a5fa; }
+}
+
+
+@media (max-width: 480px) {
+    .DialogContent { max-height: 90vh; }
+    .SelectListHeaderCell:last-child { display: none; }
+    .SelectItemMeta:last-child { display: none; }
+    .SelectToolbar .Button.neutral,
+    .SelectToolbar input[type="number"] { display: none; }
+    .ActionBar { justify-content: flex-end; }
+    .ActionBar > .Select { width: 100%; }
+    .ActionBar > .flex-grow { display: none; }
+}
+
+@keyframes contentShow {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+.animate-fadeIn  {
+    animation: fadeIn .3s;
+}
+
+.animate-slideUp  {
+    animation: slideUp .3s;
+}
+
+.bg-blue-600 {
+    background-color: rgb(28 100 242);
+}
+
+.hover\\:bg-gray-500\\/10:hover {
+    background-color: hsla(0, 0%, 61%, .1)
+}
+
+.border-\\[\\#6f6e77\\] {
+    border-color: #6f6e77;
+}
+
+.cursor-help {
+    cursor: help;
+}
+
+.dark .dark\\:bg-white\\/5 {
+    background-color: rgb(255 255 255 / 5%);
+}
+
+.dark .dark\\:text-gray-200 {
+    color: rgb(229 231 235 / 1);
+}
+
+.dark .dark\\:text-gray-300 {
+    color: rgb(209 213 219 / 1);
+}
+
+.dark .dark\\:border-gray-\\[\\#86858d\\] {
+    border-color: #86858d;
+}
+
+.gap-x-1 {
+    column-gap: 0.25rem;
+}
+
+.h-2\\.5 {
+    height: 0.625rem;
+}
+
+.h-4 {
+    height: 1rem;
+}
+
+.inline-flex {
+    display: inline-flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.ml-3 {
+    margin-left: 0.75rem;
+}
+
+.ml-4 {
+    margin-left: 1rem;
+}
+
+.mr-8 {
+    margin-right: 2rem;
+}
+
+.pb-0 {
+    padding-bottom: 0;
+}
+
+.pr-8 {
+    padding-right: 2rem;
+}
+
+.right-4 {
+    right: 1rem;
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+.select-all {
+    user-select: all!important;
+}
+
+.shrink-0 {
+    flex-shrink: 0;
+}
+
+.space-y-6>:not([hidden])~:not([hidden]) {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.whitespace-nowrap {
+    white-space: nowrap;
+}
+
+@media (min-width:768px) {
+    /* md */
+}
+
+@media (min-width:1024px) {
+    .lg\\:mt-0 {
+        margin-top: 0;
+    }
+
+    .lg\\:top-8 {
+        top: 2rem;
+    }
+}
+
+
+.toggle-switch {
+    position: relative;
+    outline: none;
+    background-color: rgb(229 231 235);
+    border: 1px solid rgb(107 114 128);
+    border-radius: 9999px;
+    cursor: pointer;
+    height: 20px;
+    width: 32px;
+}
+
+.dark .toggle-switch {
+    background-color: rgb(255 255 255 / 5%);
+    border-color: rgb(255 255 255 / 1);
+}
+
+.toggle-switch[data-state="checked"] {
+    background-color: rgb(0 0 0);
+    border-color: rgb(0 0 0);
+}
+
+.dark .toggle-switch[data-state="checked"] {
+    background-color: rgb(22 163 74);
+    border-color: rgb(22 163 74);
+}
+
+.toggle-switch-handle {
+    display: block;
+    background-color: rgb(255 255 255);
+    border-radius: 9999px;
+    height: 16px;
+    width: 16px;
+    transition: transform 0.1s;
+    will-change: transform;
+    transform: translateX(1px);
+}
+
+.toggle-switch-handle[data-state="checked"] {
+    transform: translateX(14px);
+}
+
+.toggle-switch-handle:hover {
+    background-color: rgb(243 244 246);
+}
+
+.toggle-switch-label {
+    color: rgb(107 114 128);
+    margin-left: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.toggle-switch-label:hover {
+    color: rgb(71 85 105);
 } `);
 
 (function (JSZip, html2canvas) {
@@ -9873,672 +9930,672 @@ html {\r
   instance.on("languageChanged", (lng) => {
     ScriptStorage.set(KEY_LANGUAGE, lng);
   });
-  const templateHtml = `<!DOCTYPE html>\r
-<html lang="{{lang}}" data-theme="{{theme}}">\r
-<head>\r
-    <meta charset="UTF-8" />\r
-    <link rel="icon" href="https://chat.openai.com/favicon.ico" />\r
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />\r
-    <title>{{title}}</title>\r
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">\r
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"><\/script>\r
-    <script>\r
-        hljs.highlightAll()\r
-    <\/script>\r
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/katex.min.css">\r
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/katex.min.js"><\/script>\r
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/contrib/auto-render.min.js"><\/script>\r
-    <script>\r
-        document.addEventListener("DOMContentLoaded", function() {\r
-            renderMathInElement(document.body, {\r
-                delimiters: [\r
-                    { left: "$$", right: "$$", display: true },\r
-                    { left: "$", right: "$", display: false },\r
-                    { left: "\\\\[", right: "\\\\]", display: true },\r
-                    { left: "\\\\(", right: "\\\\)", display: false }\r
-                ],\r
-                throwOnError: false,\r
-                ignoredClasses: ["no-katex"],\r
-                preProcess: function(math) {\r
-                    return \`\\\\displaystyle \\\\Large \${math}\`;\r
-                }\r
-            });\r
-            document.querySelectorAll('.katex').forEach(function(el) {\r
-                const parent = el.parentNode;\r
-                const grandparent = parent.parentNode;\r
-                if (grandparent.tagName === 'P' && isOnlyContent(grandparent, parent)) {\r
-                    el.style.width = '100%';\r
-                    el.style.display = 'block';\r
-                    el.style.textAlign = 'center';\r
-                    parent.style.textAlign = 'center';\r
-                } else {\r
-                    el.style.display = 'inline-block';\r
-                    el.style.width = 'fit-content';\r
-                }\r
-            });\r
-            function isOnlyContent(parent, element) {\r
-                let onlyKaTeX = true;\r
-                parent.childNodes.forEach(function(child) {\r
-                    console.log(child.textContent);\r
-                    if (child !== element) {\r
-                        if (child.nodeType === Node.TEXT_NODE) {\r
-                            if (child.textContent.trim().length > 0) {\r
-                                onlyKaTeX = false;\r
-                            }\r
-                        } else if (child.nodeType === Node.ELEMENT_NODE) {\r
-                            onlyKaTeX = false;\r
-                        }\r
-                    }\r
-                });\r
-                return onlyKaTeX;\r
-            }\r
-        });\r
-    <\/script>\r
-\r
-    <style>\r
-        :root {\r
-            --page-text: #0d0d0d;\r
-            --page-bg: #fff;\r
-            --td-borders: #374151;\r
-            --th-borders: #4b5563;\r
-            --tw-prose-code: var(--page-text);\r
-            --tw-prose-counters: #9b9b9b;\r
-            --tw-prose-headings: var(--page-text);\r
-            --tw-prose-hr: rgba(0,0,0,.25);\r
-            --tw-prose-links: var(--page-text);\r
-            --tw-prose-quotes: var(--page-text);\r
-            --meta-title: #616c77;\r
-        }\r
-\r
-        [data-theme="dark"] {\r
-            --page-text: #ececec;\r
-            --page-bg: #212121;\r
-            --tw-prose-code: var(--page-text);\r
-            --tw-prose-counters: #9b9b9b;\r
-            --tw-prose-headings: var(--page-text);\r
-            --tw-prose-hr: hsla(0,0%,100%,.25);\r
-            --tw-prose-links: var(--page-text);\r
-            --tw-prose-quotes: var(--page-text);\r
-            --meta-title: #959faa;\r
-        }\r
-\r
-        * {\r
-            box-sizing: border-box;\r
-            font-size: 16px;\r
-        }\r
-\r
-        ::-webkit-scrollbar {\r
-            height: 1rem;\r
-            width: .5rem\r
-        }\r
-\r
-        ::-webkit-scrollbar:horizontal {\r
-            height: .5rem;\r
-            width: 1rem\r
-        }\r
-\r
-        ::-webkit-scrollbar-track {\r
-            background-color: transparent;\r
-            border-radius: 9999px\r
-        }\r
-\r
-        ::-webkit-scrollbar-thumb {\r
-            --tw-border-opacity: 1;\r
-            background-color: rgba(217,217,227,.8);\r
-            border-color: rgba(255,255,255,var(--tw-border-opacity));\r
-            border-radius: 9999px;\r
-            border-width: 1px\r
-        }\r
-\r
-        ::-webkit-scrollbar-thumb:hover {\r
-            --tw-bg-opacity: 1;\r
-            background-color: rgba(236,236,241,var(--tw-bg-opacity))\r
-        }\r
-\r
-        .dark ::-webkit-scrollbar-thumb {\r
-            --tw-bg-opacity: 1;\r
-            background-color: rgba(86,88,105,var(--tw-bg-opacity))\r
-        }\r
-\r
-        .dark ::-webkit-scrollbar-thumb:hover {\r
-            --tw-bg-opacity: 1;\r
-            background-color: rgba(172,172,190,var(--tw-bg-opacity))\r
-        }\r
-\r
-        @media (min-width: 768px) {\r
-            .scrollbar-trigger ::-webkit-scrollbar-thumb {\r
-                visibility:hidden\r
-            }\r
-\r
-            .scrollbar-trigger:hover ::-webkit-scrollbar-thumb {\r
-                visibility: visible\r
-            }\r
-        }\r
-\r
-        body {\r
-            font-family: Söhne,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Helvetica Neue,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;\r
-            font-size: 14px;\r
-            line-height: 1.5;\r
-            color: var(--page-text);\r
-            background-color: var(--page-bg);\r
-            margin: 0;\r
-            padding: 0;\r
-        }\r
-\r
-        [data-theme="light"] .sun {\r
-            display: none;\r
-        }\r
-\r
-        [data-theme="dark"] .moon {\r
-            display: none;\r
-        }\r
-\r
-        .toggle {\r
-            display: inline-flex;\r
-            justify-content: center;\r
-            align-items: center;\r
-            width: 32px;\r
-            height: 32px;\r
-            border-radius: 4px;\r
-            background-color: #fff;\r
-            border: 1px solid #e2e8f0;\r
-        }\r
-\r
-        [data-width="narrow"] .width-toggle .expand {\r
-            display: block;\r
-        }\r
-\r
-        [data-width="wide"] .width-toggle .narrow {\r
-            display: block;\r
-        }\r
-\r
-        .width-toggle {\r
-            display: inline-flex;\r
-            justify-content: center;\r
-            align-items: center;\r
-            width: 32px;\r
-            height: 32px;\r
-            border-radius: 4px;\r
-            background-color: #fff;\r
-            border: 1px solid #e2e8f0;\r
-            margin-left: 8px;\r
-            cursor: pointer;\r
-        }\r
-\r
-        .width-toggle svg {\r
-            display: none;\r
-        }\r
-\r
-        .metadata_container {\r
-            display: flex;\r
-            flex-direction: column;\r
-            margin-top: 8px;\r
-            padding-left: 1rem;\r
-        }\r
-\r
-        .metadata_item {\r
-            display: flex;\r
-            flex-direction: row;\r
-            align-items: center;\r
-            border-radius: 16px;\r
-            padding: 4px 0.5rem;\r
-        }\r
-\r
-        .metadata_item:hover {\r
-            background-color: rgba(0,0,0,.1);\r
-        }\r
-\r
-        .metadata_item > div:first-child {\r
-            flex: 0 1 100px;\r
-            color: var(--meta-title);\r
-        }\r
-\r
-        .metadata_item > div:last-child {\r
-            flex: 1;\r
-        }\r
-\r
-        a {\r
-            color: var(--tw-prose-links);\r
-            font-size: 0.8rem;\r
-            text-decoration-line: underline;\r
-            text-underline-offset: 2px;\r
-        }\r
-\r
-        .conversation-content > p:first-child,\r
-        ol:first-child {\r
-            margin-top: 0;\r
-        }\r
-\r
-        p>code, li>code {\r
-            color: var(--tw-prose-code);\r
-            font-weight: 600;\r
-            font-size: .875em;\r
-        }\r
-\r
-        p>code::before,\r
-        p>code::after,\r
-        li>code::before,\r
-        li>code::after {\r
-            content: "\`";\r
-        }\r
-\r
-        hr {\r
-            width: 100%;\r
-            height: 0;\r
-            border: 1px solid var(--tw-prose-hr);\r
-            margin-bottom: 1em;\r
-            margin-top: 1em;\r
-        }\r
-\r
-        pre {\r
-            color: #ffffff;\r
-            background-color: #000000;\r
-            overflow-x: auto;\r
-            margin: 0 0 1rem 0;\r
-            border-radius: 0.375rem;\r
-        }\r
-\r
-        pre>code {\r
-            font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace !important;\r
-            font-weight: 400;\r
-            font-size: .875em;\r
-            line-height: 1.7142857;\r
-        }\r
-\r
-        h1, h2, h3, h4, h5, h6 {\r
-            color: var(--tw-prose-headings);\r
-            margin: 0;\r
-        }\r
-\r
-        h1 {\r
-            font-size: 2.25em;\r
-            font-weight: 600;\r
-            line-height: 1.1111111;\r
-            margin-bottom: 0.8888889em;\r
-            margin-top: 0;\r
-        }\r
-\r
-        h2 {\r
-            font-size: 1.5em;\r
-            font-weight: 700;\r
-            line-height: 1.3333333;\r
-            margin-bottom: 1em;\r
-            margin-top: 2em;\r
-        }\r
-\r
-        h3 {\r
-            font-size: 1.25em;\r
-            font-weight: 600;\r
-            line-height: 1.6;\r
-            margin-bottom: .6em;\r
-            margin-top: 1.6em;\r
-        }\r
-\r
-        h4 {\r
-            font-weight: 400;\r
-            line-height: 1.5;\r
-            margin-bottom: .5em;\r
-            margin-top: 1.5em\r
-        }\r
-\r
-        h3,h4 {\r
-            margin-bottom: .5rem;\r
-            margin-top: 1rem;\r
-        }\r
-\r
-        h5 {\r
-            font-weight: 600;\r
-        }\r
-\r
-        blockquote {\r
-            border-left: 2px solid rgba(142,142,160,1);\r
-            color: var(--tw-prose-quotes);\r
-            font-style: italic;\r
-            font-style: normal;\r
-            font-weight: 500;\r
-            line-height: 1rem;\r
-            margin: 1.6em 0;\r
-            padding-left: 1em;\r
-            quotes: "\\201C""\\201D""\\2018""\\2019";\r
-        }\r
-\r
-        blockquote p:first-of-type:before {\r
-            content: open-quote;\r
-        }\r
-\r
-        blockquote p:last-of-type:after {\r
-            content: close-quote;\r
-        }\r
-\r
-        ol, ul {\r
-            padding-left: 1.1rem;\r
-        }\r
-\r
-        ::marker {\r
-            color: var(--tw-prose-counters);\r
-            font-weight: 400;\r
-        }\r
-\r
-        table {\r
-            width: 100%;\r
-            border-collapse: separate;\r
-            border-spacing: 0 0;\r
-            table-layout: auto;\r
-            text-align: left;\r
-            font-size: .875em;\r
-            line-height: 1.7142857;\r
-        }\r
-\r
-        table * {\r
-            box-sizing: border-box;\r
-            border-width: 0;\r
-            border-style: solid;\r
-            border-color: #d9d9e3;\r
-        }\r
-\r
-        table thead {\r
-            border-bottom-color: var(--th-borders);\r
-            border-bottom-width: 1px;\r
-        }\r
-\r
-        table th {\r
-            background-color: rgba(236,236,241,.2);\r
-            border-bottom-width: 1px;\r
-            border-left-width: 1px;\r
-            border-top-width: 1px;\r
-            padding: 0.25rem 0.75rem;\r
-        }\r
-\r
-        table th:first-child {\r
-            border-top-left-radius: 0.375rem;\r
-        }\r
-\r
-        table th:last-child {\r
-            border-right-width: 1px;\r
-            border-top-right-radius: 0.375rem;\r
-        }\r
-\r
-        table tbody tr {\r
-            border-bottom-color: var(--td-borders);\r
-            border-bottom-width: 1px;\r
-        }\r
-\r
-        table tbody tr:last-child {\r
-            border-bottom-width: 0;\r
-        }\r
-\r
-        table tbody tr:last-child td:first-child {\r
-            border-bottom-left-radius: 0.375rem;\r
-        }\r
-\r
-        table tbody tr:last-child td:last-child {\r
-            border-bottom-right-radius: 0.375rem;\r
-        }\r
-\r
-        table td {\r
-            border-bottom-width: 1px;\r
-            border-left-width: 1px;\r
-            padding: 0.25rem 0.75rem;\r
-        }\r
-\r
-        table td:last-child {\r
-            border-right-width: 1px;\r
-        }\r
-\r
-        [type=checkbox], [type=radio] {\r
-            accent-color: #2563eb;\r
-        }\r
-\r
-        .conversation {\r
-            margin: 0 auto;\r
-            padding: 1rem;\r
-            max-width: 64rem;\r
-        }\r
-\r
-        [data-width="narrow"] .conversation {\r
-            max-width: 64rem;\r
-        }\r
-\r
-        [data-width="wide"] .conversation {\r
-            max-width: 90%;\r
-        }\r
-\r
-        @media (min-width: 1280px) {\r
-            .conversation {\r
-                max-width: 48rem;\r
-            }\r
-        }\r
-\r
-        @media (min-width: 1024px) {\r
-            .conversation {\r
-                max-width: 40rem;\r
-            }\r
-        }\r
-\r
-        @media (min-width: 768px) {\r
-            .conversation {\r
-                max-width: 48rem;\r
-            }\r
-        }\r
-\r
-        .conversation-header {\r
-            margin-bottom: 1rem;\r
-        }\r
-\r
-        .conversation-header h1 {\r
-            margin: 0;\r
-        }\r
-\r
-        .conversation-header h1 a {\r
-            font-size: 1.5rem;\r
-        }\r
-\r
-        .conversation-header .conversation-export {\r
-            margin-top: 0.5rem;\r
-            font-size: 0.8rem;\r
-        }\r
-\r
-        .conversation-header p {\r
-            margin-top: 0.5rem;\r
-            font-size: 0.8rem;\r
-        }\r
-\r
-        .conversation-item {\r
-            display: flex;\r
-            position: relative;\r
-            padding: 1rem;\r
-            border-left: 1px solid rgba(0,0,0,.1);\r
-            border-right: 1px solid rgba(0,0,0,.1);\r
-            border-bottom: 1px solid rgba(0,0,0,.1);\r
-        }\r
-\r
-        .conversation-item:first-of-type {\r
-            border-top: 1px solid rgba(0,0,0,.1);\r
-        }\r
-\r
-        .author {\r
-            display: flex;\r
-            flex: 0 0 30px;\r
-            justify-content: center;\r
-            align-items: center;\r
-            width: 30px;\r
-            height: 30px;\r
-            border-radius: 0.125rem;\r
-            margin-right: 1rem;\r
-            overflow: hidden;\r
-        }\r
-\r
-        .author svg {\r
-            color: #fff;\r
-            width: 22px;\r
-            height: 22px;\r
-        }\r
-\r
-        .author img {\r
-            content: url({{avatar}});\r
-            width: 100%;\r
-            height: 100%;\r
-        }\r
-\r
-        .author.GPT-3 {\r
-            background-color: rgb(16, 163, 127);\r
-        }\r
-\r
-        .author.GPT-4 {\r
-            background-color: black;\r
-        }\r
-\r
-        .conversation-content-wrapper {\r
-            display: flex;\r
-            position: relative;\r
-            overflow: hidden;\r
-            flex: 1 1 auto;\r
-            flex-direction: column;\r
-        }\r
-\r
-        .thinking {\r
-            font-size: 0.875rem;\r
-            line-height: 1.5;\r
-            margin-bottom: 0.75rem;\r
-            border: 1px solid #d1d5db;\r
-            border-radius: 0.5rem;\r
-            padding: 0.5rem 0.75rem;\r
-        }\r
-\r
-        .thinking summary {\r
-            cursor: pointer;\r
-            font-weight: 500;\r
-            color: #6b7280;\r
-        }\r
-\r
-        .thinking p {\r
-            margin: 0.5rem 0;\r
-            color: #6b7280;\r
-        }\r
-\r
-        .dark .thinking {\r
-            border-color: #4b5563;\r
-        }\r
-\r
-        .dark .thinking summary,\r
-        .dark .thinking p {\r
-            color: #9ca3af;\r
-        }\r
-\r
-        .conversation-content {\r
-            font-size: 1rem;\r
-            line-height: 1.5;\r
-        }\r
-\r
-        .conversation-content p {\r
-            white-space: pre-wrap;\r
-            line-height: 28px;\r
-        }\r
-\r
-        .conversation-content img, .conversation-content video {\r
-            display: block;\r
-            max-width: 100%;\r
-            height: auto;\r
-            margin-bottom: 2em;\r
-            margin-top: 2em;\r
-        }\r
-\r
-        .time {\r
-            position: absolute;\r
-            right: 8px;\r
-            bottom: 0;\r
-            font-size: 0.8rem;\r
-            color: #acacbe\r
-        }\r
-\r
-    </style>\r
-</head>\r
-\r
-<body>\r
-    <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\r
-        <symbol id="chatgpt" viewBox="0 0 41 41">\r
-            <path d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.500197C16.1708 0.495044 14.0893 1.16803 12.3614 2.42214C10.6335 3.67624 9.34853 5.44666 8.6917 7.47815C7.30085 7.76286 5.98686 8.3414 4.8377 9.17505C3.68854 10.0087 2.73073 11.0782 2.02839 12.312C0.956464 14.1591 0.498905 16.2988 0.721698 18.4228C0.944492 20.5467 1.83612 22.5449 3.268 24.1293C2.81966 25.4759 2.66413 26.9026 2.81182 28.3141C2.95951 29.7256 3.40701 31.0892 4.12437 32.3138C5.18791 34.1659 6.8123 35.6322 8.76321 36.5013C10.7141 37.3704 12.8907 37.5973 14.9789 37.1492C15.9208 38.2107 17.0786 39.0587 18.3747 39.6366C19.6709 40.2144 21.0755 40.5087 22.4946 40.4998C24.6307 40.5054 26.7133 39.8321 28.4418 38.5772C30.1704 37.3223 31.4556 35.5506 32.1119 33.5179C33.5027 33.2332 34.8167 32.6547 35.9659 31.821C37.115 30.9874 38.0728 29.9178 38.7752 28.684C39.8458 26.8371 40.3023 24.6979 40.0789 22.5748C39.8556 20.4517 38.9639 18.4544 37.5324 16.8707ZM22.4978 37.8849C20.7443 37.8874 19.0459 37.2733 17.6994 36.1501C17.7601 36.117 17.8666 36.0586 17.936 36.0161L25.9004 31.4156C26.1003 31.3019 26.2663 31.137 26.3813 30.9378C26.4964 30.7386 26.5563 30.5124 26.5549 30.2825V19.0542L29.9213 20.998C29.9389 21.0068 29.9541 21.0198 29.9656 21.0359C29.977 21.052 29.9842 21.0707 29.9867 21.0902V30.3889C29.9842 32.375 29.1946 34.2791 27.7909 35.6841C26.3872 37.0892 24.4838 37.8806 22.4978 37.8849ZM6.39227 31.0064C5.51397 29.4888 5.19742 27.7107 5.49804 25.9832C5.55718 26.0187 5.66048 26.0818 5.73461 26.1244L13.699 30.7248C13.8975 30.8408 14.1233 30.902 14.3532 30.902C14.583 30.902 14.8088 30.8408 15.0073 30.7248L24.731 25.1103V28.9979C24.7321 29.0177 24.7283 29.0376 24.7199 29.0556C24.7115 29.0736 24.6988 29.0893 24.6829 29.1012L16.6317 33.7497C14.9096 34.7416 12.8643 35.0097 10.9447 34.4954C9.02506 33.9811 7.38785 32.7263 6.39227 31.0064ZM4.29707 13.6194C5.17156 12.0998 6.55279 10.9364 8.19885 10.3327C8.19885 10.4013 8.19491 10.5228 8.19491 10.6071V19.808C8.19351 20.0378 8.25334 20.2638 8.36823 20.4629C8.48312 20.6619 8.64893 20.8267 8.84863 20.9404L18.5723 26.5542L15.206 28.4979C15.1894 28.5089 15.1703 28.5155 15.1505 28.5173C15.1307 28.5191 15.1107 28.516 15.0924 28.5082L7.04046 23.8557C5.32135 22.8601 4.06716 21.2235 3.55289 19.3046C3.03862 17.3858 3.30624 15.3413 4.29707 13.6194ZM31.955 20.0556L22.2312 14.4411L25.5976 12.4981C25.6142 12.4872 25.6333 12.4805 25.6531 12.4787C25.6729 12.4769 25.6928 12.4801 25.7111 12.4879L33.7631 17.1364C34.9967 17.849 36.0017 18.8982 36.6606 20.1613C37.3194 21.4244 37.6047 22.849 37.4832 24.2684C37.3617 25.6878 36.8382 27.0432 35.9743 28.1759C35.1103 29.3086 33.9415 30.1717 32.6047 30.6641C32.6047 30.5947 32.6047 30.4733 32.6047 30.3889V21.188C32.6066 20.9586 32.5474 20.7328 32.4332 20.5338C32.319 20.3348 32.154 20.1698 31.955 20.0556ZM35.3055 15.0128C35.2464 14.9765 35.1431 14.9142 35.069 14.8717L27.1045 10.2712C26.906 10.1554 26.6803 10.0943 26.4504 10.0943C26.2206 10.0943 25.9948 10.1554 25.7963 10.2712L16.0726 15.8858V11.9982C16.0715 11.9783 16.0753 11.9585 16.0837 11.9405C16.0921 11.9225 16.1048 11.9068 16.1207 11.8949L24.1719 7.25025C25.4053 6.53903 26.8158 6.19376 28.2383 6.25482C29.6608 6.31589 31.0364 6.78077 32.2044 7.59508C33.3723 8.40939 34.2842 9.53945 34.8334 10.8531C35.3826 12.1667 35.5464 13.6095 35.3055 15.0128ZM14.2424 21.9419L10.8752 19.9981C10.8576 19.9893 10.8423 19.9763 10.8309 19.9602C10.8195 19.9441 10.8122 19.9254 10.8098 19.9058V10.6071C10.8107 9.18295 11.2173 7.78848 11.9819 6.58696C12.7466 5.38544 13.8377 4.42659 15.1275 3.82264C16.4173 3.21869 17.8524 2.99464 19.2649 3.1767C20.6775 3.35876 22.0089 3.93941 23.1034 4.85067C23.0427 4.88379 22.937 4.94215 22.8668 4.98473L14.9024 9.58517C14.7025 9.69878 14.5366 9.86356 14.4215 10.0626C14.3065 10.2616 14.2466 10.4877 14.2479 10.7175L14.2424 21.9419ZM16.071 17.9991L20.4018 15.4978L24.7325 17.9975V22.9985L20.4018 25.4983L16.071 22.9985V17.9991Z" fill="currentColor"></path>\r
-        </symbol>\r
-    </svg>\r
-    <div class="conversation">\r
-        <div class="conversation-header">\r
-            <h1>\r
-                <a href="{{source}}" target="_blank" rel="noopener noreferrer">{{title}}</a>\r
-                <button class="toggle">\r
-                    <svg class="sun" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>\r
-                    <svg class="moon" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>\r
-                </button>\r
-                <button class="toggle width-toggle">\r
-                    <svg class="expand" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="display: block;">\r
-                        <path d="M3 12h18M6 8l-4 4 4 4M18 8l4 4-4 4"></path>\r
-                    </svg>\r
-                    <svg class="narrow" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="display: none;">\r
-                        <path d="M3 12h7M14 12h7M6 16l4-4-4-4M18 16l-4-4 4-4"></path>\r
-                    </svg>\r
-                </button>\r
-            </h1>\r
-            <div class="conversation-export">\r
-                <p>Exported by\r
-                <a href="https://github.com/pionxzh/chatgpt-exporter.git">ChatGPT Exporter</a>\r
-                at {{time}}</p>\r
-            </div>\r
-            {{details}}\r
-        </div>\r
-\r
-        {{content}}\r
-    </div>\r
-\r
-\r
-    <script>\r
-        function toggleDarkMode(mode) {\r
-            const html = document.querySelector('html');\r
-            const isDarkMode = html.getAttribute('data-theme') === 'dark';\r
-            const newMode = mode || (isDarkMode ? 'light' : 'dark');\r
-            if (newMode !== 'dark' && newMode !== 'light') return;\r
-            html.setAttribute('data-theme', newMode);\r
-\r
-            const url = new URL(window.location);\r
-            url.searchParams.set('theme', newMode);\r
-            window.history.replaceState({}, '', url);\r
-        }\r
-        function toggleWidthMode(mode) {\r
-            const body = document.querySelector('body');\r
-            const widthToggleButton = document.querySelector('.width-toggle');\r
-            const isWide = body.getAttribute('data-width') === 'wide';\r
-            const newWidthMode = mode || (isWide ? 'narrow' : 'wide');\r
-            if (newWidthMode !== 'narrow' && newWidthMode !== 'wide') return;\r
-            body.setAttribute('data-width', newWidthMode);\r
-\r
-            const url = new URL(window.location);\r
-            url.searchParams.set('width', newWidthMode);\r
-            window.history.replaceState({}, '', url);\r
-\r
-            // Update the icon based on the current mode\r
-            const narrowIcon = widthToggleButton.querySelector('.narrow');\r
-            const expandIcon = widthToggleButton.querySelector('.expand');\r
-\r
-            if (newWidthMode === 'wide') {\r
-                expandIcon.style.display = "none";\r
-                narrowIcon.style.display = "block";\r
-            } else {\r
-                expandIcon.style.display = "block";\r
-                narrowIcon.style.display = "none";\r
-            }\r
-        }\r
-\r
-        const urlParams = new URLSearchParams(window.location.search);\r
-        const theme = urlParams.get('theme');\r
-        const width = urlParams.get('width');\r
-\r
-        if (theme) toggleDarkMode(theme);\r
-        if (width) toggleWidthMode(width);\r
-\r
-        document.querySelector('.toggle').addEventListener('click', () => toggleDarkMode());\r
-        document.querySelector('.width-toggle').addEventListener('click', () => toggleWidthMode());\r
-    <\/script>\r
-</body>\r
-\r
-</html>\r
+  const templateHtml = `<!DOCTYPE html>
+<html lang="{{lang}}" data-theme="{{theme}}">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="https://chat.openai.com/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"><\/script>
+    <script>
+        hljs.highlightAll()
+    <\/script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/katex.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/katex.min.js"><\/script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.3/contrib/auto-render.min.js"><\/script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    { left: "$$", right: "$$", display: true },
+                    { left: "$", right: "$", display: false },
+                    { left: "\\\\[", right: "\\\\]", display: true },
+                    { left: "\\\\(", right: "\\\\)", display: false }
+                ],
+                throwOnError: false,
+                ignoredClasses: ["no-katex"],
+                preProcess: function(math) {
+                    return \`\\\\displaystyle \\\\Large \${math}\`;
+                }
+            });
+            document.querySelectorAll('.katex').forEach(function(el) {
+                const parent = el.parentNode;
+                const grandparent = parent.parentNode;
+                if (grandparent.tagName === 'P' && isOnlyContent(grandparent, parent)) {
+                    el.style.width = '100%';
+                    el.style.display = 'block';
+                    el.style.textAlign = 'center';
+                    parent.style.textAlign = 'center';
+                } else {
+                    el.style.display = 'inline-block';
+                    el.style.width = 'fit-content';
+                }
+            });
+            function isOnlyContent(parent, element) {
+                let onlyKaTeX = true;
+                parent.childNodes.forEach(function(child) {
+                    console.log(child.textContent);
+                    if (child !== element) {
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            if (child.textContent.trim().length > 0) {
+                                onlyKaTeX = false;
+                            }
+                        } else if (child.nodeType === Node.ELEMENT_NODE) {
+                            onlyKaTeX = false;
+                        }
+                    }
+                });
+                return onlyKaTeX;
+            }
+        });
+    <\/script>
+
+    <style>
+        :root {
+            --page-text: #0d0d0d;
+            --page-bg: #fff;
+            --td-borders: #374151;
+            --th-borders: #4b5563;
+            --tw-prose-code: var(--page-text);
+            --tw-prose-counters: #9b9b9b;
+            --tw-prose-headings: var(--page-text);
+            --tw-prose-hr: rgba(0,0,0,.25);
+            --tw-prose-links: var(--page-text);
+            --tw-prose-quotes: var(--page-text);
+            --meta-title: #616c77;
+        }
+
+        [data-theme="dark"] {
+            --page-text: #ececec;
+            --page-bg: #212121;
+            --tw-prose-code: var(--page-text);
+            --tw-prose-counters: #9b9b9b;
+            --tw-prose-headings: var(--page-text);
+            --tw-prose-hr: hsla(0,0%,100%,.25);
+            --tw-prose-links: var(--page-text);
+            --tw-prose-quotes: var(--page-text);
+            --meta-title: #959faa;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        ::-webkit-scrollbar {
+            height: 1rem;
+            width: .5rem
+        }
+
+        ::-webkit-scrollbar:horizontal {
+            height: .5rem;
+            width: 1rem
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: transparent;
+            border-radius: 9999px
+        }
+
+        ::-webkit-scrollbar-thumb {
+            --tw-border-opacity: 1;
+            background-color: rgba(217,217,227,.8);
+            border-color: rgba(255,255,255,var(--tw-border-opacity));
+            border-radius: 9999px;
+            border-width: 1px
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            --tw-bg-opacity: 1;
+            background-color: rgba(236,236,241,var(--tw-bg-opacity))
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            --tw-bg-opacity: 1;
+            background-color: rgba(86,88,105,var(--tw-bg-opacity))
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            --tw-bg-opacity: 1;
+            background-color: rgba(172,172,190,var(--tw-bg-opacity))
+        }
+
+        @media (min-width: 768px) {
+            .scrollbar-trigger ::-webkit-scrollbar-thumb {
+                visibility:hidden
+            }
+
+            .scrollbar-trigger:hover ::-webkit-scrollbar-thumb {
+                visibility: visible
+            }
+        }
+
+        body {
+            font-family: Söhne,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Helvetica Neue,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--page-text);
+            background-color: var(--page-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        [data-theme="light"] .sun {
+            display: none;
+        }
+
+        [data-theme="dark"] .moon {
+            display: none;
+        }
+
+        .toggle {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+        }
+
+        [data-width="narrow"] .width-toggle .expand {
+            display: block;
+        }
+
+        [data-width="wide"] .width-toggle .narrow {
+            display: block;
+        }
+
+        .width-toggle {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .width-toggle svg {
+            display: none;
+        }
+
+        .metadata_container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 8px;
+            padding-left: 1rem;
+        }
+
+        .metadata_item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border-radius: 16px;
+            padding: 4px 0.5rem;
+        }
+
+        .metadata_item:hover {
+            background-color: rgba(0,0,0,.1);
+        }
+
+        .metadata_item > div:first-child {
+            flex: 0 1 100px;
+            color: var(--meta-title);
+        }
+
+        .metadata_item > div:last-child {
+            flex: 1;
+        }
+
+        a {
+            color: var(--tw-prose-links);
+            font-size: 0.8rem;
+            text-decoration-line: underline;
+            text-underline-offset: 2px;
+        }
+
+        .conversation-content > p:first-child,
+        ol:first-child {
+            margin-top: 0;
+        }
+
+        p>code, li>code {
+            color: var(--tw-prose-code);
+            font-weight: 600;
+            font-size: .875em;
+        }
+
+        p>code::before,
+        p>code::after,
+        li>code::before,
+        li>code::after {
+            content: "\`";
+        }
+
+        hr {
+            width: 100%;
+            height: 0;
+            border: 1px solid var(--tw-prose-hr);
+            margin-bottom: 1em;
+            margin-top: 1em;
+        }
+
+        pre {
+            color: #ffffff;
+            background-color: #000000;
+            overflow-x: auto;
+            margin: 0 0 1rem 0;
+            border-radius: 0.375rem;
+        }
+
+        pre>code {
+            font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace !important;
+            font-weight: 400;
+            font-size: .875em;
+            line-height: 1.7142857;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--tw-prose-headings);
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 2.25em;
+            font-weight: 600;
+            line-height: 1.1111111;
+            margin-bottom: 0.8888889em;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            font-weight: 700;
+            line-height: 1.3333333;
+            margin-bottom: 1em;
+            margin-top: 2em;
+        }
+
+        h3 {
+            font-size: 1.25em;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: .6em;
+            margin-top: 1.6em;
+        }
+
+        h4 {
+            font-weight: 400;
+            line-height: 1.5;
+            margin-bottom: .5em;
+            margin-top: 1.5em
+        }
+
+        h3,h4 {
+            margin-bottom: .5rem;
+            margin-top: 1rem;
+        }
+
+        h5 {
+            font-weight: 600;
+        }
+
+        blockquote {
+            border-left: 2px solid rgba(142,142,160,1);
+            color: var(--tw-prose-quotes);
+            font-style: italic;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 1rem;
+            margin: 1.6em 0;
+            padding-left: 1em;
+            quotes: "\\201C""\\201D""\\2018""\\2019";
+        }
+
+        blockquote p:first-of-type:before {
+            content: open-quote;
+        }
+
+        blockquote p:last-of-type:after {
+            content: close-quote;
+        }
+
+        ol, ul {
+            padding-left: 1.1rem;
+        }
+
+        ::marker {
+            color: var(--tw-prose-counters);
+            font-weight: 400;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0;
+            table-layout: auto;
+            text-align: left;
+            font-size: .875em;
+            line-height: 1.7142857;
+        }
+
+        table * {
+            box-sizing: border-box;
+            border-width: 0;
+            border-style: solid;
+            border-color: #d9d9e3;
+        }
+
+        table thead {
+            border-bottom-color: var(--th-borders);
+            border-bottom-width: 1px;
+        }
+
+        table th {
+            background-color: rgba(236,236,241,.2);
+            border-bottom-width: 1px;
+            border-left-width: 1px;
+            border-top-width: 1px;
+            padding: 0.25rem 0.75rem;
+        }
+
+        table th:first-child {
+            border-top-left-radius: 0.375rem;
+        }
+
+        table th:last-child {
+            border-right-width: 1px;
+            border-top-right-radius: 0.375rem;
+        }
+
+        table tbody tr {
+            border-bottom-color: var(--td-borders);
+            border-bottom-width: 1px;
+        }
+
+        table tbody tr:last-child {
+            border-bottom-width: 0;
+        }
+
+        table tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 0.375rem;
+        }
+
+        table tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 0.375rem;
+        }
+
+        table td {
+            border-bottom-width: 1px;
+            border-left-width: 1px;
+            padding: 0.25rem 0.75rem;
+        }
+
+        table td:last-child {
+            border-right-width: 1px;
+        }
+
+        [type=checkbox], [type=radio] {
+            accent-color: #2563eb;
+        }
+
+        .conversation {
+            margin: 0 auto;
+            padding: 1rem;
+            max-width: 64rem;
+        }
+
+        [data-width="narrow"] .conversation {
+            max-width: 64rem;
+        }
+
+        [data-width="wide"] .conversation {
+            max-width: 90%;
+        }
+
+        @media (min-width: 1280px) {
+            .conversation {
+                max-width: 48rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .conversation {
+                max-width: 40rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .conversation {
+                max-width: 48rem;
+            }
+        }
+
+        .conversation-header {
+            margin-bottom: 1rem;
+        }
+
+        .conversation-header h1 {
+            margin: 0;
+        }
+
+        .conversation-header h1 a {
+            font-size: 1.5rem;
+        }
+
+        .conversation-header .conversation-export {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .conversation-header p {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .conversation-item {
+            display: flex;
+            position: relative;
+            padding: 1rem;
+            border-left: 1px solid rgba(0,0,0,.1);
+            border-right: 1px solid rgba(0,0,0,.1);
+            border-bottom: 1px solid rgba(0,0,0,.1);
+        }
+
+        .conversation-item:first-of-type {
+            border-top: 1px solid rgba(0,0,0,.1);
+        }
+
+        .author {
+            display: flex;
+            flex: 0 0 30px;
+            justify-content: center;
+            align-items: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 0.125rem;
+            margin-right: 1rem;
+            overflow: hidden;
+        }
+
+        .author svg {
+            color: #fff;
+            width: 22px;
+            height: 22px;
+        }
+
+        .author img {
+            content: url({{avatar}});
+            width: 100%;
+            height: 100%;
+        }
+
+        .author.GPT-3 {
+            background-color: rgb(16, 163, 127);
+        }
+
+        .author.GPT-4 {
+            background-color: black;
+        }
+
+        .conversation-content-wrapper {
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            flex: 1 1 auto;
+            flex-direction: column;
+        }
+
+        .thinking {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .thinking summary {
+            cursor: pointer;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .thinking p {
+            margin: 0.5rem 0;
+            color: #6b7280;
+        }
+
+        .dark .thinking {
+            border-color: #4b5563;
+        }
+
+        .dark .thinking summary,
+        .dark .thinking p {
+            color: #9ca3af;
+        }
+
+        .conversation-content {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .conversation-content p {
+            white-space: pre-wrap;
+            line-height: 28px;
+        }
+
+        .conversation-content img, .conversation-content video {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 2em;
+            margin-top: 2em;
+        }
+
+        .time {
+            position: absolute;
+            right: 8px;
+            bottom: 0;
+            font-size: 0.8rem;
+            color: #acacbe
+        }
+
+    </style>
+</head>
+
+<body>
+    <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <symbol id="chatgpt" viewBox="0 0 41 41">
+            <path d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.500197C16.1708 0.495044 14.0893 1.16803 12.3614 2.42214C10.6335 3.67624 9.34853 5.44666 8.6917 7.47815C7.30085 7.76286 5.98686 8.3414 4.8377 9.17505C3.68854 10.0087 2.73073 11.0782 2.02839 12.312C0.956464 14.1591 0.498905 16.2988 0.721698 18.4228C0.944492 20.5467 1.83612 22.5449 3.268 24.1293C2.81966 25.4759 2.66413 26.9026 2.81182 28.3141C2.95951 29.7256 3.40701 31.0892 4.12437 32.3138C5.18791 34.1659 6.8123 35.6322 8.76321 36.5013C10.7141 37.3704 12.8907 37.5973 14.9789 37.1492C15.9208 38.2107 17.0786 39.0587 18.3747 39.6366C19.6709 40.2144 21.0755 40.5087 22.4946 40.4998C24.6307 40.5054 26.7133 39.8321 28.4418 38.5772C30.1704 37.3223 31.4556 35.5506 32.1119 33.5179C33.5027 33.2332 34.8167 32.6547 35.9659 31.821C37.115 30.9874 38.0728 29.9178 38.7752 28.684C39.8458 26.8371 40.3023 24.6979 40.0789 22.5748C39.8556 20.4517 38.9639 18.4544 37.5324 16.8707ZM22.4978 37.8849C20.7443 37.8874 19.0459 37.2733 17.6994 36.1501C17.7601 36.117 17.8666 36.0586 17.936 36.0161L25.9004 31.4156C26.1003 31.3019 26.2663 31.137 26.3813 30.9378C26.4964 30.7386 26.5563 30.5124 26.5549 30.2825V19.0542L29.9213 20.998C29.9389 21.0068 29.9541 21.0198 29.9656 21.0359C29.977 21.052 29.9842 21.0707 29.9867 21.0902V30.3889C29.9842 32.375 29.1946 34.2791 27.7909 35.6841C26.3872 37.0892 24.4838 37.8806 22.4978 37.8849ZM6.39227 31.0064C5.51397 29.4888 5.19742 27.7107 5.49804 25.9832C5.55718 26.0187 5.66048 26.0818 5.73461 26.1244L13.699 30.7248C13.8975 30.8408 14.1233 30.902 14.3532 30.902C14.583 30.902 14.8088 30.8408 15.0073 30.7248L24.731 25.1103V28.9979C24.7321 29.0177 24.7283 29.0376 24.7199 29.0556C24.7115 29.0736 24.6988 29.0893 24.6829 29.1012L16.6317 33.7497C14.9096 34.7416 12.8643 35.0097 10.9447 34.4954C9.02506 33.9811 7.38785 32.7263 6.39227 31.0064ZM4.29707 13.6194C5.17156 12.0998 6.55279 10.9364 8.19885 10.3327C8.19885 10.4013 8.19491 10.5228 8.19491 10.6071V19.808C8.19351 20.0378 8.25334 20.2638 8.36823 20.4629C8.48312 20.6619 8.64893 20.8267 8.84863 20.9404L18.5723 26.5542L15.206 28.4979C15.1894 28.5089 15.1703 28.5155 15.1505 28.5173C15.1307 28.5191 15.1107 28.516 15.0924 28.5082L7.04046 23.8557C5.32135 22.8601 4.06716 21.2235 3.55289 19.3046C3.03862 17.3858 3.30624 15.3413 4.29707 13.6194ZM31.955 20.0556L22.2312 14.4411L25.5976 12.4981C25.6142 12.4872 25.6333 12.4805 25.6531 12.4787C25.6729 12.4769 25.6928 12.4801 25.7111 12.4879L33.7631 17.1364C34.9967 17.849 36.0017 18.8982 36.6606 20.1613C37.3194 21.4244 37.6047 22.849 37.4832 24.2684C37.3617 25.6878 36.8382 27.0432 35.9743 28.1759C35.1103 29.3086 33.9415 30.1717 32.6047 30.6641C32.6047 30.5947 32.6047 30.4733 32.6047 30.3889V21.188C32.6066 20.9586 32.5474 20.7328 32.4332 20.5338C32.319 20.3348 32.154 20.1698 31.955 20.0556ZM35.3055 15.0128C35.2464 14.9765 35.1431 14.9142 35.069 14.8717L27.1045 10.2712C26.906 10.1554 26.6803 10.0943 26.4504 10.0943C26.2206 10.0943 25.9948 10.1554 25.7963 10.2712L16.0726 15.8858V11.9982C16.0715 11.9783 16.0753 11.9585 16.0837 11.9405C16.0921 11.9225 16.1048 11.9068 16.1207 11.8949L24.1719 7.25025C25.4053 6.53903 26.8158 6.19376 28.2383 6.25482C29.6608 6.31589 31.0364 6.78077 32.2044 7.59508C33.3723 8.40939 34.2842 9.53945 34.8334 10.8531C35.3826 12.1667 35.5464 13.6095 35.3055 15.0128ZM14.2424 21.9419L10.8752 19.9981C10.8576 19.9893 10.8423 19.9763 10.8309 19.9602C10.8195 19.9441 10.8122 19.9254 10.8098 19.9058V10.6071C10.8107 9.18295 11.2173 7.78848 11.9819 6.58696C12.7466 5.38544 13.8377 4.42659 15.1275 3.82264C16.4173 3.21869 17.8524 2.99464 19.2649 3.1767C20.6775 3.35876 22.0089 3.93941 23.1034 4.85067C23.0427 4.88379 22.937 4.94215 22.8668 4.98473L14.9024 9.58517C14.7025 9.69878 14.5366 9.86356 14.4215 10.0626C14.3065 10.2616 14.2466 10.4877 14.2479 10.7175L14.2424 21.9419ZM16.071 17.9991L20.4018 15.4978L24.7325 17.9975V22.9985L20.4018 25.4983L16.071 22.9985V17.9991Z" fill="currentColor"></path>
+        </symbol>
+    </svg>
+    <div class="conversation">
+        <div class="conversation-header">
+            <h1>
+                <a href="{{source}}" target="_blank" rel="noopener noreferrer">{{title}}</a>
+                <button class="toggle">
+                    <svg class="sun" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg class="moon" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                <button class="toggle width-toggle">
+                    <svg class="expand" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                        <path d="M3 12h18M6 8l-4 4 4 4M18 8l4 4-4 4"></path>
+                    </svg>
+                    <svg class="narrow" stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                        <path d="M3 12h7M14 12h7M6 16l4-4-4-4M18 16l-4-4 4-4"></path>
+                    </svg>
+                </button>
+            </h1>
+            <div class="conversation-export">
+                <p>Exported by
+                <a href="https://github.com/pionxzh/chatgpt-exporter.git">ChatGPT Exporter</a>
+                at {{time}}</p>
+            </div>
+            {{details}}
+        </div>
+
+        {{content}}
+    </div>
+
+
+    <script>
+        function toggleDarkMode(mode) {
+            const html = document.querySelector('html');
+            const isDarkMode = html.getAttribute('data-theme') === 'dark';
+            const newMode = mode || (isDarkMode ? 'light' : 'dark');
+            if (newMode !== 'dark' && newMode !== 'light') return;
+            html.setAttribute('data-theme', newMode);
+
+            const url = new URL(window.location);
+            url.searchParams.set('theme', newMode);
+            window.history.replaceState({}, '', url);
+        }
+        function toggleWidthMode(mode) {
+            const body = document.querySelector('body');
+            const widthToggleButton = document.querySelector('.width-toggle');
+            const isWide = body.getAttribute('data-width') === 'wide';
+            const newWidthMode = mode || (isWide ? 'narrow' : 'wide');
+            if (newWidthMode !== 'narrow' && newWidthMode !== 'wide') return;
+            body.setAttribute('data-width', newWidthMode);
+
+            const url = new URL(window.location);
+            url.searchParams.set('width', newWidthMode);
+            window.history.replaceState({}, '', url);
+
+            // Update the icon based on the current mode
+            const narrowIcon = widthToggleButton.querySelector('.narrow');
+            const expandIcon = widthToggleButton.querySelector('.expand');
+
+            if (newWidthMode === 'wide') {
+                expandIcon.style.display = "none";
+                narrowIcon.style.display = "block";
+            } else {
+                expandIcon.style.display = "block";
+                narrowIcon.style.display = "none";
+            }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const theme = urlParams.get('theme');
+        const width = urlParams.get('width');
+
+        if (theme) toggleDarkMode(theme);
+        if (width) toggleWidthMode(width);
+
+        document.querySelector('.toggle').addEventListener('click', () => toggleDarkMode());
+        document.querySelector('.width-toggle').addEventListener('click', () => toggleWidthMode());
+    <\/script>
+</body>
+
+</html>
 `;
   const CitationMarkerRegex = /\uE200cite(?:\uE202[^\uE200\uE201]*)+\uE201/gu;
   function normalizeCitationText(input) {
@@ -26614,12 +26671,7 @@ ${body2}
       "div",
       {
         className: `
-            menu-item
-            __menu-item hoverable
-            flex flex-shrink-0 m-0 items-center gap-3 rounded-lg
-            transition-colors duration-200
-            cursor-pointer
-            border border-menu ${className}`,
+            ce-menu-item ${className}`,
         onClick: handleClick,
         onTouchStart: handleClick,
         disabled,
@@ -27397,20 +27449,18 @@ ${body2}
                     className: `
                         grid grid-cols-2
                         bg-menu
-                        ce-card
+                        ce-card ce-export-menu
                         transition-opacity duration-200
                         gap-1 py-2 px-1
                         ${isMobile ? "animate-slideUp" : "animate-fadeIn"}`,
                     style: {
-                      width: isMobile ? 316 : 268,
-                      left: -6,
-                      bottom: 0
+                      width: isMobile ? 316 : 268
                     },
                     sideOffset: isMobile ? 0 : 8,
                     side: isMobile ? "bottom" : "right",
                     align: "start",
-                    alignOffset: isMobile ? 0 : -64,
-                    collisionPadding: isMobile ? 0 : 8,
+                    alignOffset: 0,
+                    collisionPadding: 12,
                     children: [
                       /* @__PURE__ */ o$8(
                         SettingDialog,
@@ -27591,38 +27641,102 @@ ${body2}
   function Menu({ container }) {
     return /* @__PURE__ */ o$8(SettingProvider, { children: /* @__PURE__ */ o$8(MenuInner, { container }) });
   }
+  const PROFILE_SELECTOR = '[data-testid="accounts-profile-button"]';
+  const SHARE_SELECTOR = 'div[role="presentation"] > .w-full > div > .flex.w-full';
+  const SIDEBAR_SELECTOR = '[data-testid="sidebar"], [aria-label="Sidebar"], aside, nav, [role="navigation"]';
+  function isVisible(element2, document2) {
+    var _a;
+    const style = (_a = document2.defaultView) == null ? void 0 : _a.getComputedStyle(element2);
+    return element2.getClientRects().length > 0 && (style == null ? void 0 : style.visibility) !== "hidden" && (style == null ? void 0 : style.visibility) !== "collapse";
+  }
+  function syncExporterMenu(container, document2, sharePage = false) {
+    positionExporterMenu(container, document2, sharePage);
+    const offset = container.classList.contains("ce-menu-header-offset") ? 48 : 0;
+    const top = container.getBoundingClientRect().top - offset;
+    const nearHeader = container.dataset.ceMenuMode !== "floating" && top >= 0 && top < 48;
+    if (nearHeader) container.classList.add("ce-menu-header-offset");
+    else container.classList.remove("ce-menu-header-offset");
+  }
+  function positionExporterMenu(container, document2, sharePage) {
+    const profile = Array.from(document2.querySelectorAll(PROFILE_SELECTOR)).find((element2) => isVisible(element2, document2));
+    if (profile) {
+      container.classList.remove("ce-menu-sidebar-slot");
+      const wrapper = profile.parentElement;
+      const siblings2 = wrapper ? Array.from(wrapper.children).filter((child) => child !== container) : [];
+      const target = wrapper && siblings2.length === 1 ? wrapper : profile;
+      container.classList.remove("ce-menu-floating");
+      container.dataset.ceMenuMode = "sidebar";
+      if (container.parentElement !== target.parentElement || container.nextElementSibling !== target) {
+        target.before(container);
+      }
+      return;
+    }
+    const shareTarget = sharePage ? Array.from(document2.querySelectorAll(SHARE_SELECTOR)).find((element2) => isVisible(element2, document2)) : void 0;
+    if (shareTarget) {
+      container.classList.remove("ce-menu-sidebar-slot");
+      container.classList.remove("ce-menu-floating");
+      container.dataset.ceMenuMode = "share";
+      if (container.parentElement !== shareTarget || shareTarget.firstElementChild !== container) {
+        shareTarget.prepend(container);
+      }
+      return;
+    }
+    const sidebar = Array.from(document2.querySelectorAll(SIDEBAR_SELECTOR)).filter((element2) => {
+      var _a, _b;
+      if (!isVisible(element2, document2)) return false;
+      const rect = element2.getBoundingClientRect();
+      const minHeight = Math.max(160, (((_a = document2.defaultView) == null ? void 0 : _a.innerHeight) ?? 0) / 2);
+      const style = (_b = document2.defaultView) == null ? void 0 : _b.getComputedStyle(element2);
+      const scrolls = ((style == null ? void 0 : style.overflowY) === "auto" || (style == null ? void 0 : style.overflowY) === "scroll") && element2.scrollHeight > element2.clientHeight;
+      return rect.left >= -2 && rect.left <= 32 && rect.width >= 40 && rect.width <= 440 && rect.height >= minHeight && !scrolls;
+    }).sort((a2, b2) => b2.getBoundingClientRect().height - a2.getBoundingClientRect().height)[0];
+    if (sidebar) {
+      container.classList.remove("ce-menu-floating");
+      container.classList.add("ce-menu-sidebar-slot");
+      container.dataset.ceMenuMode = "sidebar-fallback";
+      if (container.parentElement !== sidebar || sidebar.lastElementChild !== container) {
+        sidebar.append(container);
+      }
+      return;
+    }
+    container.classList.remove("ce-menu-sidebar-slot");
+    container.classList.add("ce-menu-floating");
+    container.dataset.ceMenuMode = "floating";
+    if (document2.body && container.parentElement !== document2.body) document2.body.append(container);
+  }
+  function syncExporterTheme(document2) {
+    var _a;
+    const root2 = document2.documentElement;
+    const view = document2.defaultView;
+    if (!root2 || !view) return;
+    const scheme = view.getComputedStyle(root2).colorScheme;
+    let dark = scheme === "dark" || root2.matches('.dark, [data-theme="dark"]');
+    if (scheme !== "dark" && scheme !== "light" && !dark) {
+      const background = view.getComputedStyle(document2.body).backgroundColor;
+      const components = (_a = background.match(/[\d.]+/g)) == null ? void 0 : _a.map(Number);
+      if (components && components.length >= 3 && (components[3] ?? 1) > 0) {
+        dark = (components[0] + components[1] + components[2]) / 3 < 128;
+      } else {
+        dark = view.matchMedia("(prefers-color-scheme: dark)").matches;
+      }
+    }
+    const theme = dark ? "dark" : "light";
+    if (root2.dataset.ceTheme !== theme) root2.dataset.ceTheme = theme;
+  }
   main();
   function main() {
     onloadSafe(() => {
-      console.log("[Exporter] Loaded");
+      console.log("[Exporter] Loaded", "2.35.4");
       const styleEl = document.createElement("style");
       styleEl.id = "sentinel-css";
       document.head.append(styleEl);
-      const injectionMap = /* @__PURE__ */ new Map();
-      const injectNavMenu = (target) => {
-        if (injectionMap.has(target)) return;
-        console.log("[Exporter] Injecting nav", target);
-        const container = getMenuContainer();
-        injectionMap.set(target, container);
-        getNavMenuInsertionTarget(target).before(container);
+      const container = getMenuContainer();
+      const syncMenu = () => {
+        syncExporterTheme(document);
+        syncExporterMenu(container, document, isSharePage());
       };
-      const selector = '[data-testid="accounts-profile-button"]';
-      sentinel.on("selector", injectNavMenu);
-      setInterval(() => {
-        injectionMap.forEach((container, target) => {
-          if (!target.isConnected) {
-            container.remove();
-            injectionMap.delete(target);
-          }
-        });
-        const targets = Array.from(document.querySelectorAll(selector)).filter((target) => !injectionMap.has(target));
-        targets.forEach(injectNavMenu);
-      }, 1e3);
-      if (isSharePage()) {
-        sentinel.on(`div[role="presentation"] > .w-full > div >.flex.w-full`, (target) => {
-          target.prepend(getMenuContainer());
-        });
-      }
+      syncMenu();
+      setInterval(syncMenu, 1e3);
       let chatId = "";
       sentinel.on('[role="presentation"]', async () => {
         const currentChatId = getChatIdFromUrl();
@@ -27655,14 +27769,10 @@ ${body2}
   }
   function getMenuContainer() {
     const container = document.createElement("div");
+    container.id = "chatgpt-exporter-menu";
     container.style.zIndex = "99";
     D$4(/* @__PURE__ */ o$8(Menu, { container }), container);
     return container;
-  }
-  function getNavMenuInsertionTarget(target) {
-    const wrapper = target.parentElement;
-    if (!wrapper || wrapper.children.length !== 1) return target;
-    return wrapper;
   }
 
 })(JSZip, html2canvas);
