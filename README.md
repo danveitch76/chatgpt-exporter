@@ -21,7 +21,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp
 > [!NOTE]
 > This repository is a maintained downstream fork of [`pionxzh/chatgpt-exporter`](https://github.com/pionxzh/chatgpt-exporter). It preserves upstream attribution while adding File Discovery and asset classification, filtered Project/Chat inventory exports, Bulk Rename Conversations, validation tooling and governed upstream-maintenance automation.
 
-**Current downstream version:** `2.35.1`
+**Current downstream version:** `2.35.2`
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 
@@ -36,6 +36,14 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp
 [link-chrome]: https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo 'Chrome Web Store'
 [link-firefox]: https://addons.mozilla.org/firefox/addon/tampermonkey 'Firefox Add-ons'
 [link-edge]: https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd 'Edge Add-ons'
+
+### Exporter menu compatibility
+
+The exporter normally appears above the profile button. If that anchor is missing or hidden, a floating **ExportHelper** button appears at the bottom left. It opens the same export, inventory, File Discovery and bulk-management menu. The menu relocates automatically when a supported sidebar or shared-page anchor becomes available; no reload is needed for that relocation.
+
+The userscript runs on all paths on `chatgpt.com` and the legacy `chat.openai.com` host, including new application routes. This preserves access to the menu; it does not guarantee that a new route contains an exportable conversation.
+
+If the button is missing everywhere, check that Tampermonkey lists the script as enabled on the page, reload once, and check the browser console for `[Exporter] Loaded 2.35.2` or a startup error. If the menu opens but export fails, record that separately: the floating fallback does not validate ChatGPT's backend behaviour.
 
 ### UserScript
 

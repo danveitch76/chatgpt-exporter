@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.35.2 (unreleased)
+
+### Bug Fixes
+
+* keep one existing exporter menu reachable through a floating fallback when the ChatGPT profile-button anchor is missing or hidden
+* recover the menu after sidebar replacement, collapse/expand and client-side navigation without recreating its state
+* preserve supported shared-page placement and remove the accidental literal `selector` listener
+* include new ChatGPT application routes in the userscript match rules, restricted to the current and legacy ChatGPT hosts
+* include the exporter version in the startup console message
+
+### References
+
+* Issue #109; live validation against the changed account interface is required before release
+
 ## [2.35.1](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.35.0...userscript-v2.35.1) (2026-09-21)
 
 ### Bug Fixes

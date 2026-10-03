@@ -115,6 +115,18 @@ For 2.35.1, also verify that an installed downstream script can discover a later
 
 For changes to multi-conversation selection, also verify the default selection size and at least one non-default value plus resume selection behaviour.
 
+For the 2.35.2 menu-compatibility repair (#109), also verify the exact candidate userscript on the changed ChatGPT interface:
+
+- confirm Tampermonkey is running the candidate and the console reports its version;
+- confirm the menu is visible, opens, and exposes the existing export/discovery/inventory/management options;
+- confirm the floating menu appears if the previous profile-button anchor is absent or hidden;
+- collapse/expand the sidebar and navigate between a conversation, a Project, the home page and any new application route;
+- confirm exactly one exporter menu remains and open dialog state survives relocation;
+- verify a supported shared page and the mobile-width fallback;
+- perform a small read-only conversation export and check identity, message order and content.
+
+The menu-mount fixture verifies relocation and idempotency against a simulated element tree. It does not prove real browser rendering, Tampermonkey execution, changed-account compatibility or backend export success. Keep #109 open until that live evidence exists.
+
 ## Post-release checks
 
 1. Confirm the annotated tag resolves to the intended final release commit.

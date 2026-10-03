@@ -5,6 +5,9 @@ import packageJson from './package.json'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    define: {
+        __EXPORTER_VERSION__: JSON.stringify(packageJson.version),
+    },
     // https://github.com/lisonge/vite-plugin-monkey/issues/10#issuecomment-1207264978
     esbuild: {
         charset: 'utf8',
@@ -33,29 +36,10 @@ export default defineConfig({
                 'updateURL': 'https://raw.githubusercontent.com/danveitch76/chatgpt-exporter/master/dist/chatgpt.user.js',
                 'downloadURL': 'https://raw.githubusercontent.com/danveitch76/chatgpt-exporter/master/dist/chatgpt.user.js',
                 'match': [
-                    'https://chat.openai.com/',
-                    // support https://chat.openai.com/?model={model}
-                    'https://chat.openai.com/?*',
-                    // support https://chat.openai.com/c/123456789
-                    'https://chat.openai.com/c/*',
-                    // support https://chat.openai.com/g/g-123456789
-                    'https://chat.openai.com/g/*',
-                    // support https://chat.openai.com/gpts/
-                    'https://chat.openai.com/gpts',
-                    'https://chat.openai.com/gpts/*',
-                    // support https://chat.openai.com/share/123456789
-                    'https://chat.openai.com/share/*',
-                    // support https://chat.openai.com/share/123456789/continue
-                    'https://chat.openai.com/share/*/continue',
-
-                    'https://chatgpt.com/',
-                    'https://chatgpt.com/?*',
-                    'https://chatgpt.com/c/*',
-                    'https://chatgpt.com/g/*',
-                    'https://chatgpt.com/gpts',
-                    'https://chatgpt.com/gpts/*',
-                    'https://chatgpt.com/share/*',
-                    'https://chatgpt.com/share/*/continue',
+                    // Include new application routes as well as existing chat,
+                    // Project and share routes; remain restricted to these hosts.
+                    'https://chat.openai.com/*',
+                    'https://chatgpt.com/*',
                 ],
                 'icon': 'https://chatgpt.com/favicon.ico',
                 'run-at': 'document-end',
