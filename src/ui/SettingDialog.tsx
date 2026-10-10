@@ -63,11 +63,11 @@ export const SettingDialog: FC<SettingDialogProps> = ({
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Overlay className="DialogOverlay" />
-                <Dialog.Content className="DialogContent">
+                <Dialog.Content className="DialogContent ExporterSettingsDialog">
                     <Dialog.Title className="DialogTitle">{t('Exporter Settings')}</Dialog.Title>
                     <div className="DialogBody">
                         <dl className="space-y-6">
-                            <div className="relative flex bg-white dark:bg-white/5 rounded p-4">
+                            <div className="ExporterSettingsPanel relative flex rounded p-4">
                                 <div>
                                     <dt className="text-md font-medium text-gray-800 dark:text-white">
                                         {`${t('Language')} 🌐`}
@@ -85,7 +85,7 @@ export const SettingDialog: FC<SettingDialogProps> = ({
                                     </dd>
                                 </div>
                             </div>
-                            <div className="relative flex bg-white dark:bg-white/5 rounded p-4">
+                            <div className="ExporterSettingsPanel relative flex rounded p-4">
                                 <div>
                                     <dt className="text-md font-medium text-gray-800 dark:text-white">
                                         {t('File Name')}
@@ -113,7 +113,7 @@ export const SettingDialog: FC<SettingDialogProps> = ({
                                     </dd>
                                 </div>
                             </div>
-                            <div className="relative flex bg-white dark:bg-white/5 rounded p-4">
+                            <div className="ExporterSettingsPanel relative flex rounded p-4">
                                 <div>
                                     <dt className="text-md font-medium text-gray-800 dark:text-white">
                                         {t('Export Thinking Process')}
@@ -126,7 +126,7 @@ export const SettingDialog: FC<SettingDialogProps> = ({
                                     <Toggle label="" checked={enableThinking} onCheckedUpdate={setEnableThinking} />
                                 </div>
                             </div>
-                            <div className="relative flex bg-white dark:bg-white/5 rounded p-4">
+                            <div className="ExporterSettingsPanel relative flex rounded p-4">
                                 <div>
                                     <dt className="text-md font-medium text-gray-800 dark:text-white">
                                         {t('Export Sources')}
@@ -139,7 +139,7 @@ export const SettingDialog: FC<SettingDialogProps> = ({
                                     <Toggle label="" checked={enableSources} onCheckedUpdate={setEnableSources} />
                                 </div>
                             </div>
-                            <div className="relative flex bg-white dark:bg-white/5 rounded p-4">
+                            <div className="ExporterSettingsPanel relative flex rounded p-4">
                                 <div>
                                     <dt className="text-md font-medium text-gray-800 dark:text-white">
                                         {t('Export All Limit')}{' '}
@@ -172,7 +172,7 @@ export const SettingDialog: FC<SettingDialogProps> = ({
                                     </dd>
                                 </div>
                             </div>
-                            <div className="relative flex bg-white dark:bg-white/5 rounded p-4">
+                            <div className="ExporterSettingsPanel relative flex rounded p-4">
                                 <div>
                                     <dt className="text-md font-medium text-gray-800 dark:text-white">
                                         {t('Conversation Timestamp')}
@@ -210,7 +210,7 @@ export const SettingDialog: FC<SettingDialogProps> = ({
                                     <Toggle label="" checked={enableTimestamp} onCheckedUpdate={setEnableTimestamp} />
                                 </div>
                             </div>
-                            <div className="relative flex bg-white dark:bg-white/5 rounded p-4">
+                            <div className="ExporterSettingsPanel relative flex rounded p-4">
                                 <div>
                                     <dt className="text-md font-medium text-gray-800 dark:text-white">
                                         {t('Export Metadata')}
