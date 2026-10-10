@@ -341,3 +341,24 @@
         transform: translate(-50%, -50%) scale(1);
     }
 }
+
+/* Settings cards must not inherit the host application's light background
+   utility while using dark-theme text utilities. */
+.ExporterSettingsDialog .ExporterSettingsPanel {
+    background-color: var(--ce-dialog-header, #f1f1f1);
+    color: var(--ce-dialog-text, #171717);
+    border: 1px solid var(--ce-dialog-border, #a3a3a3);
+}
+.ExporterSettingsDialog .ExporterSettingsPanel dt,
+.ExporterSettingsDialog .ExporterSettingsPanel dd,
+.ExporterSettingsDialog .ExporterSettingsPanel p,
+.ExporterSettingsDialog .ExporterSettingsPanel span,
+.ExporterSettingsDialog .ExporterSettingsPanel strong,
+.ExporterSettingsDialog .ExporterSettingsPanel label {
+    color: var(--ce-dialog-text, #171717);
+}
+.ExporterSettingsDialog .ExporterSettingsPanel .Input,
+.ExporterSettingsDialog .ExporterSettingsPanel .Select {
+    background-color: var(--ce-dialog-field, #ffffff);
+    color: var(--ce-dialog-text, #171717);
+}
