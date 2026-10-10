@@ -21,9 +21,9 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Français](./README_FR.md) &nbsp;&nbsp;|&nbsp
 > [!NOTE]
 > This repository is a maintained downstream fork of [`pionxzh/chatgpt-exporter`](https://github.com/pionxzh/chatgpt-exporter). It preserves upstream attribution while adding File Discovery and asset classification, filtered Project/Chat inventory exports, Bulk Rename Conversations, validation tooling and governed upstream-maintenance automation.
 
-**Current downstream version:** `2.35.4`
+**Current downstream version:** `2.35.5`
 
-The main GitHub install/update channel carries the 2.35.4 menu-compatibility repair, published as [userscript-v2.35.4](https://github.com/danveitch76/chatgpt-exporter/releases/tag/userscript-v2.35.4). Publication uses the authorised manual release route because repository automation remains unavailable. Live screenshots confirm the menu presentation and title clearance; a live conversation export test remains outstanding. See [validation evidence](./docs/validation/2026-10-03-menu-styling.md).
+Version 2.35.5 improves exporter dialog, table and Settings contrast in light and dark themes. The separate conversation-detection defect is tracked in issue #112. See CHANGELOG.md for release details.
 
 ![image](https://github.com/danveitch76/chatgpt-exporter/assets/9910706/1c864670-7912-4484-b4be-bdf5dde51557)
 

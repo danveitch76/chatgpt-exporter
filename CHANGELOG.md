@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.35.5](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.35.4...userscript-v2.35.5) (2026-10-10)
+
+### Bug Fixes
+
+* restore readable text and background contrast across exporter dialogs in light and dark themes
+* harmonise table header, row, border and form control colours
+* correct Settings panel backgrounds and text contrast
+* make the conversation discovery regression fixture tolerant of whitespace differences
+
+### Validation
+
+* lint, TypeScript compilation and all thirteen regression fixtures passed
+* production userscript built successfully
+* modal colour changes visually accepted
+* single-conversation action detection remains deferred to issue #112
+
+### References
+
+* Pull request #111
+* Issue #112 (deferred)
+
+
 ## [2.35.4](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.35.1...userscript-v2.35.4) (2026-10-03)
 
 ### Bug Fixes
