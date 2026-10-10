@@ -823,3 +823,45 @@ html.dark .DialogContent,
 .DialogContent button:disabled {
     opacity: 0.55;
 }
+
+/* Shared table surfaces inside exporter dialogs. Keep header and body colours
+   consistent even when ChatGPT changes its own table utility classes. */
+.DialogContent {
+    --ce-dialog-header: #f1f1f1;
+    --ce-dialog-row: #ffffff;
+}
+html[data-ce-theme="dark"] .DialogContent,
+html[data-theme="dark"] .DialogContent,
+html.dark .DialogContent,
+.dark .DialogContent {
+    --ce-dialog-header: #383838;
+    --ce-dialog-row: #262626;
+}
+.DialogContent table {
+    color: var(--ce-dialog-text);
+    border-color: var(--ce-dialog-border);
+}
+.DialogContent table thead,
+.DialogContent table th,
+.DialogContent [role="columnheader"],
+.DialogContent .BulkRenamePreviewTable > div:first-child {
+    background-color: var(--ce-dialog-header);
+    color: var(--ce-dialog-text);
+    border-color: var(--ce-dialog-border);
+}
+.DialogContent table tbody,
+.DialogContent table td,
+.DialogContent [role="rowgroup"],
+.DialogContent [role="cell"] {
+    color: var(--ce-dialog-text);
+    border-color: var(--ce-dialog-border);
+}
+.DialogContent table tbody tr {
+    background-color: var(--ce-dialog-row);
+}
+.DialogContent .ProjectManagementPreviewTable {
+    color: var(--ce-dialog-text);
+}
+.DialogContent .BulkRenameFooter {
+    background-color: var(--ce-dialog-surface);
+}
