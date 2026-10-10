@@ -34,7 +34,7 @@ assert.deepEqual(
 const apiPath = fileURLToPath(new URL('../api.ts', import.meta.url))
 const apiSource = readFileSync(apiPath, 'utf8')
 const aggregateFunctionMatch = apiSource.match(
-    /export async function fetchAllConversationsAll\([\s\S]*?\n}\n\nexport async function archiveConversation/,
+    /export async function fetchAllConversationsAll\([\s\S]*?\n}\s*export async function archiveConversation/,
 )
 
 assert.ok(aggregateFunctionMatch, 'fetchAllConversationsAll must remain present in src/api.ts.')
