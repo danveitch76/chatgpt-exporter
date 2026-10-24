@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.35.5](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.35.4...userscript-v2.35.5) (2026-10-24)
+
+
+### Bug Fixes
+
+* [#98](https://github.com/danveitch76/chatgpt-exporter/issues/98) restore Actions validation and release permissions ([42e8638](https://github.com/danveitch76/chatgpt-exporter/commit/42e8638f34010649336107ab08cee725f3eaf6f3))
+* [#98](https://github.com/danveitch76/chatgpt-exporter/issues/98) restore workflow execution and release permissions ([3060a0c](https://github.com/danveitch76/chatgpt-exporter/commit/3060a0c5155754278ce9afa3cf5d0380c950f5e4))
+
 ## [Unreleased]
 
 ### Maintenance
@@ -1234,4 +1242,3 @@
 ### Continuous Integration
 
 * fix release ([771c435](https://github.com/pionxzh/chatgpt-exporter/commit/771c435ebc69bd2fa8a6e60f96ffe041bee155bf))
-
