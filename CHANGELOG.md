@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Maintenance
+
+* restore fork Actions execution for #98 and declare least-required workflow permissions
+* allow manual Release Validation against the selected ref without creating a tag or release
+* retain all lint, test, build, reproducibility and release-metadata checks
+
 ## [2.35.4](https://github.com/danveitch76/chatgpt-exporter/compare/userscript-v2.35.1...userscript-v2.35.4) (2026-10-03)
 
 ### Bug Fixes

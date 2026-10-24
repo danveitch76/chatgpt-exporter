@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'userscript-v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -45,7 +46,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          tag_version="${GITHUB_REF_NAME#userscript-v}"
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            tag_version="$(node -p "require('./package.json').version")"
+          else
+            tag_version="${GITHUB_REF_NAME#userscript-v}"
+          fi
           package_version="$(node -p "require('./package.json').version")"
           manifest_version="$(node -p "require('./.release-please-manifest.json')['.']")"
           userscript_version="$(sed -n 's#^// @version[[:space:]]*##p' dist/chatgpt.user.js | head -n 1)"
@@ -61,6 +66,7 @@ jobs:
           echo "Validated userscript-v$tag_version against package, manifest, userscript, README and CHANGELOG."
 
       - name: Create GitHub Release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/userscript-v')
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash

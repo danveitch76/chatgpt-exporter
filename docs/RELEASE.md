@@ -152,3 +152,11 @@ git ls-remote --tags origin "userscript-vX.Y.Z*"
 ```
 
 Avoid rewriting already-published history unless there is a deliberate, reviewed reason to do so and a backup ref has been created first.
+
+## Actions restoration, 24 October 2026 (#98)
+
+The repository Actions page confirmed that GitHub had disabled workflows inherited by this fork. Actions has now been enabled. Enablement alone is not execution evidence. The repair pull request must demonstrate Check runs on its branch and pull request, then the merged master revision must pass Check and start Release Please.
+
+Release Please declares contents and pull-request write permissions at workflow scope. Check has contents-read permission only. Release Validation can also be run manually against a selected ref; manual execution derives the expected version from package.json and performs every existing quality and metadata check, but its release-creation step is restricted to real userscript-v tag pushes. Manual execution never creates a tag or release.
+
+Record actual run links in #98. Keep the tag-trigger and release-creation acceptance criteria open until a controlled tag test or the next authorised release provides that evidence. Do not rewrite published tags or create a fictitious release to complete an audit.
